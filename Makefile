@@ -3,7 +3,8 @@ SRC_DIR     = src
 INC_DIR     = include
 SRC_FILES   = main.cpp \
               utils/Logger.cpp \
-			  utils/utils.cpp
+			  utils/utils.cpp \
+			  core/ServerSocket.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++

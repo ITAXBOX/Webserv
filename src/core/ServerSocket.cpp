@@ -1,1 +1,210 @@
-#include "../../include/core/ServerSocket.hpp"
+// TCP server socket implementation
+// Handles creating, binding, listening, and accepting client connections
+// This is the part of a program that waits for incoming network connections, for example:
+// when you connect to a web server, there’s a socket like this listening for you.
+
+// A socket is a file descriptor (number) that represents a communication channel.
+// In C (and by extension C++), a socket is just a number you read from and write to,
+// like a file, but it connects over a network.
+#include "core/ServerSocket.hpp"
+#include "utils/Logger.hpp"
+
+#include <cerrno>
+#include <cstring>
+#include <sstream>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+ServerSocket::ServerSocket()
+	: _fd(-1), _ip(""), _port(-1)
+{
+}
+
+ServerSocket::~ServerSocket()
+{
+	close();
+}
+
+bool ServerSocket::setNonBlocking(int fd)
+{
+	// The non-blocking behavior is achieved by explicitly setting the socket file descriptor
+	// (both the server and the accepted clients) to non-blocking mode using the fcntl() system call.
+	int flags = fcntl(fd, F_GETFL, 0);
+	if (flags == -1)
+	{
+		Logger::error(std::string("fcntl(F_GETFL) failed: ") + std::strerror(errno));
+		return false;
+	}
+	if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1)
+	{
+		Logger::error(std::string("fcntl(F_SETFL, O_NONBLOCK) failed: ") + std::strerror(errno));
+		return false;
+	}
+	return true;
+}
+
+bool ServerSocket::init(const std::string &ip, int port, int backlog)
+{
+	if (valid())
+	{
+		Logger::warn("ServerSocket already initialized; closing previous fd");
+		closeAndReset();
+	}
+
+	_ip = ip;
+	_port = port;
+
+	if (!createSocket())
+		return false;
+	if (!applySocketOptions())
+	{
+		closeAndReset();
+		return false;
+	}
+	if (!setNonBlocking(_fd))
+	{
+		closeAndReset();
+		return false;
+	}
+
+	struct sockaddr_in addr;
+	if (!buildSockAddr(_ip, _port, addr))
+	{
+		closeAndReset();
+		return false;
+	}
+	if (!bindSocket(addr))
+	{
+		closeAndReset();
+		return false;
+	}
+	if (!startListening(backlog))
+	{
+		closeAndReset();
+		return false;
+	}
+
+	logListening(_ip, _port);
+	return true;
+}
+
+bool ServerSocket::createSocket()
+{
+	_fd = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (_fd < 0)
+	{
+		Logger::error(std::string("socket() failed: ") + std::strerror(errno));
+		return false;
+	}
+	return true;
+}
+
+bool ServerSocket::applySocketOptions()
+{
+	int yes = 1;
+	if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
+	{
+		Logger::error(std::string("setsockopt(SO_REUSEADDR) failed: ") + std::strerror(errno));
+		return false;
+	}
+	return true;
+}
+
+bool ServerSocket::buildSockAddr(const std::string &ip, int port, struct sockaddr_in &out)
+{
+	std::memset(&out, 0, sizeof(out));
+	out.sin_family = AF_INET;
+	out.sin_port = htons(static_cast<unsigned short>(port));
+
+	// INADDR_ANY if empty, "*", or "0.0.0.0"
+	if (ip.empty() || ip == "*" || ip == "0.0.0.0")
+	{
+		out.sin_addr.s_addr = htonl(INADDR_ANY);
+	}
+	else
+	{
+		unsigned long a = ::inet_addr(ip.c_str());
+		if (a == INADDR_NONE)
+		{
+			Logger::error("Invalid IPv4 address: " + ip);
+			return false;
+		}
+		out.sin_addr.s_addr = a;
+	}
+	return true;
+}
+
+bool ServerSocket::bindSocket(const struct sockaddr_in &addr)
+{
+	if (::bind(_fd, reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) < 0)
+	{
+		std::ostringstream os;
+		os << "bind(" << (_ip.empty() ? "0.0.0.0" : _ip) << ":" << _port
+		   << ") failed: " << std::strerror(errno);
+		Logger::error(os.str());
+		return false;
+	}
+	return true;
+}
+
+bool ServerSocket::startListening(int backlog)
+{
+	if (::listen(_fd, backlog) < 0)
+	{
+		Logger::error(std::string("listen() failed: ") + std::strerror(errno));
+		return false;
+	}
+	return true;
+}
+
+void ServerSocket::closeAndReset()
+{
+	if (_fd >= 0)
+		::close(_fd);
+	_fd = -1;
+}
+
+void ServerSocket::logListening(const std::string &ip, int port) const
+{
+	std::ostringstream os;
+	os << "Socket ready: " << (ip.empty() ? "0.0.0.0" : ip) << ":" << port
+	   << " (fd=" << _fd << ", non-blocking)";
+	Logger::info(os.str());
+}
+
+int ServerSocket::acceptClient()
+{
+	if (!valid())
+		return -1;
+
+	struct sockaddr_in cli;
+	socklen_t len = sizeof(cli);
+	int cfd = ::accept(_fd, reinterpret_cast<struct sockaddr *>(&cli), &len);
+	if (cfd < 0)
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			return -1;
+		Logger::error(std::string("accept() failed: ") + std::strerror(errno));
+		return -1;
+	}
+
+	// Make client non-blocking too
+	if (!setNonBlocking(cfd))
+	{
+		::close(cfd);
+		return -1;
+	}
+	return cfd;
+}
+
+void ServerSocket::close()
+{
+	if (_fd >= 0)
+	{
+		::close(_fd);
+		_fd = -1;
+	}
+}
