@@ -25,7 +25,8 @@ ServerSocket::ServerSocket()
 
 ServerSocket::~ServerSocket()
 {
-	close();
+    if (_fd != -1)
+	    close(_fd);
 }
 
 bool ServerSocket::setNonBlocking(int fd)

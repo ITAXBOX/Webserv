@@ -1,5 +1,5 @@
-#ifndef SERVER_SOCKET_HPP
-#define SERVER_SOCKET_HPP
+#ifndef SERVERSOCKET_HPP
+#define SERVERSOCKET_HPP
 
 #include <string>
 
