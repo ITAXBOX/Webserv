@@ -10,12 +10,19 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	printWebservStartup(argc, argv);
+	if (argc > 1)
+		Logger::info(std::string("Configuration file: ") + argv[1]);
+	else
+		Logger::warn("No configuration file provided. Falling back to defaults.");
 
-	// Placeholder for server initialization and startup logic
+	ServerSocket srv;
+	if (!srv.init("0.0.0.0", 8080, 128))
+	{
+		Logger::error("Server socket initialization failed.");
+		return 1;
+	}
 
-	Logger::debug("Initializing core components (placeholder)...");
-	Logger::info("Server initialized successfully (placeholder).");
+	Logger::info("Core ready (placeholder). Event loop will be added next.");
 
 	return 0;
 }
