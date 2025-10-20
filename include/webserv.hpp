@@ -6,5 +6,6 @@
 #include "core/core.hpp"
 #include "http/http.hpp"
 #include "utils/utils.hpp"
+#include "utils/Logger.hpp"
 
 #endif

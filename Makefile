@@ -2,10 +2,10 @@ NAME        = webserv
 SRC_DIR     = src
 INC_DIR     = include
 SRC_FILES   = main.cpp \
-              utils/utils.cpp
+              utils/Logger.cpp \
+			  utils/utils.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
-
 CXX         = c++
 CXXFLAGS    = -Wall -Wextra -Werror -std=c++98 -I$(INC_DIR)
 
@@ -15,6 +15,10 @@ $(NAME): $(OBJ_FILES)
 	@echo "Linking $(NAME)..."
 	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJ_FILES)
 	@echo "✅ Build complete: ./$(NAME)"
+
+debug:
+	@$(MAKE) CXXFLAGS="$(CXXFLAGS) -DLOGGER_DEBUG" all
+	@echo "🐞 Debug build complete (LOGGER_DEBUG enabled)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
@@ -31,4 +35,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+run: all
+	@./$(NAME)
+
+.PHONY: all clean fclean re run debug
