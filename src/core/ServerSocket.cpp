@@ -200,12 +200,3 @@ int ServerSocket::acceptClient()
 	}
 	return cfd;
 }
-
-void ServerSocket::close()
-{
-	if (_fd >= 0)
-	{
-		::close(_fd);
-		_fd = -1;
-	}
-}

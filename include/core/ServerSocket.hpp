@@ -11,7 +11,6 @@ public:
 
 	bool init(const std::string &ip, int port, int backlog);
 	int acceptClient();
-	void close();
 
 	int fd() const
 	{

@@ -15,14 +15,21 @@ int main(int argc, char **argv)
 	else
 		Logger::warn("No configuration file provided. Falling back to defaults.");
 
-	ServerSocket srv;
-	if (!srv.init("0.0.0.0", 8080, 128))
+	ServerSocket *srv = new ServerSocket();
+	if (!srv->init("0.0.0.0", 8080, 128))
 	{
 		Logger::error("Server socket initialization failed.");
+		delete srv;
 		return 1;
 	}
 
-	Logger::info("Core ready (placeholder). Event loop will be added next.");
+	Logger::info("Server socket initialized on 0.0.0.0:8080");
+
+	EventLoop loop;
+	loop.addServer(srv);
+	loop.run();
+
+	Logger::info("Server stopped. Cleaning up...");
 
 	return 0;
 }
