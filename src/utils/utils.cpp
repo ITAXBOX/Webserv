@@ -3,12 +3,15 @@
 
 void printWebservStartup(int argc, char **argv)
 {
-	std::cout << "==========================================" << std::endl;
-	std::cout << "         🚀 Webserv starting up...         " << std::endl;
-	std::cout << "==========================================" << std::endl;
+	std::cout << "\n===============================================" << std::endl;
+	std::cout << "🔥  WEB SERV INITIALIZATION SEQUENCE STARTED  🔥" << std::endl;
+	std::cout << "===============================================" << std::endl;
+	std::cout << "     Team: Cache Me If You Can" << std::endl;
+	std::cout << "     Engineers: mal-moha & aitawi" << std::endl;
+	std::cout << std::endl;
 
 	if (argc > 1)
-        Logger::info(std::string("Configuration file: ") + argv[1]);
-    else
-        Logger::warn("No configuration file provided. Falling back to defaults.");
+		Logger::info(std::string("Configuration file: ") + argv[1]);
+	else
+		Logger::warn("No configuration file provided. Falling back to defaults.");
 }
