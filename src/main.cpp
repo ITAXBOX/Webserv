@@ -2,9 +2,11 @@
 
 int main(int argc, char **argv)
 {
+	Logger::showTimestamp(true);
+
 	if (argc > 2)
 	{
-		std::cerr << "Usage: " << argv[0] << " [config_file]" << std::endl;
+		Logger::error(std::string("Usage: ") + argv[0] + " [config_file]");
 		return 1;
 	}
 
@@ -12,7 +14,8 @@ int main(int argc, char **argv)
 
 	// Placeholder for server initialization and startup logic
 
-	std::cout << "Server initialized successfully (placeholder)." << std::endl;
+	Logger::debug("Initializing core components (placeholder)...");
+	Logger::info("Server initialized successfully (placeholder).");
 
 	return 0;
 }

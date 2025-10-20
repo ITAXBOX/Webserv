@@ -1,4 +1,5 @@
 #include "../../include/utils/utils.hpp"
+#include "../../include/utils/Logger.hpp"
 
 void printWebservStartup(int argc, char **argv)
 {
@@ -7,7 +8,7 @@ void printWebservStartup(int argc, char **argv)
 	std::cout << "==========================================" << std::endl;
 
 	if (argc > 1)
-		std::cout << "Configuration file: " << argv[1] << std::endl;
-	else
-		std::cout << "Using default configuration file." << std::endl;
+        Logger::info(std::string("Configuration file: ") + argv[1]);
+    else
+        Logger::warn("No configuration file provided. Falling back to defaults.");
 }
