@@ -1,4 +1,5 @@
 #include "../include/webserv.hpp"
+#include "core/core.hpp"
 
 int main(int argc, char **argv)
 {
@@ -11,26 +12,18 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (argc > 1)
-		Logger::info(std::string("Configuration file: ") + argv[1]);
-	else
-		Logger::warn("No configuration file provided. Falling back to defaults.");
+	std::string configFile = (argc == 2) ? argv[1] : "";
 
-	ServerSocket *srv = new ServerSocket();
-	if (!srv->init("0.0.0.0", 8080, 128))
+	// Create and initialize WebServer (Facade pattern)
+	WebServer server;
+	if (!server.init(configFile))
 	{
-		Logger::error("Server socket initialization failed.");
-		delete srv;
+		Logger::error("WebServer initialization failed");
 		return 1;
 	}
 
-	Logger::info("Server socket initialized on 0.0.0.0:8080");
+	server.run();
 
-	EventLoop loop;
-	loop.addServer(srv);
-	loop.run();
-
-	Logger::info("Server stopped. Cleaning up...");
-
+	Logger::info("Server shutdown complete");
 	return 0;
 }
