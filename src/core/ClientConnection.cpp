@@ -1,11 +1,17 @@
 #include "core/ClientConnection.hpp"
+#include "utils/Logger.hpp"
 #include <unistd.h>
+#include <sstream>
 
 ClientConnection::ClientConnection(int fd)
-    : _fd(fd), _state(READING) {}
+    : _fd(fd), _state(READING)
+{
+    Logger::debug(Logger::fdMsg("ClientConnection created", fd));
+}
 
 ClientConnection::~ClientConnection()
 {
+    Logger::debug(Logger::fdMsg("ClientConnection destroyed, closing socket", _fd));
     close(_fd);
 }
 
