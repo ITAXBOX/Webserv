@@ -3,6 +3,7 @@
 int main(int argc, char **argv)
 {
 	Logger::showTimestamp(true);
+	Logger::showColors(true);
 
 	if (argc > 2)
 	{

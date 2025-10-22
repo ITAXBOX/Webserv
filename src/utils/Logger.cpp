@@ -2,6 +2,8 @@
 #include <iostream>
 #include <ctime>
 #include <sstream>
+#include <cstring>
+#include <cerrno>
 
 Logger::Level Logger::s_minLevel =
 #ifdef LOGGER_DEBUG
@@ -11,6 +13,7 @@ Logger::Level Logger::s_minLevel =
 #endif
 
 bool Logger::s_showTimestamp = true;
+bool Logger::s_showColors = true;
 
 void Logger::setLevel(Logger::Level lvl)
 {
@@ -20,6 +23,11 @@ void Logger::setLevel(Logger::Level lvl)
 void Logger::showTimestamp(bool enabled)
 {
 	s_showTimestamp = enabled;
+}
+
+void Logger::showColors(bool enabled)
+{
+	s_showColors = enabled;
 }
 
 void Logger::debug(const std::string &msg)
@@ -48,13 +56,20 @@ void Logger::log(Logger::Level lvl, const std::string &msg)
 	if (lvl < s_minLevel)
 		return;
 
-	// build a string piece by piece (like a mini “formatter”) instead of concatenating multiple strings.
+	// build a string piece by piece (like a mini "formatter") instead of concatenating multiple strings.
 	std::ostringstream line;
+	
+	if (s_showColors)
+		line << levelColor(lvl);
+	
 	if (s_showTimestamp)
 	{
 		line << "[" << now() << "] ";
 	}
 	line << levelName(lvl) << " " << msg;
+	
+	if (s_showColors)
+		line << "\033[0m"; // Reset color
 
 	if (lvl == LEVEL_ERROR)
 		std::cerr << line.str() << std::endl;
@@ -78,6 +93,22 @@ const char *Logger::levelName(Logger::Level lvl)
 	return "[UNKWN]";
 }
 
+const char *Logger::levelColor(Logger::Level lvl)
+{
+	switch (lvl)
+	{
+	case LEVEL_DEBUG:
+		return "\033[36m"; // Cyan
+	case LEVEL_INFO:
+		return "\033[32m"; // Green
+	case LEVEL_WARN:
+		return "\033[33m"; // Yellow
+	case LEVEL_ERROR:
+		return "\033[31m"; // Red
+	}
+	return "\033[0m"; // Reset
+}
+
 std::string Logger::now()
 {
 	std::time_t t = std::time(0);
@@ -86,4 +117,27 @@ std::string Logger::now()
 	if (lt && std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", lt))
 		return std::string(buf);
 	return "0000-00-00 00:00:00";
+}
+
+std::string Logger::errnoMsg(const std::string &prefix)
+{
+	std::ostringstream os;
+	os << prefix << ": " << std::strerror(errno);
+	return os.str();
+}
+
+std::string Logger::fdMsg(const std::string &prefix, int fd)
+{
+	std::ostringstream os;
+	os << prefix << " (fd=" << fd << ")";
+	return os.str();
+}
+
+std::string Logger::connMsg(const std::string &prefix, int fd, const std::string &detail)
+{
+	std::ostringstream os;
+	os << prefix << " (fd=" << fd << ")";
+	if (!detail.empty())
+		os << " - " << detail;
+	return os.str();
 }
