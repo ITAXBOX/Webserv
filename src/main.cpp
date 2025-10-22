@@ -1,10 +1,11 @@
 #include "../include/webserv.hpp"
-#include "core/core.hpp"
 
 int main(int argc, char **argv)
 {
 	Logger::showTimestamp(true);
 	Logger::showColors(true);
+
+	printWebservStartup();
 
 	if (argc > 2)
 	{

@@ -4,6 +4,6 @@
 #include <iostream>
 #include <string>
 
-void printWebservStartup(int argc, char **argv);
+void printWebservStartup();
 
 #endif
