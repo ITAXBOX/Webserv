@@ -40,6 +40,13 @@ void EventLoop::addServer(ServerSocket* server)
     Logger::debug(Logger::fdMsg("Server added to event loop", server->getFd()));
 }
 
+/*
+struct pollfd {
+    int   fd;         // file descriptor to watch
+    short events;     // requested events to watch
+    short revents;    // returned events that occurred
+};
+*/
 void EventLoop::run()
 {
     Logger::info("Event loop started. Press Ctrl+C to stop.");
@@ -142,7 +149,10 @@ void EventLoop::handleClientRead(int clientFd)
     for (size_t i = 0; i < _fds.size(); i++)
     {
         if (_fds[i].fd == clientFd)
+        {
             _fds[i].events = POLLOUT;
+            break;
+        }
     }
 }
 
@@ -177,7 +187,10 @@ void EventLoop::handleClientWrite(int clientFd)
     for (size_t i = 0; i < _fds.size(); i++)
     {
         if (_fds[i].fd == clientFd)
+        {
             _fds[i].events = POLLIN;
+            break;
+        }
     }
 }
 
