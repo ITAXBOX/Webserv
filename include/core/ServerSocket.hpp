@@ -12,24 +12,28 @@ public:
 	bool init(const std::string &ip, int port, int backlog);
 	int acceptClient();
 
-	int fd() const
+	int getFd() const
 	{
 		return _fd;
 	}
-	bool valid() const
+	bool isValid() const
 	{
 		return _fd >= 0;
 	}
-	std::string ip() const
+	std::string getIp() const
 	{
 		return _ip;
 	}
-	int port() const
+	int getPort() const
 	{
 		return _port;
 	}
 
 private:
+	int _fd;
+	std::string _ip;
+	int _port;
+
 	ServerSocket(const ServerSocket &);
 	ServerSocket &operator=(const ServerSocket &);
 
@@ -41,11 +45,6 @@ private:
 	bool startListening(int backlog);
 	void closeAndReset();
 	void logListening(const std::string &ip, int port) const;
-
-private:
-	int _fd;
-	std::string _ip;
-	int _port;
 };
 
 #endif

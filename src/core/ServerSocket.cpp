@@ -49,7 +49,7 @@ bool ServerSocket::setNonBlocking(int fd)
 
 bool ServerSocket::init(const std::string &ip, int port, int backlog)
 {
-	if (valid())
+	if (isValid())
 	{
 		Logger::warn("ServerSocket already initialized; closing previous fd");
 		closeAndReset();
@@ -178,7 +178,7 @@ void ServerSocket::logListening(const std::string &ip, int port) const
 
 int ServerSocket::acceptClient()
 {
-	if (!valid())
+	if (!isValid())
 		return -1;
 
 	struct sockaddr_in cli;

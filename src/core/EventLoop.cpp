@@ -29,8 +29,8 @@ EventLoop::~EventLoop()
 
 void EventLoop::addServer(ServerSocket* server)
 {
-    _servers[server->fd()] = server;
-    pollfd pfd = { server->fd(), POLLIN, 0 };
+    _servers[server->getFd()] = server;
+    pollfd pfd = { server->getFd(), POLLIN, 0 };
     _fds.push_back(pfd);
 }
 
