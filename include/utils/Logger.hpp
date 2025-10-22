@@ -29,6 +29,10 @@ public:
 	static std::string connMsg(const std::string &prefix, int fd, const std::string &detail = "");
 
 private:
+	Logger();
+	Logger(const Logger &);
+	Logger &operator=(const Logger &);
+
 	static void log(Level lvl, const std::string &msg);
 	static const char *levelName(Level lvl);
 	static const char *levelColor(Level lvl);
