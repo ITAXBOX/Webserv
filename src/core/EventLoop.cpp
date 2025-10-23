@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cerrno>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <sstream>
 
 static EventLoop* g_loop = NULL;
@@ -22,7 +23,14 @@ EventLoop::EventLoop() : _running(true)
 {
     g_loop = this;
     signal(SIGINT, signalHandler);
-    Logger::debug("EventLoop initialized");
+    
+    if (!_poller.isValid())
+    {
+        Logger::error("Failed to create Poller (epoll)");
+        _running = false;
+    }
+    
+    Logger::debug("EventLoop initialized with Poller");
 }
 
 EventLoop::~EventLoop()
@@ -35,59 +43,70 @@ EventLoop::~EventLoop()
 void EventLoop::addServer(ServerSocket* server)
 {
     _servers[server->getFd()] = server;
-    pollfd pfd = { server->getFd(), POLLIN, 0 };
-    _fds.push_back(pfd);
+    
+    // Add server socket to poller (watch for EPOLLIN - incoming connections)
+    if (!_poller.addFd(server->getFd(), EPOLLIN))
+    {
+        Logger::error(Logger::fdMsg("Failed to add server to poller", server->getFd()));
+        return;
+    }
+    
     Logger::debug(Logger::fdMsg("Server added to event loop", server->getFd()));
 }
 
-/*
-struct pollfd {
-    int   fd;         // file descriptor to watch
-    short events;     // requested events to watch
-    short revents;    // returned events that occurred
-};
-*/
 void EventLoop::run()
 {
-    Logger::info("Event loop started. Press Ctrl+C to stop.");
+    Logger::info("Event loop started with epoll. Press Ctrl+C to stop.");
+    
     while (_running)
     {
-        int ret = poll(_fds.data(), _fds.size(), -1);
-        if (ret < 0)
+        // Wait for events using Poller (epoll-based)
+        int n = _poller.wait(-1);  // -1 = infinite timeout
+        
+        if (n < 0)
         {
-            if (errno == EINTR)
-            {
-                Logger::debug("poll() interrupted by signal");
-                continue;
-            }
-            Logger::error(Logger::errnoMsg("poll() failed"));
+            Logger::error("Poller wait failed");
             break;
         }
         
-        Logger::debug("poll() returned, processing events");
-        std::vector<int> toRemove;
-        for (size_t i = 0; i < _fds.size(); i++)
+        if (n == 0)
+            continue;  // No events (shouldn't happen with infinite timeout)
+        
+        // Get events from poller
+        const std::vector<PollEvent>& events = _poller.getEvents();
+        
+        // Process each event
+        for (size_t i = 0; i < events.size(); i++)
         {
-            pollfd &pfd = _fds[i];
-            if (pfd.revents & POLLIN)
+            const PollEvent& ev = events[i];
+            
+            // Handle errors/hangups first
+            if (ev.error || ev.hangup)
             {
-                if (_servers.count(pfd.fd))
-                    handleNewConnection(pfd.fd);
-                else if (_clients.count(pfd.fd))
-                    handleClientRead(pfd.fd);
+                Logger::warn(Logger::fdMsg("Connection error/hangup detected", ev.fd));
+                if (_clients.count(ev.fd))
+                    handleClientDisconnect(ev.fd);
+                continue;
             }
-            else if (pfd.revents & POLLOUT)
-                handleClientWrite(pfd.fd);
-            else if (pfd.revents & (POLLERR | POLLHUP))
+            
+            // Handle readable events
+            if (ev.readable)
             {
-                Logger::warn(Logger::fdMsg("Connection error/hangup detected", pfd.fd));
-                toRemove.push_back(pfd.fd);
+                if (_servers.count(ev.fd))
+                    handleNewConnection(ev.fd);
+                else if (_clients.count(ev.fd))
+                    handleClientRead(ev.fd);
+            }
+            
+            // Handle writable events
+            if (ev.writable)
+            {
+                if (_clients.count(ev.fd))
+                    handleClientWrite(ev.fd);
             }
         }
-
-        for (size_t i = 0; i < toRemove.size(); i++)
-            handleClientDisconnect(toRemove[i]);
     }
+    
     Logger::info("Event loop ended.");
 }
 
@@ -96,17 +115,34 @@ void EventLoop::stop()
     _running = false;
     Logger::info("Stopping server...");
 
+    // Cleanup clients first
     Logger::debug("Cleaning up client connections");
-    for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); it++)
-        delete it->second;
+    std::vector<int> clientFds;
+    for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+        clientFds.push_back(it->first);
+    
+    for (size_t i = 0; i < clientFds.size(); i++)
+    {
+        int fd = clientFds[i];
+        _poller.removeFd(fd);
+        delete _clients[fd];
+    }
     _clients.clear();
 
+    // Cleanup servers
     Logger::debug("Cleaning up server sockets");
-    for (std::map<int, ServerSocket*>::iterator it = _servers.begin(); it != _servers.end(); it++)
-        delete it->second;
+    std::vector<int> serverFds;
+    for (std::map<int, ServerSocket*>::iterator it = _servers.begin(); it != _servers.end(); ++it)
+        serverFds.push_back(it->first);
+    
+    for (size_t i = 0; i < serverFds.size(); i++)
+    {
+        int fd = serverFds[i];
+        _poller.removeFd(fd);
+        delete _servers[fd];
+    }
     _servers.clear();
     
-    _fds.clear();
     Logger::info("Server stopped successfully");
 }
 
@@ -116,11 +152,18 @@ void EventLoop::handleNewConnection(int serverFd)
     if (clientFd < 0)
         return;
     
-    fcntl(clientFd, F_SETFL, O_NONBLOCK);
+    // Note: ServerSocket already sets non-blocking in acceptClient()
     _clients[clientFd] = new ClientConnection(clientFd);
 
-    pollfd newPfd = { clientFd, POLLIN, 0 };
-    _fds.push_back(newPfd);
+    // Add client to poller (watch for EPOLLIN - incoming data)
+    if (!_poller.addFd(clientFd, EPOLLIN))
+    {
+        Logger::error(Logger::fdMsg("Failed to add client to poller", clientFd));
+        delete _clients[clientFd];
+        _clients.erase(clientFd);
+        close(clientFd);
+        return;
+    }
 
     Logger::info(Logger::connMsg("New client connected", clientFd));
 }
@@ -146,14 +189,8 @@ void EventLoop::handleClientRead(int clientFd)
     _clients[clientFd]->appendToWriteBuffer(msg);
     _clients[clientFd]->setState(WRITING);
 
-    for (size_t i = 0; i < _fds.size(); i++)
-    {
-        if (_fds[i].fd == clientFd)
-        {
-            _fds[i].events = POLLOUT;
-            break;
-        }
-    }
+    // Change to monitor for write events
+    _poller.modifyFd(clientFd, EPOLLOUT);
 }
 
 void EventLoop::handleClientWrite(int clientFd)
@@ -184,28 +221,23 @@ void EventLoop::handleClientWrite(int clientFd)
     c->clearWriteBuffer();
     c->setState(READING);
 
-    for (size_t i = 0; i < _fds.size(); i++)
-    {
-        if (_fds[i].fd == clientFd)
-        {
-            _fds[i].events = POLLIN;
-            break;
-        }
-    }
+    // Change back to monitor for read events
+    _poller.modifyFd(clientFd, EPOLLIN);
 }
 
 void EventLoop::handleClientDisconnect(int fd)
 {
     Logger::info(Logger::connMsg("Client disconnected", fd));
-    delete _clients[fd];
+    
+    // Check if client exists
+    if (_clients.count(fd) == 0)
+        return;
+    
+    // Remove from poller first (before closing fd)
+    _poller.removeFd(fd);
+    
+    // Clean up client connection (this closes the fd)
+    ClientConnection* client = _clients[fd];
     _clients.erase(fd);
-
-    for (size_t i = 0; i < _fds.size(); i++)
-    {
-        if (_fds[i].fd == fd)
-        {
-            _fds.erase(_fds.begin() + i);
-            break;
-        }
-    }
+    delete client;
 }

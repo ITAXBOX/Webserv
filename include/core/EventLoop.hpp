@@ -1,10 +1,9 @@
 #ifndef EVENTLOOP_HPP
 # define EVENTLOOP_HPP
 
-#include <vector>
-#include <poll.h>
 #include <map>
 #include <signal.h>
+#include "core/Poller.hpp"
 #include "core/ServerSocket.hpp"
 #include "core/ClientConnection.hpp"
 
@@ -12,7 +11,7 @@ class EventLoop
 {
 private:
     bool _running;
-    std::vector<pollfd> _fds;
+    Poller _poller;  // Using Poller instead of raw poll()
     std::map<int, ServerSocket*> _servers;
     std::map<int, ClientConnection*> _clients;
 
