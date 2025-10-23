@@ -5,6 +5,7 @@ SRC_FILES   = main.cpp \
               utils/Logger.cpp \
 			  utils/utils.cpp \
 			  core/core.cpp \
+			  core/Poller.cpp \
 			  core/ServerSocket.cpp \
 			  core/EventLoop.cpp \
 			  core/ClientConnection.cpp
