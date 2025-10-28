@@ -4,11 +4,13 @@ INC_DIR     = include
 SRC_FILES   = main.cpp \
               utils/Logger.cpp \
 			  utils/utils.cpp \
+			  utils/StatusCodes.cpp \
 			  core/core.cpp \
 			  core/Poller.cpp \
 			  core/ServerSocket.cpp \
 			  core/EventLoop.cpp \
-			  core/ClientConnection.cpp
+			  core/ClientConnection.cpp \
+			  http/HttpResponse.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++

@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <sstream>
+#include "http/HttpResponse.hpp"
+#include "utils/StatusCodes.hpp"
 
 static EventLoop* g_loop = NULL;
 
@@ -181,12 +183,13 @@ void EventLoop::handleClientRead(int clientFd)
         return;
     }
     
-    std::string msg(buffer, n);
     std::ostringstream os;
     os << "Received " << n << " bytes from client";
     Logger::debug(Logger::connMsg(os.str(), clientFd));
 
-    _clients[clientFd]->appendToWriteBuffer(msg);
+    // test response
+    HttpResponse response = StatusCodes::createOkResponse(std::string(buffer, n), "text/plain");
+    _clients[clientFd]->appendToWriteBuffer(response.build());
     _clients[clientFd]->setState(WRITING);
 
     // Change to monitor for write events
