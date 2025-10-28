@@ -19,9 +19,9 @@ class HttpRequest
 {
 private:
 	HttpMethod method;
-	std::string uri;
-	std::string version;
-	std::map<std::string, std::string> headers;
+	std::string uri; // The Uniform Resource Identifier - the path requested
+	std::string version; // 1.1
+	std::map<std::string, std::string> headers; // metadata about the request - like the Host, Content-Type, etc.
 	std::string body;
 
 public:

@@ -92,6 +92,7 @@ void EventLoop::run()
             }
             
             // Handle readable events
+            // we only read from servers (new connections) and clients (data)
             if (ev.readable)
             {
                 if (_servers.count(ev.fd))
@@ -101,6 +102,7 @@ void EventLoop::run()
             }
             
             // Handle writable events
+            // we only write to clients
             if (ev.writable)
             {
                 if (_clients.count(ev.fd))
@@ -148,6 +150,7 @@ void EventLoop::stop()
     Logger::info("Server stopped successfully");
 }
 
+// Handle new incoming connection on server socket
 void EventLoop::handleNewConnection(int serverFd)
 {
     int clientFd = _servers[serverFd]->acceptClient();
@@ -170,6 +173,8 @@ void EventLoop::handleNewConnection(int serverFd)
     Logger::info(Logger::connMsg("New client connected", clientFd));
 }
 
+// Handle reading data from client
+// TCP read event
 void EventLoop::handleClientRead(int clientFd)
 {
     char buffer[1024];
@@ -196,6 +201,8 @@ void EventLoop::handleClientRead(int clientFd)
     _poller.modifyFd(clientFd, EPOLLOUT);
 }
 
+// Handle writing data to client
+// TCP write event
 void EventLoop::handleClientWrite(int clientFd)
 {
     ClientConnection *c = _clients[clientFd];
@@ -228,6 +235,7 @@ void EventLoop::handleClientWrite(int clientFd)
     _poller.modifyFd(clientFd, EPOLLIN);
 }
 
+// Handle client disconnection and cleanup
 void EventLoop::handleClientDisconnect(int fd)
 {
     Logger::info(Logger::connMsg("Client disconnected", fd));

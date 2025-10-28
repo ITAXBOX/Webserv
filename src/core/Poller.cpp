@@ -47,9 +47,13 @@ bool Poller::addFd(int fd, int events)
 	struct epoll_event ev;
 	std::memset(&ev, 0, sizeof(ev));
 	// Edge-triggered
+	// EPOLLET is used to avoid repeated notifications until the condition changes
 	ev.events = events | EPOLLET;
 	ev.data.fd = fd;
 
+	// epoll_ctl to add fd
+	// EPOLL_CTL_ADD: add new fd
+	// red-black tree insertion O(log n) internally
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, fd, &ev) < 0)
 	{
 		std::ostringstream os;
@@ -116,6 +120,10 @@ int Poller::wait(int timeout_ms)
 	_rawEvents.resize(64);
 
 	// Wait for events
+	// timeout_ms: -1 infinite, 0 non-blocking, >0 timeout
+	// the epoll_wait call is O(1) internally
+	// it returns the number of fds with events
+	// from a red-black tree structure
 	int n = epoll_wait(_epollFd, _rawEvents.data(), _rawEvents.size(), timeout_ms);
 
 	if (n < 0)

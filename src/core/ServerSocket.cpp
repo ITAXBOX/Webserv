@@ -33,6 +33,7 @@ bool ServerSocket::setNonBlocking(int fd)
 {
 	// The non-blocking behavior is achieved by explicitly setting the socket file descriptor
 	// (both the server and the accepted clients) to non-blocking mode using the fcntl() system call.
+	// F_GETFL Command to get file descriptor flags - which are: O_RDONLY, O_WRONLY, O_RDWR, etc.
 	int flags = fcntl(fd, F_GETFL, 0);
 	if (flags == -1)
 	{
@@ -94,6 +95,7 @@ bool ServerSocket::init(const std::string &ip, int port, int backlog)
 
 bool ServerSocket::createSocket()
 {
+	// AF_INET: IPv4, SOCK_STREAM: TCP, 0: default protocol (TCP for SOCK_STREAM)
 	_fd = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd < 0)
 	{
@@ -114,20 +116,27 @@ bool ServerSocket::applySocketOptions()
 	return true;
 }
 
+// sockaddr_in is a struct that holds an internet address
+// out contains in its struct: sin_family, sin_port, sin_addr
 bool ServerSocket::buildSockAddr(const std::string &ip, int port, struct sockaddr_in &out)
 {
 	std::memset(&out, 0, sizeof(out));
+	// out.sin_family: Address family (AF_INET for IPv4)
 	out.sin_family = AF_INET;
+	// out.sin_port: Port number (in network byte order)
 	out.sin_port = htons(static_cast<unsigned short>(port));
 
 	// INADDR_ANY if empty, "*", or "0.0.0.0"
 	if (ip.empty() || ip == "*" || ip == "0.0.0.0")
 	{
+		// out.sin_addr.s_addr: IP address (in network byte order)
 		out.sin_addr.s_addr = htonl(INADDR_ANY);
 	}
 	else
 	{
+		// inet_addr: Convert IPv4 address from string to binary form
 		unsigned long a = ::inet_addr(ip.c_str());
+		// INADDR_NONE indicates invalid address
 		if (a == INADDR_NONE)
 		{
 			Logger::error("Invalid IPv4 address: " + ip);
@@ -140,6 +149,11 @@ bool ServerSocket::buildSockAddr(const std::string &ip, int port, struct sockadd
 
 bool ServerSocket::bindSocket(const struct sockaddr_in &addr)
 {
+	// bind the socket to the specified IP address and port
+	// sockaddr_in is cast to sockaddr for the bind function
+	// reinterpret_cast<const struct sockaddr *>(&addr) is used for this purpose
+	// it tells the compiler to treat the pointer to sockaddr_in as a pointer to sockaddr
+	// dynamically converting the type without changing the actual data
 	if (::bind(_fd, reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) < 0)
 	{
 		std::ostringstream os;
@@ -153,6 +167,8 @@ bool ServerSocket::bindSocket(const struct sockaddr_in &addr)
 
 bool ServerSocket::startListening(int backlog)
 {
+	// listen for incoming connections on the socket
+	// backlog specifies the maximum number of pending connections
 	if (::listen(_fd, backlog) < 0)
 	{
 		Logger::error(std::string("listen() failed: ") + std::strerror(errno));
@@ -181,11 +197,17 @@ int ServerSocket::acceptClient()
 	if (!isValid())
 		return -1;
 
+	// sockaddr_in cli will hold the client's address info
 	struct sockaddr_in cli;
 	socklen_t len = sizeof(cli);
+	// accept a new client connection
+	// sockaddr_in is cast to sockaddr for the accept function
+	// reinterpret_cast<struct sockaddr *>(&cli) is used for this purpose
 	int cfd = ::accept(_fd, reinterpret_cast<struct sockaddr *>(&cli), &len);
 	if (cfd < 0)
 	{
+		// EAGAIN or EWOULDBLOCK means no pending connections (non-blocking mode)
+		// errno is a global variable set by system calls in the event of an error
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			return -1;
 		Logger::error(std::string("accept() failed: ") + std::strerror(errno));
