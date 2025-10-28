@@ -10,7 +10,8 @@ SRC_FILES   = main.cpp \
 			  core/ServerSocket.cpp \
 			  core/EventLoop.cpp \
 			  core/ClientConnection.cpp \
-			  http/HttpResponse.cpp
+			  http/HttpResponse.cpp \
+			  http/HttpRequest.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++
