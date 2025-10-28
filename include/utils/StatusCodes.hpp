@@ -1,9 +1,9 @@
-#ifndef HTTPRESPONSEFACTORY_HPP
-#define HTTPRESPONSEFACTORY_HPP
+#ifndef STATUSCODES_HPP
+#define STATUSCODES_HPP
 
 #include "http/HttpResponse.hpp"
 
-class HttpResponseFactory
+class StatusCodes
 {
 public:
     static HttpResponse createOkResponse(const std::string &body, const std::string &contentType = "text/html");

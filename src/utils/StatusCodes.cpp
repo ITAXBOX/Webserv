@@ -1,7 +1,7 @@
-#include "http/HttpResponseFactory.hpp"
+#include "utils/StatusCodes.hpp"
 #include <sstream>
 
-HttpResponse HttpResponseFactory::createOkResponse(const std::string &body, const std::string &contentType)
+HttpResponse StatusCodes::createOkResponse(const std::string &body, const std::string &contentType)
 {
     HttpResponse response;
     response.setStatus(200, "OK")
@@ -11,7 +11,7 @@ HttpResponse HttpResponseFactory::createOkResponse(const std::string &body, cons
     return response;
 }
 
-HttpResponse HttpResponseFactory::createNotFoundResponse()
+HttpResponse StatusCodes::createNotFoundResponse()
 {
     std::string body = "<html><body><h1>404 Not Found</h1></body></html>";
     HttpResponse response;
@@ -22,7 +22,7 @@ HttpResponse HttpResponseFactory::createNotFoundResponse()
     return response;
 }
 
-HttpResponse HttpResponseFactory::createServerErrorResponse()
+HttpResponse StatusCodes::createServerErrorResponse()
 {
     std::string body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
     HttpResponse response;
