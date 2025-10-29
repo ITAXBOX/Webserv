@@ -12,6 +12,10 @@ SRC_FILES   = main.cpp \
 			  core/ClientConnection.cpp \
 			  http/HttpResponse.cpp \
 			  http/HttpRequest.cpp \
+			  http/HttpParser.cpp \
+			  http/IParseState.cpp \
+			  config/ServerConfig.cpp \
+			  config/LocationConfig.cpp \
 			  app/app.cpp \
 			  app/FileHandler.cpp 
 OBJ_DIR     = obj
