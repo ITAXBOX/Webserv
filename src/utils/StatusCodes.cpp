@@ -1,7 +1,7 @@
 #include "utils/StatusCodes.hpp"
 #include "app/app.hpp"
+#include "app/FileHandler.hpp"
 #include <sstream>
-#include <fstream>
 
 namespace
 {
@@ -10,16 +10,6 @@ namespace
         std::ostringstream os;
         os << n;
         return os.str();
-    }
-
-    std::string loadFile(const std::string &filePath)
-    {
-        std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
-        if (!file)
-            return "";
-        std::ostringstream buffer;
-        buffer << file.rdbuf();
-        return buffer.str();
     }
 
     HttpResponse buildResponse(int code, const std::string &reason, const std::string &body, const std::string &contentType = "text/html")
@@ -35,11 +25,23 @@ namespace
 
 HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
 {
-    std::string body = loadFile(filePath);
-    std::string contentType = MimeTypes::getMimeType(filePath);
-
-    if (body.empty())
+    if (!FileHandler::fileExists(filePath))
         return createNotFoundResponse();
+    
+    if (FileHandler::isDirectory(filePath))
+        return createNotFoundResponse();
+    
+    if (!FileHandler::isReadable(filePath))
+    {
+        std::string body = "<html><body><h1>403 Forbidden</h1><p>Permission denied</p></body></html>";
+        return buildResponse(403, "Forbidden", body);
+    }
+
+    std::string body = FileHandler::readFile(filePath);
+    if (body.empty())
+        return createServerErrorResponse();
+    
+    std::string contentType = MimeTypes::getMimeType(filePath);
          
     return buildResponse(200, "OK", body, contentType);
 }
