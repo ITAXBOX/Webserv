@@ -11,7 +11,8 @@ SRC_FILES   = main.cpp \
 			  core/EventLoop.cpp \
 			  core/ClientConnection.cpp \
 			  http/HttpResponse.cpp \
-			  http/HttpRequest.cpp
+			  http/HttpRequest.cpp \
+			  app/app.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++
