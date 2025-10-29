@@ -192,8 +192,8 @@ void EventLoop::handleClientRead(int clientFd)
     os << "Received " << n << " bytes from client";
     Logger::debug(Logger::connMsg(os.str(), clientFd));
 
-    // test response
-    HttpResponse response = StatusCodes::createOkResponse(std::string(buffer, n), "text/plain");
+    std::string requestedFile = "www/index.html"; // for testing, serve a fixed file
+    HttpResponse response = StatusCodes::createOkResponse(requestedFile);
     _clients[clientFd]->appendToWriteBuffer(response.build());
     _clients[clientFd]->setState(WRITING);
 

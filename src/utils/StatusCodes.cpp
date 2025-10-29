@@ -1,5 +1,7 @@
 #include "utils/StatusCodes.hpp"
+#include "app/app.hpp"
 #include <sstream>
+#include <fstream>
 
 namespace
 {
@@ -10,19 +12,35 @@ namespace
         return os.str();
     }
 
+    std::string loadFile(const std::string &filePath)
+    {
+        std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
+        if (!file)
+            return "";
+        std::ostringstream buffer;
+        buffer << file.rdbuf();
+        return buffer.str();
+    }
+
     HttpResponse buildResponse(int code, const std::string &reason, const std::string &body, const std::string &contentType = "text/html")
     {
         HttpResponse response;
         response.setStatus(code, reason)
-                .addHeader("Content-Type", contentType)
-                .addHeader("Content-Length", toString(body.size()))
-                .setBody(body);
+            .addHeader("Content-Type", contentType)
+            .addHeader("Content-Length", toString(body.size()))
+            .setBody(body);
         return response;
     }
 }
 
-HttpResponse StatusCodes::createOkResponse(const std::string &body, const std::string &contentType)
+HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
 {
+    std::string body = loadFile(filePath);
+    std::string contentType = MimeTypes::getMimeType(filePath);
+
+    if (body.empty())
+        return createNotFoundResponse();
+         
     return buildResponse(200, "OK", body, contentType);
 }
 
