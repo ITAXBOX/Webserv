@@ -12,8 +12,7 @@ SRC_FILES   = main.cpp \
 			  core/ClientConnection.cpp \
 			  http/HttpResponse.cpp \
 			  http/HttpRequest.cpp \
-			  app/app.cpp \
-			  app/FileHandler.cpp
+			  app/app.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++
