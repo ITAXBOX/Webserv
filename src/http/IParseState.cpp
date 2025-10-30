@@ -9,8 +9,13 @@
 // ParseRequestLineState - Parse "GET /path HTTP/1.1"
 // ============================================================================
 
+// the CRLF is used to denote the end of a line in HTTP
+// Its the Delimiter that tells us where one line ends and the next begins
+// which is "\r\n" (carriage return + line feed)
+
 void ParseRequestLineState::parse(HttpParser &parser)
 {
+	// we search for the first CRLF to get the request line
 	size_t pos = findCRLF(parser._buffer);
 	if (pos == std::string::npos)
 		return; // Need more data
@@ -44,6 +49,9 @@ bool ParseRequestLineState::parseRequestLine(HttpParser &parser, const std::stri
 	std::istringstream iss(line);
 	std::string method, uri, version;
 
+	// Extract components, we expect exactly 3 components
+	// example: line = "GET /index.html HTTP/1.1"
+	// method = "GET", uri = "/index.html", version = "HTTP/1.1"
 	if (!(iss >> method >> uri >> version))
 		return false;
 
@@ -86,6 +94,8 @@ void ParseHeadersState::parse(HttpParser &parser)
 		parser._buffer.erase(0, pos + 2); // Remove line + \r\n
 
 		// Empty line = end of headers
+		// when we reach an empty line, it means headers are done
+		// and now for the body (if any)
 		if (line.empty())
 		{
 			Logger::debug("Headers parsing complete");
@@ -146,6 +156,7 @@ size_t ParseHeadersState::getContentLength(HttpParser &parser)
 	if (clHeader.empty())
 		return 0;
 
+	// what we are doing here is converting the Content-Length header value to size_t
 	return static_cast<size_t>(std::atoi(clHeader.c_str()));
 }
 
@@ -159,9 +170,18 @@ ParseBodyState::ParseBodyState(size_t contentLength)
 	Logger::debug("ParseBodyState created for body parsing");
 }
 
+// Parses the Http request body incrementally until we reach Content-Length
+// bodies can be large and may arrive in chunks, like file uploads
+// data arrive over the network in chunks, not all at once
 void ParseBodyState::parse(HttpParser &parser)
 {
 	// Read up to Content-Length bytes
+	// example: Content-Length = 1000
+	// we may receive data in chunks of 200, 300, etc.
+	// so we need to keep track of how much we've read so far
+	// remaining = 1000 - 300 = 700 bytes  // Still need 700 more
+	// available = 200 bytes                // Only have 200 right now
+	// toRead = min(200, 700) = 200 bytes  // Read what we have (200)
 	size_t remaining = _contentLength - _bytesRead;
 	size_t available = parser._buffer.size();
 	size_t toRead = (available < remaining) ? available : remaining;

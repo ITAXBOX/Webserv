@@ -44,6 +44,8 @@ private:
 	void setError(const std::string &message);
 
 	// Allow states to access private members
+	// friend is used here to grant access to private members
+	// which means we don't have to expose setters publicly
 	friend class ParseRequestLineState;
 	friend class ParseHeadersState;
 	friend class ParseBodyState;
