@@ -103,7 +103,7 @@ bool WebServer::setupDefaultServer()
 
 	if (!srv->init(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_BACKLOG))
 	{
-		Logger::error("Failed to initialize default server on " DEFAULT_HOST);
+		Logger::error(std::string("Failed to initialize default server on ") + DEFAULT_HOST);
 		delete srv;
 		return false;
 	}
@@ -111,7 +111,7 @@ bool WebServer::setupDefaultServer()
 	_servers.push_back(srv);
 	_eventLoop->addServer(srv);
 
-	Logger::info("Default server configured: " DEFAULT_HOST);
+	Logger::info(std::string("Default server configured: ") + DEFAULT_HOST);
 	return true;
 }
 
