@@ -9,6 +9,7 @@ public:
     static HttpResponse createOkResponse(const std::string &filePath);
     static HttpResponse createNotFoundResponse();
     static HttpResponse createServerErrorResponse();
+    static HttpResponse createErrorResponse(int code, const std::string &reason);
 };
 
 #endif

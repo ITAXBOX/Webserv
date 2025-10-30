@@ -1,4 +1,5 @@
 #include "utils/StatusCodes.hpp"
+#include "utils/defines.hpp"
 #include "app/app.hpp"
 #include "app/FileHandler.hpp"
 #include <sstream>
@@ -34,7 +35,7 @@ HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
     if (!FileHandler::isReadable(filePath))
     {
         std::string body = "<html><body><h1>403 Forbidden</h1><p>Permission denied</p></body></html>";
-        return buildResponse(403, "Forbidden", body);
+        return buildResponse(HTTP_FORBIDDEN, "Forbidden", body);
     }
 
     std::string body = FileHandler::readFile(filePath);
@@ -43,17 +44,24 @@ HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
     
     std::string contentType = MimeTypes::getMimeType(filePath);
          
-    return buildResponse(200, "OK", body, contentType);
+    return buildResponse(HTTP_OK, "OK", body, contentType);
 }
 
 HttpResponse StatusCodes::createNotFoundResponse()
 {
     std::string body = "<html><body><h1>404 Not Found</h1></body></html>";
-    return buildResponse(404, "Not Found", body);
+    return buildResponse(HTTP_NOT_FOUND, "Not Found", body);
 }
 
 HttpResponse StatusCodes::createServerErrorResponse()
 {
     std::string body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
-    return buildResponse(500, "Internal Server Error", body);
+    return buildResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error", body);
+}
+
+HttpResponse StatusCodes::createErrorResponse(int code, const std::string &reason)
+{
+    std::ostringstream body;
+    body << "<html><body><h1>" << code << " " << reason << "</h1></body></html>";
+    return buildResponse(code, reason, body.str());
 }
