@@ -25,7 +25,8 @@ extern "C" void signalHandler(int)
 EventLoop::EventLoop() : _running(true)
 {
     g_loop = this;
-    signal(SIGINT, signalHandler);
+    signal(SIGINT, signalHandler);  // Ctrl+C for graceful shutdown
+    signal(SIGTSTP, SIG_IGN);       // Ignore Ctrl+Z to prevent suspension
     
     if (!_poller.isValid())
     {
