@@ -2,6 +2,7 @@
 # define CLIENTCONNECTION_HPP
 
 #include <string>
+#include "http/HttpParser.hpp"
 
 enum ConnState { READING, WRITING, CLOSED };
 
@@ -12,6 +13,7 @@ private:
     std::string _readBuffer; // store data read from client
     std::string _writeBuffer; // store data to be sent to client
     ConnState _state;
+    HttpParser _parser; // HTTP request parser
 public:
     ClientConnection(int fd);
     ~ClientConnection();
@@ -24,6 +26,9 @@ public:
 
     void appendToWriteBuffer(const std::string& data);
     void clearWriteBuffer();
+    
+    // HTTP Parser access
+    HttpParser& getParser();
 };
 
 #endif

@@ -49,3 +49,8 @@ void ClientConnection::clearWriteBuffer()
 {
     _writeBuffer.clear();
 }
+
+HttpParser& ClientConnection::getParser()
+{
+    return _parser;
+}
