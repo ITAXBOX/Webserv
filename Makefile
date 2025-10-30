@@ -16,6 +16,7 @@ SRC_FILES   = main.cpp \
 			  http/IParseState.cpp \
 			  config/ServerConfig.cpp \
 			  config/LocationConfig.cpp \
+			  config/Tokenizer.cpp \
 			  app/app.cpp \
 			  app/FileHandler.cpp 
 OBJ_DIR     = obj
