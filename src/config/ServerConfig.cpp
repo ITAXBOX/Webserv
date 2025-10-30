@@ -1,13 +1,14 @@
 #include "config/ServerConfig.hpp"
+#include "utils/defines.hpp"
 
 ServerConfig::ServerConfig()
-	: host("0.0.0.0"),				// Listen on all interfaces by default
-	  port(8080),					// Default port
-	  root("./www"),				// Default web root
-	  clientMaxBodySize(1048576)	// 1MB default (1024 * 1024)
+	: host(DEFAULT_HOST),			// Listen on all interfaces by default
+	  port(DEFAULT_PORT),			// Default port
+	  root(DEFAULT_ROOT),			// Default web root
+	  clientMaxBodySize(MAX_BODY_SIZE)	// 1MB default
 {
 	// Default index files
-	index.push_back("index.html");
+	index.push_back(DEFAULT_INDEX);
 	index.push_back("index.htm");
 	
 	// Default server name
@@ -114,15 +115,15 @@ const std::vector<LocationConfig> &ServerConfig::getLocations() const
 // Utility
 void ServerConfig::clear()
 {
-	host = "0.0.0.0";
-	port = 8080;
+	host = DEFAULT_HOST;
+	port = DEFAULT_PORT;
 	serverNames.clear();
 	serverNames.push_back("localhost");
-	root = "./www";
+	root = DEFAULT_ROOT;
 	index.clear();
-	index.push_back("index.html");
+	index.push_back(DEFAULT_INDEX);
 	index.push_back("index.htm");
-	clientMaxBodySize = 1048576;
+	clientMaxBodySize = MAX_BODY_SIZE;
 	errorPages.clear();
 	locations.clear();
 }

@@ -22,5 +22,16 @@
 // ============================================================================
 
 #define BUFFER_SIZE 1024
+#define MAX_BODY_SIZE 1048576  // 1MB (1024 * 1024)
+
+// ============================================================================
+// Default Server Configuration
+// ============================================================================
+
+#define DEFAULT_HOST "0.0.0.0"
+#define DEFAULT_PORT 8080
+#define DEFAULT_ROOT "./www"
+#define DEFAULT_INDEX "index.html"
+#define DEFAULT_BACKLOG 128
 
 #endif

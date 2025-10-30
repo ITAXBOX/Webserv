@@ -319,9 +319,9 @@ HttpResponse EventLoop::handleRequest(const HttpRequest& request)
     }
     
     // Build file path (default root is www/)
-    std::string filePath = "www";
+    std::string filePath = DEFAULT_ROOT;
     if (uri == "/" || uri.empty())
-        filePath += "/index.html";  // Default file
+        filePath += "/" DEFAULT_INDEX;  // Default file
     else
         filePath += uri;
     

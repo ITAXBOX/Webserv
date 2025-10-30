@@ -1,7 +1,10 @@
 #include "core/core.hpp"
 #include "core/EventLoop.hpp"
 #include "core/ServerSocket.hpp"
+#include "app/app.hpp"
 #include "utils/Logger.hpp"
+#include "utils/defines.hpp"
+#include <csignal>
 
 WebServer::WebServer()
 	: _eventLoop(NULL), _configFile(""), _initialized(false)
@@ -90,7 +93,7 @@ bool WebServer::loadConfiguration()
 
 bool WebServer::setupDefaultServer()
 {
-	// Create a default server listening on 0.0.0.0:8080
+	// Create a default server listening on DEFAULT_HOST:DEFAULT_PORT
 	ServerSocket *srv = new ServerSocket();
 	if (!srv)
 	{
@@ -98,9 +101,9 @@ bool WebServer::setupDefaultServer()
 		return false;
 	}
 
-	if (!srv->init("0.0.0.0", 8080, 128))
+	if (!srv->init(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_BACKLOG))
 	{
-		Logger::error("Failed to initialize default server on 0.0.0.0:8080");
+		Logger::error("Failed to initialize default server on " DEFAULT_HOST);
 		delete srv;
 		return false;
 	}
@@ -108,7 +111,7 @@ bool WebServer::setupDefaultServer()
 	_servers.push_back(srv);
 	_eventLoop->addServer(srv);
 
-	Logger::info("Default server configured: 0.0.0.0:8080");
+	Logger::info("Default server configured: " DEFAULT_HOST);
 	return true;
 }
 
