@@ -40,6 +40,46 @@ size_t findCRLF(const std::string &str, size_t start)
 }
 
 // ============================================================================
+// Config Parsing Utilities
+// ============================================================================
+
+// Skip whitespace (space, tab, newline) and update line counter
+void skipWhitespace(const std::string &input, size_t &pos, int &line)
+{
+	while (pos < input.length())
+	{
+		char c = input[pos];
+		if (c == ' ' || c == '\t' || c == '\r')
+			pos++;
+		else if (c == '\n')
+		{
+			pos++;
+			line++;
+		}
+		else
+			break;
+	}
+}
+
+// Skip comment (from # to end of line)
+void skipComment(const std::string &input, size_t &pos)
+{
+	if (pos < input.length() && input[pos] == '#')
+	{
+		// Skip until newline or EOF
+		while (pos < input.length() && input[pos] != '\n')
+			pos++;
+	}
+}
+
+// Check if character is valid for a word (alphanumeric, -, _, ., /, :)
+bool isWordChar(char c)
+{
+	return std::isalnum(static_cast<unsigned char>(c)) || 
+	       c == '-' || c == '_' || c == '.' || c == '/' || c == ':';
+}
+
+// ============================================================================
 // HTTP Utilities
 // ============================================================================
 
