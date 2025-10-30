@@ -185,7 +185,12 @@ void EventLoop::handleClientRead(int clientFd)
     {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return;
-        Logger::warn(Logger::connMsg("Client read failed or closed connection", clientFd));
+        // n == 0 means graceful shutdown (normal), n < 0 means error
+        if (n == 0)
+            Logger::debug(Logger::connMsg("Client closed connection", clientFd));
+        else
+            Logger::warn(Logger::connMsg(std::string("Client read error: ") + std::strerror(errno), clientFd));
+        
         handleClientDisconnect(clientFd);
         return;
     }
@@ -312,14 +317,37 @@ HttpResponse EventLoop::handleRequest(const HttpRequest& request)
     if (queryPos != std::string::npos)
         uri = uri.substr(0, queryPos);
     
-    // Security: Prevent directory traversal (../)
+    // Security: Detect and block suspicious path patterns
+    // Return 404 instead of 403 to prevent information disclosure
+    // We did this to prevent Information Disclosure through Error Messages
+    // For example, if a user tries to access a restricted directory,
+    // we dont want to give the attacker clues about the server structure
+    // like whether the directory exists or forbidden
+    // To prevent attackers from inferring server structure
+    // Noticed during security reviews
     if (uri.find("..") != std::string::npos)
     {
         Logger::warn("Directory traversal attempt detected: " + uri);
-        return StatusCodes::createErrorResponse(HTTP_FORBIDDEN, "Forbidden");
+        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
+    }
+    if (uri.find("//") != std::string::npos)
+    {
+        Logger::warn("Double slash detected in URI: " + uri);
+        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
+    }
+    if (uri.find("\\") != std::string::npos)
+    {
+        Logger::warn("Backslash detected in URI: " + uri);
+        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
+    }
+    // Prevent null byte injection
+    if (uri.find('\0') != std::string::npos)
+    {
+        Logger::warn("Null byte detected in URI");
+        return StatusCodes::createErrorResponse(HTTP_BAD_REQUEST, "Bad Request");
     }
     
-    // Build file path (default root is www/)
+    // Build file path (default root is tests/)
     std::string filePath = DEFAULT_ROOT;
     if (uri == "/" || uri.empty())
         filePath += "/" + std::string(DEFAULT_INDEX);  // Default file
