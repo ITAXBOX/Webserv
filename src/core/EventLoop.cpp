@@ -1,5 +1,6 @@
 #include "core/EventLoop.hpp"
 #include "utils/Logger.hpp"
+#include "utils/defines.hpp"
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
@@ -177,7 +178,7 @@ void EventLoop::handleNewConnection(int serverFd)
 // TCP read event
 void EventLoop::handleClientRead(int clientFd)
 {
-    char buffer[1024];
+    char buffer[BUFFER_SIZE];
     int n = recv(clientFd, buffer, sizeof(buffer), 0);
     if (n <= 0)
     {
@@ -192,13 +193,44 @@ void EventLoop::handleClientRead(int clientFd)
     os << "Received " << n << " bytes from client";
     Logger::debug(Logger::connMsg(os.str(), clientFd));
 
-    std::string requestedFile = "www/index.html"; // for testing, serve a fixed file
-    HttpResponse response = StatusCodes::createOkResponse(requestedFile);
-    _clients[clientFd]->appendToWriteBuffer(response.build());
-    _clients[clientFd]->setState(WRITING);
-
-    // Change to monitor for write events
-    _poller.modifyFd(clientFd, EPOLLOUT);
+    ClientConnection* client = _clients[clientFd];
+    
+    // Feed the data chunk to the HTTP parser
+    std::string chunk(buffer, n);
+    client->getParser().parse(chunk);
+    
+    // Check if parsing is complete
+    if (client->getParser().isComplete())
+    {
+        Logger::info(Logger::connMsg("HTTP request parsing complete", clientFd));
+        
+        // Get the parsed request
+        HttpRequest& request = client->getParser().getRequest();
+        
+        // Process the request and generate response
+        HttpResponse response = handleRequest(request);
+        client->appendToWriteBuffer(response.build());
+        client->setState(WRITING);
+        
+        // Reset parser for next request (keep-alive support)
+        client->getParser().reset();
+        
+        // Change to monitor for write events
+        _poller.modifyFd(clientFd, EPOLLOUT);
+    }
+    else if (client->getParser().hasError())
+    {
+        Logger::error(Logger::connMsg("HTTP parsing error: " + client->getParser().getErrorMessage(), clientFd));
+        
+        // Send 400 Bad Request
+        HttpResponse response = StatusCodes::createErrorResponse(HTTP_BAD_REQUEST, "Bad Request");
+        client->appendToWriteBuffer(response.build());
+        client->setState(WRITING);
+        
+        // Change to monitor for write events
+        _poller.modifyFd(clientFd, EPOLLOUT);
+    }
+    // else: Still parsing, wait for more data (do nothing)
 }
 
 // Handle writing data to client
@@ -251,4 +283,59 @@ void EventLoop::handleClientDisconnect(int fd)
     ClientConnection* client = _clients[fd];
     _clients.erase(fd);
     delete client;
+}
+
+// Handle HTTP request and generate response
+HttpResponse EventLoop::handleRequest(const HttpRequest& request)
+{
+    // Log the request
+    std::ostringstream os;
+    os << request.getMethodString() << " " << request.getUri() << " " << request.getVersion();
+    Logger::info("Processing request: " + os.str());
+    
+    // Get the HTTP method
+    HttpMethod method = request.getMethod();
+    
+    // Only support GET and HEAD for now
+    if (method != HTTP_GET && method != HTTP_HEAD)
+    {
+        Logger::warn("Method not allowed: " + request.getMethodString());
+        return StatusCodes::createErrorResponse(HTTP_METHOD_NOT_ALLOWED, "Method Not Allowed");
+    }
+    
+    // Get the requested URI
+    std::string uri = request.getUri();
+    
+    // Remove query string if present (e.g., /index.html?foo=bar -> /index.html)
+    size_t queryPos = uri.find('?');
+    if (queryPos != std::string::npos)
+        uri = uri.substr(0, queryPos);
+    
+    // Security: Prevent directory traversal (../)
+    if (uri.find("..") != std::string::npos)
+    {
+        Logger::warn("Directory traversal attempt detected: " + uri);
+        return StatusCodes::createErrorResponse(HTTP_FORBIDDEN, "Forbidden");
+    }
+    
+    // Build file path (default root is www/)
+    std::string filePath = "www";
+    if (uri == "/" || uri.empty())
+        filePath += "/index.html";  // Default file
+    else
+        filePath += uri;
+    
+    Logger::debug("Serving file: " + filePath);
+    
+    // Try to serve the file
+    HttpResponse response = StatusCodes::createOkResponse(filePath);
+    
+    // For HEAD requests, clear the body (only send headers)
+    if (method == HTTP_HEAD)
+    {
+        response.setBody("");
+        Logger::debug("HEAD request - body cleared");
+    }
+    
+    return response;
 }
