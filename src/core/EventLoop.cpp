@@ -7,7 +7,6 @@
 #include <cerrno>
 #include <sys/socket.h>
 #include <sys/epoll.h>
-#include <sstream>
 #include "http/HttpResponse.hpp"
 #include "utils/StatusCodes.hpp"
 

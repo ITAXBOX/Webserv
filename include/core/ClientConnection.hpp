@@ -1,7 +1,6 @@
 #ifndef CLIENTCONNECTION_HPP
 # define CLIENTCONNECTION_HPP
 
-#include <string>
 #include "http/HttpParser.hpp"
 
 enum ConnState { READING, WRITING, CLOSED };

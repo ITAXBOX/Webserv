@@ -1,7 +1,6 @@
 #ifndef EVENTLOOP_HPP
 # define EVENTLOOP_HPP
 
-#include <map>
 #include <signal.h>
 #include "core/Poller.hpp"
 #include "core/ServerSocket.hpp"

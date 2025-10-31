@@ -2,7 +2,6 @@
 #define HTTPPARSER_HPP
 
 #include "http/HttpRequest.hpp"
-#include <string>
 
 // Forward declarations
 class IParseState;

@@ -1,7 +1,6 @@
 #include "core/ClientConnection.hpp"
 #include "utils/Logger.hpp"
 #include <unistd.h>
-#include <sstream>
 
 ClientConnection::ClientConnection(int fd)
     : _fd(fd), _state(READING)

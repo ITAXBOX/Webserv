@@ -1,8 +1,6 @@
 #ifndef SERVERCONFIG_HPP
 #define SERVERCONFIG_HPP
 
-#include <string>
-#include <vector>
 #include <map>
 #include "config/LocationConfig.hpp"
 
