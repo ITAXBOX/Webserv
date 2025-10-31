@@ -1,5 +1,5 @@
 #include "config/ConfigParser.hpp"
-#include "config/ConfigDirectives.hpp"
+#include "utils/ConfigDirectives.hpp"
 #include "utils/Logger.hpp"
 #include <sstream>
 

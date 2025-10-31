@@ -1,4 +1,4 @@
-#include "config/ConfigDirectives.hpp"
+#include "utils/ConfigDirectives.hpp"
 #include "utils/Logger.hpp"
 #include <sstream>
 #include <cstdlib>

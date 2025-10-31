@@ -2,6 +2,7 @@ NAME        = webserv
 SRC_DIR     = src
 INC_DIR     = include
 SRC_FILES   = main.cpp \
+			  utils/ConfigDirectives.cpp \
               utils/Logger.cpp \
 			  utils/utils.cpp \
 			  utils/StatusCodes.cpp \
@@ -18,7 +19,6 @@ SRC_FILES   = main.cpp \
 			  config/LocationConfig.cpp \
 			  config/Tokenizer.cpp \
 			  config/ConfigParser.cpp \
-			  config/ConfigDirectives.cpp \
 			  app/app.cpp \
 			  app/FileHandler.cpp 
 OBJ_DIR     = obj
