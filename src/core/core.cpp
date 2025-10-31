@@ -1,10 +1,14 @@
 #include "core/core.hpp"
 #include "core/EventLoop.hpp"
 #include "core/ServerSocket.hpp"
+#include "config/Tokenizer.hpp"
+#include "config/ConfigParser.hpp"
 #include "app/app.hpp"
 #include "utils/Logger.hpp"
+#include "utils/utils.hpp"
 #include "utils/defines.hpp"
 #include <csignal>
+#include <fstream>
 
 WebServer::WebServer()
 	: _eventLoop(NULL), _configFile(""), _initialized(false)
@@ -43,8 +47,8 @@ bool WebServer::init(const std::string &configFile)
 		return false;
 	}
 
-	// Setup servers (for now, just default server)
-	if (!setupDefaultServer())
+	// Setup servers (from config or defaults)
+	if (!setupServers())
 	{
 		Logger::error("Failed to setup servers");
 		cleanup();
@@ -86,8 +90,107 @@ bool WebServer::loadConfiguration()
 	}
 
 	Logger::info(std::string("Loading configuration from: ") + _configFile);
-	// TODO: Parse config file in Phase 2
-	// For now, just acknowledge the file
+
+	// Read config file
+	std::ifstream file(_configFile.c_str());
+	if (!file.is_open())
+	{
+		Logger::error("Failed to open config file: " + _configFile);
+		return false;
+	}
+
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string content = buffer.str();
+	file.close();
+
+	if (content.empty())
+	{
+		Logger::error("Config file is empty: " + _configFile);
+		return false;
+	}
+
+	// Tokenize
+	Tokenizer tokenizer;
+	if (!tokenizer.tokenize(content))
+	{
+		Logger::error("Config tokenization failed: " + tokenizer.getError());
+		return false;
+	}
+
+	Logger::debug("Config tokenization successful");
+
+	// Parse
+	ConfigParser parser;
+	if (!parser.parse(tokenizer.getTokens()))
+	{
+		Logger::error("Config parsing failed: " + parser.getError());
+		return false;
+	}
+
+	_serverConfigs = parser.getServers();
+	Logger::info("Config parsed successfully: " + toString(_serverConfigs.size()) + " server(s)");
+	return true;
+}
+
+bool WebServer::setupServers()
+{
+	// If no config loaded, use default server
+	if (_serverConfigs.empty())
+	{
+		Logger::info("No config servers found, using default");
+		return setupDefaultServer();
+	}
+
+	// Create servers from config
+	for (size_t i = 0; i < _serverConfigs.size(); i++)
+	{
+		const ServerConfig &config = _serverConfigs[i];
+		
+		std::string host = config.getHost();
+		if (host.empty())
+			host = DEFAULT_HOST;
+		
+		int port = config.getPort();
+		if (port == 0)
+			port = DEFAULT_PORT;
+
+		ServerSocket *srv = new ServerSocket();
+		if (!srv)
+		{
+			Logger::error("Failed to allocate ServerSocket");
+			return false;
+		}
+
+		if (!srv->init(host, port, DEFAULT_BACKLOG))
+		{
+			Logger::error("Failed to initialize server on " + host + ":" + toString(port));
+			delete srv;
+			return false;
+		}
+
+		_servers.push_back(srv);
+		_eventLoop->addServer(srv);
+
+		// Log server names if any
+		const std::vector<std::string> &names = config.getServerNames();
+		if (!names.empty())
+		{
+			std::string nameList = "";
+			for (size_t j = 0; j < names.size(); j++)
+			{
+				nameList += names[j];
+				if (j < names.size() - 1)
+					nameList += ", ";
+			}
+			Logger::info("Server configured: " + host + ":" + toString(port) + " (" + nameList + ")");
+		}
+		else
+		{
+			Logger::info("Server configured: " + host + ":" + toString(port));
+		}
+	}
+
 	return true;
 }
 
@@ -111,7 +214,7 @@ bool WebServer::setupDefaultServer()
 	_servers.push_back(srv);
 	_eventLoop->addServer(srv);
 
-	Logger::info(std::string("Default server configured: ") + DEFAULT_HOST);
+	Logger::info(std::string("Default server configured: ") + DEFAULT_HOST + ":" + toString(DEFAULT_PORT));
 	return true;
 }
 

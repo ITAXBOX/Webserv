@@ -1,8 +1,7 @@
 #ifndef CORE_HPP
 #define CORE_HPP
 
-#include <string>
-#include <vector>
+#include "config/ServerConfig.hpp"
 
 class EventLoop;
 class ServerSocket;
@@ -27,10 +26,12 @@ public:
 private:
 	EventLoop *_eventLoop;
 	std::vector<ServerSocket *> _servers;
+	std::vector<ServerConfig> _serverConfigs;
 	std::string _configFile;
 	bool _initialized;
 
 	bool loadConfiguration();
+	bool setupServers();
 	bool setupDefaultServer();
 	void cleanup();
 
