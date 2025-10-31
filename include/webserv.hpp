@@ -9,5 +9,6 @@
 #include "http/http.hpp"
 #include "utils/utils.hpp"
 #include "utils/Logger.hpp"
+#include "utils/signal.hpp"
 
 #endif

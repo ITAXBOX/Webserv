@@ -17,6 +17,10 @@ int main(int argc, char **argv)
 
 	// Create and initialize WebServer (Facade pattern)
 	WebServer server;
+	
+	// Setup signal handlers (Ctrl+C, Ctrl+Z, Ctrl+\)
+	SignalHandler::setup(&server);
+	
 	if (!server.init(configFile))
 	{
 		Logger::error("WebServer initialization failed");

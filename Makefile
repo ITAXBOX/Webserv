@@ -6,6 +6,7 @@ SRC_FILES   = main.cpp \
               utils/Logger.cpp \
 			  utils/utils.cpp \
 			  utils/StatusCodes.cpp \
+			  utils/signal.cpp \
 			  core/core.cpp \
 			  core/Poller.cpp \
 			  core/ServerSocket.cpp \

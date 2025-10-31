@@ -10,23 +10,8 @@
 #include "http/HttpResponse.hpp"
 #include "utils/StatusCodes.hpp"
 
-static EventLoop* g_loop = NULL;
-
-extern "C" void signalHandler(int)
-{
-    if (g_loop)
-    {
-        Logger::info("Received interrupt signal (Ctrl+C)");
-        g_loop->stop();
-    }
-}
-
 EventLoop::EventLoop() : _running(true)
 {
-    g_loop = this;
-    signal(SIGINT, signalHandler);  // Ctrl+C for graceful shutdown
-    signal(SIGTSTP, SIG_IGN);       // Ignore Ctrl+Z to prevent suspension
-    
     if (!_poller.isValid())
     {
         Logger::error("Failed to create Poller (epoll)");
