@@ -1,18 +1,12 @@
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
+#include "utils/utils.hpp"
 #include "app/app.hpp"
 #include "app/FileHandler.hpp"
 #include <sstream>
 
 namespace
 {
-    std::string toString(size_t n)
-    {
-        std::ostringstream os;
-        os << n;
-        return os.str();
-    }
-
     HttpResponse buildResponse(int code, const std::string &reason, const std::string &body, const std::string &contentType = "text/html")
     {
         HttpResponse response;
