@@ -17,6 +17,7 @@ SRC_FILES   = main.cpp \
 			  config/ServerConfig.cpp \
 			  config/LocationConfig.cpp \
 			  config/Tokenizer.cpp \
+			  config/ConfigDirectives.cpp \
 			  app/app.cpp \
 			  app/FileHandler.cpp 
 OBJ_DIR     = obj
