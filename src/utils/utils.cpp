@@ -39,6 +39,20 @@ size_t findCRLF(const std::string &str, size_t start)
 	return str.find("\r\n", start);
 }
 
+std::string toString(size_t n)
+{
+	std::ostringstream os;
+	os << n;
+	return os.str();
+}
+
+std::string toString(int n)
+{
+	std::ostringstream os;
+	os << n;
+	return os.str();
+}
+
 // ============================================================================
 // Config Parsing Utilities
 // ============================================================================
