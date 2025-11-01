@@ -1,12 +1,13 @@
 #include "app/RequestHandler.hpp"
 #include "app/GetHandler.hpp"
 // #include "app/HeadHandler.hpp"
-// #include "app/PostHandler.hpp"
+#include "app/PostHandler.hpp"
 // #include "app/PutHandler.hpp"
 // #include "app/DeleteHandler.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/utils.hpp"
+#include "utils/defines.hpp"
 
 RequestHandler::RequestHandler()
 {
@@ -25,7 +26,7 @@ void RequestHandler::initializeDefaultHandlers()
 	// Register default handlers for each HTTP method
 	_handlers[HTTP_GET] = new GetHandler();
 	// _handlers[HTTP_HEAD] = new HeadHandler();
-	// _handlers[HTTP_POST] = new PostHandler();
+	_handlers[HTTP_POST] = new PostHandler();
 	// _handlers[HTTP_PUT] = new PutHandler();
 	// _handlers[HTTP_DELETE] = new DeleteHandler();
 
@@ -72,5 +73,5 @@ HttpResponse RequestHandler::handleRequest(
 
 	// No handler found for this method
 	Logger::warn("No handler registered for method: " + methodStr);
-	return StatusCodes::createErrorResponse(405, "Method Not Allowed");
+	return StatusCodes::createErrorResponse(HTTP_METHOD_NOT_ALLOWED, "Method Not Allowed");
 }
