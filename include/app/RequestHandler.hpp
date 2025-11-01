@@ -17,31 +17,30 @@ class RequestHandler
 public:
 	RequestHandler();
 	~RequestHandler();
-	
+
 	// Main request handler - delegates to registered strategy
 	HttpResponse handleRequest(
-		const HttpRequest& request,
-		const std::string& rootDir,
-		const std::string& defaultIndex
-	);
-	
+		const HttpRequest &request,
+		const std::string &rootDir,
+		const std::string &defaultIndex);
+
 	// Register custom handler for specific HTTP method
 	// Takes ownership of the handler pointer
-	void registerHandler(HttpMethod method, IMethodHandler* handler);
+	void registerHandler(HttpMethod method, IMethodHandler *handler);
 
 private:
 	// Strategy map: HTTP method -> Handler
-	std::map<HttpMethod, IMethodHandler*> _handlers;
-	
+	std::map<HttpMethod, IMethodHandler *> _handlers;
+
 	// Initialize default handlers (GET, HEAD, POST, PUT, DELETE)
 	void initializeDefaultHandlers();
-	
+
 	// Clean up all registered handlers
 	void cleanup();
-	
+
 	// Non-copyable (handlers have ownership semantics)
-	RequestHandler(const RequestHandler&);
-	RequestHandler& operator=(const RequestHandler&);
+	RequestHandler(const RequestHandler &);
+	RequestHandler &operator=(const RequestHandler &);
 };
 
 #endif
