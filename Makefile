@@ -21,7 +21,8 @@ SRC_FILES   = main.cpp \
 			  config/Tokenizer.cpp \
 			  config/ConfigParser.cpp \
 			  app/app.cpp \
-			  app/FileHandler.cpp 
+			  app/FileHandler.cpp \
+			  app/RequestHandler.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++
