@@ -123,12 +123,15 @@ bool ServerSocket::buildSockAddr(const std::string &ip, int port, struct sockadd
 	// out.sin_family: Address family (AF_INET for IPv4)
 	out.sin_family = AF_INET;
 	// out.sin_port: Port number (in network byte order)
+	// the htons function converts a port number in host byte order to network byte order
 	out.sin_port = htons(static_cast<unsigned short>(port));
 
 	// INADDR_ANY if empty, "*", or "0.0.0.0"
 	if (ip.empty() || ip == "*" || ip == "0.0.0.0")
 	{
 		// out.sin_addr.s_addr: IP address (in network byte order)
+		// htonl converts a long integer from host byte order to network byte order
+		// INADDR_ANY is a constant that means "any local IP address"
 		out.sin_addr.s_addr = htonl(INADDR_ANY);
 	}
 	else

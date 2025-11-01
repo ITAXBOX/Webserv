@@ -32,7 +32,7 @@ bool WebServer::init(const std::string &configFile)
 
 	_configFile = configFile;
 
-	// Load configuration (for now, just use defaults)
+	// Load configuration
 	if (!loadConfiguration())
 	{
 		Logger::error("Failed to load configuration");

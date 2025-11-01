@@ -28,6 +28,13 @@
 // Default Server Configuration
 // ============================================================================
 
+// 0.0.0.0 means bind to all interfaces
+// This allows the server to accept connections on any network interface
+// like 127.0.0.1 (localhost)
+// localhost
+// 192.168.x.x
+// 10.x.x.x
+// or any other IP assigned to the machine
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 8080
 #define DEFAULT_ROOT "./tests"
