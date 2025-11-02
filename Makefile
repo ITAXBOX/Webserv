@@ -7,6 +7,7 @@ SRC_FILES   = main.cpp \
 			  utils/utils.cpp \
 			  utils/StatusCodes.cpp \
 			  utils/FileHandler.cpp \
+			  utils/MimeTypes.cpp \
 			  utils/signal.cpp \
 			  core/core.cpp \
 			  core/Poller.cpp \
@@ -21,7 +22,6 @@ SRC_FILES   = main.cpp \
 			  config/LocationConfig.cpp \
 			  config/Tokenizer.cpp \
 			  config/ConfigParser.cpp \
-			  app/app.cpp \
 			  app/RequestHandler.cpp \
 			  app/GetHandler.cpp \
 			  app/PostHandler.cpp \

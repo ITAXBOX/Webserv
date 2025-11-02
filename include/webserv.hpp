@@ -1,7 +1,7 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-#include "app/app.hpp"
+#include "utils/MimeTypes.hpp"
 #include "config/config.hpp"
 #include "core/core.hpp"
 #include "core/ServerSocket.hpp"

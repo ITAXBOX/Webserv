@@ -1,7 +1,7 @@
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
 #include "utils/utils.hpp"
-#include "app/app.hpp"
+#include "utils/MimeTypes.hpp"
 #include "utils/FileHandler.hpp"
 #include <sstream>
 

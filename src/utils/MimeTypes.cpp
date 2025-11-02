@@ -1,7 +1,4 @@
-#include "app/app.hpp"
-#include <algorithm>
-#include <cctype>
-#include <map>
+#include "utils/MimeTypes.hpp"
 
 // Extract file extension from path
 std::string MimeTypes::getExtension(const std::string &filePath)

@@ -1,7 +1,10 @@
-#ifndef APP_HPP
-#define APP_HPP
+#ifndef MIMETYPES_HPP
+#define MIMETYPES_HPP
 
 #include <string>
+#include <algorithm>
+#include <cctype>
+#include <map>
 
 class MimeTypes
 {

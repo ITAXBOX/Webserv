@@ -3,7 +3,7 @@
 #include "core/ServerSocket.hpp"
 #include "config/Tokenizer.hpp"
 #include "config/ConfigParser.hpp"
-#include "app/app.hpp"
+#include "utils/MimeTypes.hpp"
 #include "utils/Logger.hpp"
 #include "utils/utils.hpp"
 #include "utils/defines.hpp"

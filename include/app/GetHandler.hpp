@@ -7,7 +7,7 @@
 #include "utils/StatusCodes.hpp"
 #include "utils/utils.hpp"
 #include "utils/defines.hpp"
-#include "app/app.hpp"
+#include "utils/MimeTypes.hpp"
 
 // GetHandler - Strategy for handling HTTP GET requests
 // Serves static files (HTML, CSS, images, etc.)
