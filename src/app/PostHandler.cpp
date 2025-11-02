@@ -1,5 +1,5 @@
 #include "app/PostHandler.hpp"
-#include "app/FileHandler.hpp"
+#include "utils/FileHandler.hpp"
 #include "utils/defines.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
