@@ -9,8 +9,10 @@
 #include <sys/epoll.h>
 #include "http/HttpResponse.hpp"
 #include "utils/StatusCodes.hpp"
+#include "app/RequestHandler.hpp"
 
-EventLoop::EventLoop() : _running(true)
+EventLoop::EventLoop() 
+    : _running(true), _requestHandler(new RequestHandler())
 {
     if (!_poller.isValid())
     {
@@ -18,13 +20,15 @@ EventLoop::EventLoop() : _running(true)
         _running = false;
     }
     
-    Logger::debug("EventLoop initialized with Poller");
+    Logger::debug("EventLoop initialized with Poller and RequestHandler");
 }
 
 EventLoop::~EventLoop()
 {
     for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); it++)
         delete it->second;
+    
+    delete _requestHandler;
     Logger::debug("EventLoop destroyed");
 }
 
@@ -78,7 +82,6 @@ void EventLoop::run()
             }
             
             // Handle readable events
-            // we only read from servers (new connections) and clients (data)
             if (ev.readable)
             {
                 if (_servers.count(ev.fd))
@@ -88,7 +91,6 @@ void EventLoop::run()
             }
             
             // Handle writable events
-            // we only write to clients
             if (ev.writable)
             {
                 if (_clients.count(ev.fd))
@@ -136,14 +138,12 @@ void EventLoop::stop()
     Logger::info("Server stopped successfully");
 }
 
-// Handle new incoming connection on server socket
 void EventLoop::handleNewConnection(int serverFd)
 {
     int clientFd = _servers[serverFd]->acceptClient();
     if (clientFd < 0)
         return;
     
-    // Note: ServerSocket already sets non-blocking in acceptClient()
     _clients[clientFd] = new ClientConnection(clientFd);
 
     // Add client to poller (watch for EPOLLIN - incoming data)
@@ -159,8 +159,6 @@ void EventLoop::handleNewConnection(int serverFd)
     Logger::info(Logger::connMsg("New client connected", clientFd));
 }
 
-// Handle reading data from client
-// TCP read event
 void EventLoop::handleClientRead(int clientFd)
 {
     char buffer[BUFFER_SIZE];
@@ -169,7 +167,7 @@ void EventLoop::handleClientRead(int clientFd)
     {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return;
-        // n == 0 means graceful shutdown (normal), n < 0 means error
+        
         if (n == 0)
             Logger::debug(Logger::connMsg("Client closed connection", clientFd));
         else
@@ -197,8 +195,13 @@ void EventLoop::handleClientRead(int clientFd)
         // Get the parsed request
         HttpRequest& request = client->getParser().getRequest();
         
-        // Process the request and generate response
-        HttpResponse response = handleRequest(request);
+        // Delegate to RequestHandler (Strategy Pattern)
+        HttpResponse response = _requestHandler->handleRequest(
+            request, 
+            DEFAULT_ROOT, 
+            DEFAULT_INDEX
+        );
+        
         client->appendToWriteBuffer(response.build());
         client->setState(WRITING);
         
@@ -220,11 +223,9 @@ void EventLoop::handleClientRead(int clientFd)
         // Change to monitor for write events
         _poller.modifyFd(clientFd, EPOLLOUT);
     }
-    // else: Still parsing, wait for more data (do nothing)
+    // else: Still parsing, wait for more data
 }
 
-// Handle writing data to client
-// TCP write event
 void EventLoop::handleClientWrite(int clientFd)
 {
     ClientConnection *c = _clients[clientFd];
@@ -257,98 +258,16 @@ void EventLoop::handleClientWrite(int clientFd)
     _poller.modifyFd(clientFd, EPOLLIN);
 }
 
-// Handle client disconnection and cleanup
 void EventLoop::handleClientDisconnect(int fd)
 {
     Logger::info(Logger::connMsg("Client disconnected", fd));
     
-    // Check if client exists
     if (_clients.count(fd) == 0)
         return;
     
-    // Remove from poller first (before closing fd)
     _poller.removeFd(fd);
     
-    // Clean up client connection (this closes the fd)
     ClientConnection* client = _clients[fd];
     _clients.erase(fd);
     delete client;
-}
-
-// Handle HTTP request and generate response
-HttpResponse EventLoop::handleRequest(const HttpRequest& request)
-{
-    // Log the request
-    std::ostringstream os;
-    os << request.getMethodString() << " " << request.getUri() << " " << request.getVersion();
-    Logger::info("Processing request: " + os.str());
-    
-    // Get the HTTP method
-    HttpMethod method = request.getMethod();
-    
-    // Only support GET and HEAD for now
-    if (method != HTTP_GET && method != HTTP_HEAD)
-    {
-        Logger::warn("Method not allowed: " + request.getMethodString());
-        return StatusCodes::createErrorResponse(HTTP_METHOD_NOT_ALLOWED, "Method Not Allowed");
-    }
-    
-    // Get the requested URI
-    std::string uri = request.getUri();
-    
-    // Remove query string if present (e.g., /index.html?foo=bar -> /index.html)
-    size_t queryPos = uri.find('?');
-    if (queryPos != std::string::npos)
-        uri = uri.substr(0, queryPos);
-    
-    // Security: Detect and block suspicious path patterns
-    // Return 404 instead of 403 to prevent information disclosure
-    // We did this to prevent Information Disclosure through Error Messages
-    // For example, if a user tries to access a restricted directory,
-    // we dont want to give the attacker clues about the server structure
-    // like whether the directory exists or forbidden
-    // To prevent attackers from inferring server structure
-    // Noticed during security reviews
-    if (uri.find("..") != std::string::npos)
-    {
-        Logger::warn("Directory traversal attempt detected: " + uri);
-        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
-    }
-    if (uri.find("//") != std::string::npos)
-    {
-        Logger::warn("Double slash detected in URI: " + uri);
-        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
-    }
-    if (uri.find("\\") != std::string::npos)
-    {
-        Logger::warn("Backslash detected in URI: " + uri);
-        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
-    }
-    // Prevent null byte injection
-    if (uri.find('\0') != std::string::npos)
-    {
-        Logger::warn("Null byte detected in URI");
-        return StatusCodes::createErrorResponse(HTTP_BAD_REQUEST, "Bad Request");
-    }
-    
-    // Build file path (default root is tests/)
-    std::string filePath = DEFAULT_ROOT;
-    if (uri == "/" || uri.empty())
-        filePath += "/" + std::string(DEFAULT_INDEX);  // Default file
-    else
-        filePath += uri;
-    
-    Logger::debug("Serving file: " + filePath);
-    
-    // Try to serve the file
-    HttpResponse response = StatusCodes::createOkResponse(filePath);
-    
-    // For HEAD requests, clear the body (only send headers)
-    if (method == HTTP_HEAD)
-    {
-        response.setBody("");
-        Logger::debug("HEAD request - body cleared");
-    }
-    
-    return response;
 }
