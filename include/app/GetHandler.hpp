@@ -2,9 +2,12 @@
 #define GETHANDLER_HPP
 
 #include "app/IMethodHandler.hpp"
-#include "http/HttpRequest.hpp"
-#include "http/HttpResponse.hpp"
-#include <string>
+#include "utils/FileHandler.hpp"
+#include "utils/Logger.hpp"
+#include "utils/StatusCodes.hpp"
+#include "utils/utils.hpp"
+#include "utils/defines.hpp"
+#include "app/app.hpp"
 
 // GetHandler - Strategy for handling HTTP GET requests
 // Serves static files (HTML, CSS, images, etc.)
@@ -13,8 +16,8 @@
 class GetHandler : public IMethodHandler
 {
 public:
-	GetHandler();
-	~GetHandler();
+	GetHandler() {}
+	~GetHandler() {}
 
 	// IMethodHandler interface implementation
 	HttpResponse handle(

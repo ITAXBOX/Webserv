@@ -2,9 +2,11 @@
 #define POSTHANDLER_HPP
 
 #include "app/IMethodHandler.hpp"
-#include "http/HttpRequest.hpp"
-#include "http/HttpResponse.hpp"
-#include <string>
+#include "utils/Logger.hpp"
+#include "utils/StatusCodes.hpp"
+#include "utils/defines.hpp"
+#include "utils/utils.hpp"
+#include <fstream>
 #include <map>
 
 // PostHandler - Strategy for handling HTTP POST requests
@@ -14,8 +16,8 @@
 class PostHandler : public IMethodHandler
 {
 public:
-	PostHandler();
-	~PostHandler();
+	PostHandler() {}
+	~PostHandler() {}
 
 	// IMethodHandler interface implementation
 	HttpResponse handle(

@@ -1,48 +1,34 @@
 #include "app/DeleteHandler.hpp"
-#include "utils/FileHandler.hpp"
-#include "utils/Logger.hpp"
-#include "utils/StatusCodes.hpp"
-#include "utils/utils.hpp"
-#include "utils/defines.hpp"
-#include <cstring>
-#include <cerrno>
 
 HttpResponse DeleteHandler::handle(const HttpRequest &request,
                                    const std::string &rootDir,
                                    const std::string &defaultIndex)
 {
-	HttpResponse response;
+    std::string path = buildFilePath(request.getUri(), rootDir, defaultIndex);
+    Logger::info("DELETE " + path);
 
-	std::string path = buildFilePath(request.getUri(), rootDir, defaultIndex);
-	Logger::info("DELETE request for: " + path);
+    // Check if file exists
+    if (!FileHandler::fileExists(path))
+        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "File not found");
 
-	// Check if file exists
-	if (!FileHandler::fileExists(path))
-	{
-		Logger::warn("File not found: " + path);
-		return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "File not found");
-	}
+    // Check if it's a directory
+    if (FileHandler::isDirectory(path))
+        return StatusCodes::createErrorResponse(HTTP_FORBIDDEN, "Cannot delete directory");
 
-	// Ensure it’s not a directory
-	if (FileHandler::isDirectory(path))
-	{
-		Logger::warn("Attempt to delete directory: " + path);
-		return StatusCodes::createErrorResponse(HTTP_FORBIDDEN, "Cannot delete directories");
-	}
+    // Truncate (simulate delete)
+    int fd = open(path.c_str(), O_WRONLY | O_TRUNC);
+    if (fd < 0)
+    {
+        Logger::error("Failed to open file for truncation: " + std::string(strerror(errno)));
+        return StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, strerror(errno));
+    }
+    close(fd);
 
-	// Attempt to delete file
-	if (unlink(path.c_str()) != 0)
-	{
-		Logger::error("Failed to delete file (" + path + "): " + std::string(strerror(errno)));
-		return StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, strerror(errno));
-	}
+    Logger::info("File truncated (simulated delete): " + path);
 
-	// Return success response
-	Logger::info("File deleted successfully: " + path);
-
-	response.setStatus(HTTP_NO_CONTENT, "No Content");
-	response.addHeader("Content-Length", "0");
-	response.addHeader("Connection", "close");
-
-	return response;
+    HttpResponse response;
+    response.setStatus(HTTP_OK, "File deleted")
+    		.addHeader("Content-Type", "text/plain")
+    		.setBody("File successfully deleted (truncated)");
+    return response;
 }

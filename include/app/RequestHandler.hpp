@@ -2,9 +2,13 @@
 #define REQUESTHANDLER_HPP
 
 #include "app/IMethodHandler.hpp"
-#include "http/HttpRequest.hpp"
-#include "http/HttpResponse.hpp"
-#include <string>
+#include "app/GetHandler.hpp"
+#include "app/PostHandler.hpp"
+#include "app/PutHandler.hpp"
+#include "app/DeleteHandler.hpp"
+#include "utils/Logger.hpp"
+#include "utils/StatusCodes.hpp"
+#include "utils/defines.hpp"
 #include <map>
 
 // RequestHandler - Context (Strategy Pattern)
@@ -30,7 +34,7 @@ public:
 
 private:
 	// Strategy map: HTTP method -> Handler
-	std::map<HttpMethod, IMethodHandler *> _handlers;
+	std::map<HttpMethod, IMethodHandler *> handlers;
 
 	// Initialize default handlers (GET, HEAD, POST, PUT, DELETE)
 	void initializeDefaultHandlers();

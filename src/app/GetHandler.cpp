@@ -1,17 +1,4 @@
 #include "app/GetHandler.hpp"
-#include "utils/FileHandler.hpp"
-#include "app/app.hpp"
-#include "utils/Logger.hpp"
-#include "utils/StatusCodes.hpp"
-#include "utils/utils.hpp"
-#include "utils/defines.hpp"
-
-GetHandler::GetHandler()
-{
-    Logger::debug("GetHandler created");
-}
-
-GetHandler::~GetHandler() {}
 
 HttpResponse GetHandler::handle(
     const HttpRequest &request,

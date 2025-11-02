@@ -1,18 +1,4 @@
 #include "app/PostHandler.hpp"
-#include "utils/FileHandler.hpp"
-#include "utils/defines.hpp"
-#include "utils/Logger.hpp"
-#include "utils/StatusCodes.hpp"
-#include "utils/utils.hpp"
-#include <sstream>
-#include <fstream>
-
-PostHandler::PostHandler()
-{
-	Logger::debug("PostHandler created");
-}
-
-PostHandler::~PostHandler() {}
 
 HttpResponse PostHandler::handle(
 	const HttpRequest &request,
