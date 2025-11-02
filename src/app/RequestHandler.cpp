@@ -16,7 +16,7 @@ void RequestHandler::initializeDefaultHandlers()
 {
 	// Register default handlers for each HTTP method
 	handlers[HTTP_GET] = new GetHandler();
-	// handlers[HTTP_HEAD] = new HeadHandler();
+	handlers[HTTP_HEAD] = new HeadHandler();
 	handlers[HTTP_POST] = new PostHandler();
 	handlers[HTTP_PUT] = new PutHandler();
 	handlers[HTTP_DELETE] = new DeleteHandler();

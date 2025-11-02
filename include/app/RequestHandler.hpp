@@ -6,6 +6,7 @@
 #include "app/PostHandler.hpp"
 #include "app/PutHandler.hpp"
 #include "app/DeleteHandler.hpp"
+#include "app/HeadHandler.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
