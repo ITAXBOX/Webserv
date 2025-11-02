@@ -21,4 +21,6 @@ bool isWordChar(char c);
 // HTTP utilities
 HttpMethod stringToHttpMethod(const std::string &method);
 
+// APP utilities
+std::string buildFilePath(const std::string &uri, const std::string &rootDir, const std::string &defaultIndex);
 #endif

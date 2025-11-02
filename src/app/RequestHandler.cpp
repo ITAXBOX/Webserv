@@ -3,7 +3,7 @@
 // #include "app/HeadHandler.hpp"
 #include "app/PostHandler.hpp"
 // #include "app/PutHandler.hpp"
-// #include "app/DeleteHandler.hpp"
+#include "app/DeleteHandler.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/utils.hpp"
@@ -28,7 +28,7 @@ void RequestHandler::initializeDefaultHandlers()
 	// _handlers[HTTP_HEAD] = new HeadHandler();
 	_handlers[HTTP_POST] = new PostHandler();
 	// _handlers[HTTP_PUT] = new PutHandler();
-	// _handlers[HTTP_DELETE] = new DeleteHandler();
+	_handlers[HTTP_DELETE] = new DeleteHandler();
 
 	Logger::debug("Registered 5 default method handlers");
 }

@@ -7,6 +7,7 @@
 
 // 2xx Success
 #define HTTP_OK 200
+#define HTTP_NO_CONTENT 204
 
 // 4xx Client Errors
 #define HTTP_BAD_REQUEST 400

@@ -1,6 +1,8 @@
-#include "../../include/utils/utils.hpp"
-#include "../../include/utils/Logger.hpp"
+#include "utils/utils.hpp"
+#include "utils/Logger.hpp"
+#include "app/FileHandler.hpp"
 #include <cctype>
+#include <sys/stat.h>
 
 // ============================================================================
 // Webserv Startup Print
@@ -110,4 +112,29 @@ HttpMethod stringToHttpMethod(const std::string &method)
 	if (method == "HEAD")
 		return HTTP_HEAD;
 	return HTTP_UNKNOWN;
+}
+
+// ============================================================================
+// APP Utilities
+// ============================================================================
+
+std::string buildFilePath(const std::string &uri, const std::string &rootDir, const std::string &defaultIndex)
+{
+	std::string filePath = rootDir;
+
+	if (uri == "/" || uri.empty())
+		filePath += "/" + defaultIndex;
+	else
+	{
+		filePath += uri;
+
+		if (FileHandler::isDirectory(filePath))
+		{
+			if (filePath[filePath.length() - 1] != '/')
+				filePath += "/";
+			filePath += defaultIndex;
+		}
+	}
+
+	return filePath;
 }

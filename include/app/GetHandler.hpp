@@ -28,10 +28,6 @@ private:
 	// Path handling and security
 	bool isPathSafe(const std::string &uri);
 	std::string normalizeUri(const std::string &uri);
-	std::string buildFilePath(
-		const std::string &uri,
-		const std::string &rootDir,
-		const std::string &defaultIndex);
 
 	// File serving
 	HttpResponse serveFile(const std::string &filePath);
