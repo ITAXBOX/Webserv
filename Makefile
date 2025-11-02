@@ -23,7 +23,8 @@ SRC_FILES   = main.cpp \
 			  app/app.cpp \
 			  app/FileHandler.cpp \
 			  app/RequestHandler.cpp \
-			  app/GetHandler.cpp 
+			  app/GetHandler.cpp \
+			  app/PostHandler.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++
