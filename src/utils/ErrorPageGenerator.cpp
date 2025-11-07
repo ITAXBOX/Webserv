@@ -2,29 +2,29 @@
 #include "utils/FileHandler.hpp"
 #include <sstream>
 
-ErrorPageHandler& ErrorPageHandler::getInstance()
+ErrorPageGenerator& ErrorPageGenerator::getInstance()
 {
-    static ErrorPageHandler instance;
+    static ErrorPageGenerator instance;
     return instance;
 }
 
-void ErrorPageHandler::setErrorPage(int statusCode, const std::string &filePath)
+void ErrorPageGenerator::setErrorPage(int statusCode, const std::string &filePath)
 {
     if (FileHandler::fileExists(filePath) && !FileHandler::isDirectory(filePath))
         errorPages_[statusCode] = filePath;
 }
 
-void ErrorPageHandler::clearErrorPage(int statusCode)
+void ErrorPageGenerator::clearErrorPage(int statusCode)
 {
     errorPages_.erase(statusCode);
 }
 
-void ErrorPageHandler::clearAllErrorPages()
+void ErrorPageGenerator::clearAllErrorPages()
 {
     errorPages_.clear();
 }
 
-std::string ErrorPageHandler::getErrorPage(int statusCode, const std::string &reason) const
+std::string ErrorPageGenerator::getErrorPage(int statusCode, const std::string &reason) const
 {
     // Check if custom error page exists
     std::map<int, std::string>::const_iterator it = errorPages_.find(statusCode);
@@ -62,12 +62,12 @@ std::string ErrorPageHandler::getErrorPage(int statusCode, const std::string &re
     return generateDefaultPage(statusCode, reason);
 }
 
-bool ErrorPageHandler::hasCustomPage(int statusCode) const
+bool ErrorPageGenerator::hasCustomPage(int statusCode) const
 {
     return errorPages_.find(statusCode) != errorPages_.end();
 }
 
-std::string ErrorPageHandler::generateDefaultPage(int statusCode, const std::string &reason) const
+std::string ErrorPageGenerator::generateDefaultPage(int statusCode, const std::string &reason) const
 {
     std::ostringstream html;
     html << "<html><body><h1>" << statusCode << " " << reason << "</h1></body></html>";

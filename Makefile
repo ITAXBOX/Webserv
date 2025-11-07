@@ -9,6 +9,7 @@ SRC_FILES   = main.cpp \
 			  utils/FileHandler.cpp \
 			  utils/MimeTypes.cpp \
 			  utils/signal.cpp \
+			  utils/ErrorPageGenerator.cpp \
 			  core/core.cpp \
 			  core/Poller.cpp \
 			  core/ServerSocket.cpp \

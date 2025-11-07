@@ -3,6 +3,7 @@
 #include "utils/utils.hpp"
 #include "utils/MimeTypes.hpp"
 #include "utils/FileHandler.hpp"
+#include "utils/ErrorPageGenerator.hpp"
 #include <sstream>
 
 namespace
@@ -18,6 +19,21 @@ namespace
     }
 }
 
+void StatusCodes::configureErrorPage(int statusCode, const std::string &filePath)
+{
+    ErrorPageGenerator::getInstance().setErrorPage(statusCode, filePath);
+}
+
+void StatusCodes::clearErrorPage(int statusCode)
+{
+    ErrorPageGenerator::getInstance().clearErrorPage(statusCode);
+}
+
+void StatusCodes::clearAllErrorPages()
+{
+    ErrorPageGenerator::getInstance().clearAllErrorPages();
+}
+
 HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
 {
     if (!FileHandler::fileExists(filePath))
@@ -28,7 +44,7 @@ HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
     
     if (!FileHandler::isReadable(filePath))
     {
-        std::string body = "<html><body><h1>403 Forbidden</h1><p>Permission denied</p></body></html>";
+        std::string body = ErrorPageGenerator::getInstance().getErrorPage(HTTP_FORBIDDEN, "Forbidden");
         return buildResponse(HTTP_FORBIDDEN, "Forbidden", body);
     }
 
@@ -43,19 +59,18 @@ HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
 
 HttpResponse StatusCodes::createNotFoundResponse()
 {
-    std::string body = "<html><body><h1>404 Not Found</h1></body></html>";
+    std::string body = ErrorPageGenerator::getInstance().getErrorPage(HTTP_NOT_FOUND, "Not Found");
     return buildResponse(HTTP_NOT_FOUND, "Not Found", body);
 }
 
 HttpResponse StatusCodes::createServerErrorResponse()
 {
-    std::string body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
+    std::string body = ErrorPageGenerator::getInstance().getErrorPage(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
     return buildResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error", body);
 }
 
 HttpResponse StatusCodes::createErrorResponse(int code, const std::string &reason)
 {
-    std::ostringstream body;
-    body << "<html><body><h1>" << code << " " << reason << "</h1></body></html>";
-    return buildResponse(code, reason, body.str());
+    std::string body = ErrorPageGenerator::getInstance().getErrorPage(code, reason);
+    return buildResponse(code, reason, body);
 }

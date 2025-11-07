@@ -1,18 +1,18 @@
-#ifndef ERRORPAGEHANDLER_HPP
-#define ERRORPAGEHANDLER_HPP
+#ifndef ERRORPAGEGENERATOR_HPP
+#define ERRORPAGEGENERATOR_HPP
 
 #include <string>
 #include <map>
 
-class ErrorPageHandler
+class ErrorPageGenerator
 {
 public:
     // Get singleton instance
-    static ErrorPageHandler &getInstance();
+    static ErrorPageGenerator &getInstance();
 
     // Delete copy constructor and assignment operator
-    ErrorPageHandler(const ErrorPageHandler &) = delete;
-    ErrorPageHandler &operator=(const ErrorPageHandler &) = delete;
+    ErrorPageGenerator(const ErrorPageGenerator &);
+    ErrorPageGenerator &operator=(const ErrorPageGenerator &);
 
     // Configure custom error pages
     void setErrorPage(int statusCode, const std::string &filePath);
@@ -29,8 +29,8 @@ private:
     std::map<int, std::string> errorPages_;
 
     // Private constructor for singleton
-    ErrorPageHandler() {}
-    ~ErrorPageHandler() {}
+    ErrorPageGenerator() {}
+    ~ErrorPageGenerator() {}
 
     // Generate default error page HTML
     std::string generateDefaultPage(int statusCode, const std::string &reason) const;
