@@ -43,10 +43,7 @@ HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
         return createNotFoundResponse();
     
     if (!FileHandler::isReadable(filePath))
-    {
-        std::string body = ErrorPageGenerator::getInstance().getErrorPage(HTTP_FORBIDDEN, "Forbidden");
-        return buildResponse(HTTP_FORBIDDEN, "Forbidden", body);
-    }
+        return createErrorResponse(HTTP_FORBIDDEN, "Forbidden");
 
     std::string body = FileHandler::readFile(filePath);
     if (body.empty())
@@ -59,15 +56,14 @@ HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
 
 HttpResponse StatusCodes::createNotFoundResponse()
 {
-    std::string body = ErrorPageGenerator::getInstance().getErrorPage(HTTP_NOT_FOUND, "Not Found");
-    return buildResponse(HTTP_NOT_FOUND, "Not Found", body);
+    return createErrorResponse(HTTP_NOT_FOUND, "Not Found");
 }
 
 HttpResponse StatusCodes::createServerErrorResponse()
 {
-    std::string body = ErrorPageGenerator::getInstance().getErrorPage(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
-    return buildResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error", body);
+    return createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
 }
+
 
 HttpResponse StatusCodes::createErrorResponse(int code, const std::string &reason)
 {

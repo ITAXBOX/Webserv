@@ -33,7 +33,7 @@ private:
     ~ErrorPageGenerator() {}
 
     // Generate default error page HTML
-    std::string generateDefaultPage(int statusCode, const std::string &reason) const;
+    std::string generateDefaultPage() const;
 };
 
 #endif

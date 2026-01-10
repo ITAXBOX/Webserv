@@ -107,6 +107,11 @@ bool ServerSocket::createSocket()
 bool ServerSocket::applySocketOptions()
 {
 	int yes = 1;
+	// _fd: The file descriptor of the socket to configure.
+    // SOL_SOCKET: Specifies that the option is at the socket API level (not protocol level like TCP).
+    // SO_REUSEADDR: The specific option to enable. It allows the socket to bind to a port that is still in TIME_WAIT from a previous run.
+    // &yes: A pointer to the value enabling the option (integer 1).
+    // sizeof(yes): The length of the option value data.
 	if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
 	{
 		Logger::error(std::string("setsockopt(SO_REUSEADDR) failed: ") + std::strerror(errno));
