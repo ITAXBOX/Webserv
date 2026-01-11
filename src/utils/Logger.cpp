@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cerrno>
 
+// if LOGGER_DEBUG macro is defined in the build, set default log level to DEBUG, else INFO
 Logger::Level Logger::s_minLevel =
 #ifdef LOGGER_DEBUG
 	Logger::LEVEL_DEBUG;
@@ -14,11 +15,6 @@ Logger::Level Logger::s_minLevel =
 
 bool Logger::s_showTimestamp = true;
 bool Logger::s_showColors = true;
-
-void Logger::setLevel(Logger::Level lvl)
-{
-	s_minLevel = lvl;
-}
 
 void Logger::showTimestamp(bool enabled)
 {

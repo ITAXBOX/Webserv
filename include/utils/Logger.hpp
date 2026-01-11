@@ -15,7 +15,6 @@ public:
 		LEVEL_ERROR = 3
 	};
 
-	static void setLevel(Level lvl);
 	static void showTimestamp(bool enabled);
 	static void showColors(bool enabled);
 
