@@ -164,10 +164,7 @@ void EventLoop::handleClientRead(int clientFd)
     char buffer[BUFFER_SIZE];
     int n = recv(clientFd, buffer, sizeof(buffer), 0);
     if (n <= 0)
-    {
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
-            return;
-        
+    {   
         if (n == 0)
             Logger::debug(Logger::connMsg("Client closed connection", clientFd));
         else
@@ -234,8 +231,6 @@ void EventLoop::handleClientWrite(int clientFd)
     ssize_t bytes = send(clientFd, data.c_str(), data.size(), 0);
     if (bytes <= 0)
     {
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
-            return;
         Logger::warn(Logger::connMsg("Client write failed", clientFd));
         handleClientDisconnect(clientFd);
         return;
