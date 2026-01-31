@@ -3,6 +3,7 @@
 
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
+#include "config/LocationConfig.hpp"
 #include <string>
 
 // Strategy Pattern: IMethodHandler Interface
@@ -17,8 +18,7 @@ public:
 	// Handle the request and return a response
 	virtual HttpResponse handle(
 		const HttpRequest &request,
-		const std::string &rootDir,
-		const std::string &defaultIndex) = 0;
+		const LocationConfig &location) = 0;
 
 	// Get handler name for debugging
 	virtual std::string getName() const = 0;

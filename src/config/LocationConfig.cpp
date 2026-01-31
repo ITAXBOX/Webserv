@@ -5,8 +5,6 @@ LocationConfig::LocationConfig()
 	  root(""),
 	  autoindex(false),
 	  uploadPath(""),
-	  cgiExtension(""),
-	  cgiPath(""),
 	  redirect(""),
 	  redirectCode(0)
 {
@@ -27,8 +25,6 @@ LocationConfig::LocationConfig(const std::string &p)
 	  root(""),
 	  autoindex(false),
 	  uploadPath(""),
-	  cgiExtension(""),
-	  cgiPath(""),
 	  redirect(""),
 	  redirectCode(0)
 {
@@ -78,15 +74,9 @@ LocationConfig &LocationConfig::setUploadPath(const std::string &p)
 	return *this;
 }
 
-LocationConfig &LocationConfig::setCgiExtension(const std::string &extension)
+LocationConfig &LocationConfig::addCgiHandler(const std::string &extension, const std::string &interpreterPath)
 {
-	cgiExtension = extension;
-	return *this;
-}
-
-LocationConfig &LocationConfig::setCgiPath(const std::string &p)
-{
-	cgiPath = p;
+	cgiHandlers[extension] = interpreterPath;
 	return *this;
 }
 
@@ -133,14 +123,17 @@ std::string LocationConfig::getUploadPath() const
 	return uploadPath;
 }
 
-std::string LocationConfig::getCgiExtension() const
+std::string LocationConfig::getCgiPath(const std::string &extension) const
 {
-	return cgiExtension;
+	std::map<std::string, std::string>::const_iterator it = cgiHandlers.find(extension);
+    if (it != cgiHandlers.end())
+        return it->second;
+    return "";
 }
 
-std::string LocationConfig::getCgiPath() const
+const std::map<std::string, std::string> &LocationConfig::getCgiHandlers() const
 {
-	return cgiPath;
+    return cgiHandlers;
 }
 
 std::string LocationConfig::getRedirect() const
@@ -169,8 +162,7 @@ void LocationConfig::clear()
 	allowedMethods.insert("HEAD");
 	autoindex = false;
 	uploadPath.clear();
-	cgiExtension.clear();
-	cgiPath.clear();
+	cgiHandlers.clear();
 	redirect.clear();
 	redirectCode = 0;
 }

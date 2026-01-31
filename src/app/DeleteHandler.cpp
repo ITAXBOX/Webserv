@@ -2,10 +2,10 @@
 
 HttpResponse DeleteHandler::handle(
     const HttpRequest &request,
-    const std::string &rootDir,
-    const std::string &defaultIndex)
+    const LocationConfig &location)
 {
-    (void)defaultIndex;
+    std::string rootDir = location.getRoot();
+    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
 
     std::string path = buildFilePath(request.getUri(), rootDir, "");
     Logger::info("DELETE request for: " + path);

@@ -32,9 +32,10 @@ EventLoop::~EventLoop()
     Logger::debug("EventLoop destroyed");
 }
 
-void EventLoop::addServer(ServerSocket* server)
+void EventLoop::addServer(ServerSocket* server, const ServerConfig& config)
 {
     _servers[server->getFd()] = server;
+    _serverConfigs[server->getFd()] = config;
     
     // Add server socket to poller (watch for EPOLLIN - incoming connections)
     if (!_poller.addFd(server->getFd(), EPOLLIN))
@@ -145,6 +146,7 @@ void EventLoop::handleNewConnection(int serverFd)
         return;
     
     _clients[clientFd] = new ClientConnection(clientFd);
+    _clientToServer[clientFd] = serverFd;
 
     // Add client to poller (watch for EPOLLIN - incoming data)
     if (!_poller.addFd(clientFd, EPOLLIN))
@@ -192,11 +194,24 @@ void EventLoop::handleClientRead(int clientFd)
         // Get the parsed request
         HttpRequest& request = client->getParser().getRequest();
         
+        // Resolve Config
+        int serverFd = _clientToServer[clientFd];
+        const ServerConfig &config = _serverConfigs[serverFd];
+        
+        // Resolve Location
+        const LocationConfig *location = config.matchLocation(request.getUri());
+        
+        static LocationConfig defaultLocation("/");
+        if (location == NULL) {
+             defaultLocation.setRoot(config.getRoot());
+             if (!config.getIndex().empty()) defaultLocation.addIndex(config.getIndex()[0]);
+             location = &defaultLocation;
+        }
+
         // Delegate to RequestHandler (Strategy Pattern)
         HttpResponse response = _requestHandler->handleRequest(
             request, 
-            DEFAULT_ROOT, 
-            DEFAULT_INDEX
+            *location
         );
         
         client->appendToWriteBuffer(response.build());
@@ -264,5 +279,6 @@ void EventLoop::handleClientDisconnect(int fd)
     
     ClientConnection* client = _clients[fd];
     _clients.erase(fd);
+    _clientToServer.erase(fd);
     delete client;
 }

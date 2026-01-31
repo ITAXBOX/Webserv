@@ -1,7 +1,7 @@
 #ifndef GETHANDLER_HPP
 #define GETHANDLER_HPP
 
-#include "app/IMethodHandler.hpp"
+#include "app/BaseMethodHandler.hpp"
 #include "utils/FileHandler.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
@@ -13,7 +13,7 @@
 // Serves static files (HTML, CSS, images, etc.)
 // Implements security checks and MIME type detection
 
-class GetHandler : public IMethodHandler
+class GetHandler : public BaseMethodHandler
 {
 public:
 	GetHandler() {}
@@ -22,8 +22,7 @@ public:
 	// IMethodHandler interface implementation
 	HttpResponse handle(
 		const HttpRequest &request,
-		const std::string &rootDir,
-		const std::string &defaultIndex);
+		const LocationConfig &location);
 
 	std::string getName() const { return "GET"; }
 
@@ -35,9 +34,6 @@ private:
 	// File serving
 	HttpResponse serveFile(const std::string &filePath);
 
-    // CGI Handling
-    bool isCgiRequest(const std::string &path);
-    HttpResponse executeCgi(const HttpRequest &request, const std::string &path);
 };
 
 #endif

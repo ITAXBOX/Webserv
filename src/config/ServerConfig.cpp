@@ -112,6 +112,32 @@ const std::vector<LocationConfig> &ServerConfig::getLocations() const
 	return locations;
 }
 
+const LocationConfig *ServerConfig::matchLocation(const std::string &uri) const
+{
+    const LocationConfig *bestMatch = NULL;
+    size_t bestLen = 0;
+
+    for (size_t i = 0; i < locations.size(); ++i)
+    {
+        const std::string &path = locations[i].getPath();
+        // Check if URI starts with path
+        if (uri.compare(0, path.length(), path) == 0)
+        {
+            // Ensure full path component match (e.g. /img matches /img/foo but not /images)
+            if (path == "/" || uri.length() == path.length() || uri[path.length()] == '/')
+            {
+                // Longest prefix match
+                if (path.length() > bestLen || bestMatch == NULL)
+                {
+                    bestMatch = &locations[i];
+                    bestLen = path.length();
+                }
+            }
+        }
+    }
+    return bestMatch;
+}
+
 // Utility
 void ServerConfig::clear()
 {

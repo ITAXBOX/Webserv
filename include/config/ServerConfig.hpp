@@ -44,6 +44,7 @@ public:
 	size_t getClientMaxBodySize() const;
 	std::string getErrorPage(int statusCode) const;
 	const std::vector<LocationConfig> &getLocations() const;
+    const LocationConfig *matchLocation(const std::string &uri) const;
 
 	// Utility
 	void clear();

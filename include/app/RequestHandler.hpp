@@ -7,6 +7,7 @@
 #include "app/PutHandler.hpp"
 #include "app/DeleteHandler.hpp"
 #include "app/HeadHandler.hpp"
+#include "config/LocationConfig.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
@@ -26,8 +27,7 @@ public:
 	// Main request handler - delegates to registered strategy
 	HttpResponse handleRequest(
 		const HttpRequest &request,
-		const std::string &rootDir,
-		const std::string &defaultIndex);
+		const LocationConfig &location);
 
 	// Register custom handler for specific HTTP method
 	// Takes ownership of the handler pointer

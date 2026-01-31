@@ -1,7 +1,7 @@
 #ifndef POSTHANDLER_HPP
 #define POSTHANDLER_HPP
 
-#include "app/IMethodHandler.hpp"
+#include "app/BaseMethodHandler.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
@@ -13,7 +13,7 @@
 // Handles form submissions and file uploads
 // Supports: application/x-www-form-urlencoded, multipart/form-data
 
-class PostHandler : public IMethodHandler
+class PostHandler : public BaseMethodHandler
 {
 public:
 	PostHandler() {}
@@ -22,8 +22,7 @@ public:
 	// IMethodHandler interface implementation
 	HttpResponse handle(
 		const HttpRequest &request,
-		const std::string &rootDir,
-		const std::string &defaultIndex);
+		const LocationConfig &location);
 
 	std::string getName() const { return "POST"; }
 

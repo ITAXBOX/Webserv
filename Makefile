@@ -23,6 +23,8 @@ SRC_FILES   = main.cpp \
 			  config/LocationConfig.cpp \
 			  config/Tokenizer.cpp \
 			  config/ConfigParser.cpp \
+			  app/CgiExecutor.cpp \
+			  app/BaseMethodHandler.cpp \
 			  app/RequestHandler.cpp \
 			  app/GetHandler.cpp \
 			  app/PostHandler.cpp \

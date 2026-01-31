@@ -19,8 +19,7 @@ public:
 
     HttpResponse handle(
         const HttpRequest &request,
-        const std::string &rootDir,
-        const std::string &defaultIndex);
+        const LocationConfig &location);
 
     std::string getName() const { return "PUT"; }
 };

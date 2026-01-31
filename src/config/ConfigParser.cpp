@@ -69,7 +69,7 @@ bool ConfigParser::isLocationDirective(const std::string &word) const
 {
 	return word == "root" || word == "index" || word == "allowed_methods" || 
 	       word == "autoindex" || word == "upload_path" || 
-	       word == "cgi_extension" || word == "cgi_path" || word == "return";
+	       word == "cgi_assign" || word == "return";
 }
 
 // ============================================================================
@@ -228,10 +228,8 @@ bool ConfigParser::parseLocationDirective(LocationConfig &location)
 		return ConfigDirectives::parseAutoindex(_tokens, _pos, location, _error);
 	else if (directive.value == "upload_path")
 		return ConfigDirectives::parseUploadPath(_tokens, _pos, location, _error);
-	else if (directive.value == "cgi_extension")
-		return ConfigDirectives::parseCgiExtension(_tokens, _pos, location, _error);
-	else if (directive.value == "cgi_path")
-		return ConfigDirectives::parseCgiPath(_tokens, _pos, location, _error);
+	else if (directive.value == "cgi_assign")
+		return ConfigDirectives::parseCgiAssign(_tokens, _pos, location, _error);
 	else if (directive.value == "return")
 		return ConfigDirectives::parseReturn(_tokens, _pos, location, _error);
 	

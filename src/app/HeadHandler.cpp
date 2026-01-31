@@ -2,9 +2,13 @@
 
 HttpResponse HeadHandler::handle(
     const HttpRequest &request,
-    const std::string &rootDir,
-    const std::string &defaultIndex)
+    const LocationConfig &location)
 {
+    std::string rootDir = location.getRoot();
+    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+    std::string defaultIndex = DEFAULT_INDEX;
+    if (!location.getIndex().empty()) defaultIndex = location.getIndex()[0];
+    
     std::string path = buildFilePath(request.getUri(), rootDir, defaultIndex);
     Logger::info("HEAD request for: " + path);
 

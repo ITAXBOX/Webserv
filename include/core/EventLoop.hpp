@@ -9,6 +9,8 @@
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
 
+#include "config/ServerConfig.hpp"
+
 // Forward declaration to avoid circular dependency
 class RequestHandler;
 
@@ -18,7 +20,9 @@ private:
     bool _running;
     Poller _poller;                                    // Using Poller instead of raw poll()
     std::map<int, ServerSocket*> _servers;
+    std::map<int, ServerConfig> _serverConfigs;        // Map server FD to its config
     std::map<int, ClientConnection*> _clients;
+    std::map<int, int> _clientToServer;                // Map client FD to server FD (to look up config)
     RequestHandler* _requestHandler;                   // Strategy pattern handler
 
     void handleNewConnection(int serverFd);
@@ -30,7 +34,7 @@ public:
     EventLoop();
     ~EventLoop();
 
-    void addServer(ServerSocket* server);
+    void addServer(ServerSocket* server, const ServerConfig& config);
     void run();
     void stop();
 };

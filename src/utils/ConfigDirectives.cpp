@@ -221,33 +221,19 @@ bool ConfigDirectives::parseUploadPath(std::vector<Token> &tokens, size_t &pos, 
 	return expectSemicolon(tokens, pos, error);
 }
 
-bool ConfigDirectives::parseCgiExtension(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
+bool ConfigDirectives::parseCgiAssign(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {
-	advance(tokens, pos); // Consume 'cgi_extension'
-	Token value = advance(tokens, pos);
+	advance(tokens, pos); // Consume 'cgi_assign'
+	Token extension = advance(tokens, pos);
+    Token path = advance(tokens, pos);
 	
-	if (value.type != TOKEN_WORD)
+	if (extension.type != TOKEN_WORD || path.type != TOKEN_WORD)
 	{
-		setError(error, "Expected extension after 'cgi_extension'", value.line);
+		setError(error, "Expected extension and path after 'cgi_assign'", extension.line);
 		return false;
 	}
 	
-	location.setCgiExtension(value.value);
-	return expectSemicolon(tokens, pos, error);
-}
-
-bool ConfigDirectives::parseCgiPath(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
-{
-	advance(tokens, pos); // Consume 'cgi_path'
-	Token value = advance(tokens, pos);
-	
-	if (value.type != TOKEN_WORD)
-	{
-		setError(error, "Expected path after 'cgi_path'", value.line);
-		return false;
-	}
-	
-	location.setCgiPath(value.value);
+	location.addCgiHandler(extension.value, path.value);
 	return expectSemicolon(tokens, pos, error);
 }
 

@@ -1,13 +1,42 @@
 #include "app/PostHandler.hpp"
+#include "app/CgiExecutor.hpp"
+#include "utils/FileHandler.hpp"
+#include <sstream>
 
 HttpResponse PostHandler::handle(
 	const HttpRequest &request,
-	const std::string &rootDir,
-	const std::string &defaultIndex)
+    const LocationConfig &location)
 {
-	(void)defaultIndex;
+    std::string rootDir = location.getRoot();
+    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+    std::string defaultIndex = DEFAULT_INDEX;
+    if (!location.getIndex().empty()) defaultIndex = location.getIndex()[0];
 
-	Logger::info("PostHandler processing: " + request.getUri());
+	std::string uri = request.getUri();
+    Logger::info("PostHandler processing: " + uri);
+
+    // Normalize URI (remove query strings, fragments)
+    size_t endPos = uri.find_first_of("?#");
+    if (endPos != std::string::npos)
+        uri = uri.substr(0, endPos);
+
+    // Build file path (Simple manual construction for now)
+    std::string filePath = rootDir;
+    if (!filePath.empty() && filePath[filePath.size() - 1] != '/' && !uri.empty() && uri[0] != '/')
+        filePath += "/";
+    filePath += uri;
+
+    // Handle Directory Index
+    if (FileHandler::isDirectory(filePath))
+    {
+        if (filePath[filePath.size() - 1] != '/')
+            filePath += "/";
+        filePath += defaultIndex;
+    }
+
+	// Check for CGI
+	if (isCgiRequest(filePath, location))
+		return executeCgi(request, filePath, location);
 
 	// Check if request has a body
 	if (request.getHeader("Content-Length") == "")
@@ -259,3 +288,6 @@ std::string PostHandler::generateUploadResponse(
 
 	return html.str();
 }
+
+
+

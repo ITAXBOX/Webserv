@@ -43,8 +43,7 @@ void RequestHandler::registerHandler(HttpMethod method, IMethodHandler *handler)
 
 HttpResponse RequestHandler::handleRequest(
 	const HttpRequest &request,
-	const std::string &rootDir,
-	const std::string &defaultIndex)
+    const LocationConfig &location)
 {
 	HttpMethod method = request.getMethod();
 	std::string methodStr = request.getMethodString();
@@ -59,7 +58,7 @@ HttpResponse RequestHandler::handleRequest(
 		// Delegate to the strategy
 		IMethodHandler *handler = it->second;
 		Logger::debug("Delegating to " + handler->getName() + " handler");
-		return handler->handle(request, rootDir, defaultIndex);
+		return handler->handle(request, location);
 	}
 
 	// No handler found for this method

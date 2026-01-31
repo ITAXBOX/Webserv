@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 
 // LocationConfig: Configuration for a location block
 // Represents a location directive in the config file
@@ -16,8 +17,7 @@ private:
 	std::set<std::string> allowedMethods;	 // Allowed HTTP methods (GET, POST, DELETE)
 	bool autoindex;							 // Enable directory listing
 	std::string uploadPath;					 // Directory for file uploads
-	std::string cgiExtension;				 // CGI file extension (e.g., ".py", ".php")
-	std::string cgiPath;					 // Path to CGI interpreter
+    std::map<std::string, std::string> cgiHandlers; // Map extension -> interpreter path
 	std::string redirect;					 // Redirect URL (if any)
 	int redirectCode;						 // Redirect status code (301, 302, etc.)
 
@@ -33,8 +33,7 @@ public:
 	LocationConfig &addAllowedMethod(const std::string &method);
 	LocationConfig &setAutoindex(bool enabled);
 	LocationConfig &setUploadPath(const std::string &path);
-	LocationConfig &setCgiExtension(const std::string &extension);
-	LocationConfig &setCgiPath(const std::string &path);
+    LocationConfig &addCgiHandler(const std::string &extension, const std::string &interpreterPath);
 	LocationConfig &setRedirect(const std::string &url, int code = 301);
 
 	// Getters
@@ -45,8 +44,8 @@ public:
 	bool isMethodAllowed(const std::string &method) const;
 	bool getAutoindex() const;
 	std::string getUploadPath() const;
-	std::string getCgiExtension() const;
-	std::string getCgiPath() const;
+    std::string getCgiPath(const std::string &extension) const;
+    const std::map<std::string, std::string> &getCgiHandlers() const;
 	std::string getRedirect() const;
 	int getRedirectCode() const;
 	bool hasRedirect() const;

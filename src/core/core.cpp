@@ -170,7 +170,7 @@ bool WebServer::setupServers()
 		}
 
 		_servers.push_back(srv);
-		_eventLoop->addServer(srv);
+		_eventLoop->addServer(srv, config);
 
 		// Log server names if any
 		const std::vector<std::string> &names = config.getServerNames();
@@ -212,7 +212,12 @@ bool WebServer::setupDefaultServer()
 	}
 
 	_servers.push_back(srv);
-	_eventLoop->addServer(srv);
+	
+	ServerConfig config;
+	config.setHost(DEFAULT_HOST);
+	config.setPort(DEFAULT_PORT);
+
+	_eventLoop->addServer(srv, config);
 
 	Logger::info(std::string("Default server configured: ") + DEFAULT_HOST + ":" + toString(DEFAULT_PORT));
 	return true;
