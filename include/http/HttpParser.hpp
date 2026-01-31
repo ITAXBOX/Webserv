@@ -29,10 +29,14 @@ public:
 	// Reset parser for reuse (e.g., for keep-alive connections)
 	void reset();
 
+	void setMaxBodySize(size_t size) { _maxBodySize = size; }
+	size_t getMaxBodySize() const { return _maxBodySize; }
+
 private:
 	HttpRequest _request;		// The request being built
 	IParseState *_currentState; // Current parsing state
 	std::string _buffer;		// Accumulated unparsed data
+	size_t _maxBodySize;		// Max allowed body size
 	bool _isComplete;			// Parsing completed successfully
 	bool _hasError;				// Parsing error occurred
 	std::string _errorMessage;	// Error description
@@ -48,6 +52,7 @@ private:
 	friend class ParseRequestLineState;
 	friend class ParseHeadersState;
 	friend class ParseBodyState;
+	friend class ParseChunkedBodyState;
 	friend class ParseCompleteState;
 	friend class ParseErrorState;
 

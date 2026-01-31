@@ -81,6 +81,22 @@ public:
 	ParseBodyState(size_t contentLength);
 };
 
+// State 3b: Parse chunked body (Transfer-Encoding: chunked)
+// In this state, we read data in chunks until a 0-size chunk is found
+class ParseChunkedBodyState : public IParseState
+{
+public:
+	ParseChunkedBodyState();
+	virtual void parse(HttpParser &parser);
+	virtual std::string getName() const { return "ParseChunkedBody"; }
+
+private:
+    enum ChunkState { CHUNK_SIZE, CHUNK_DATA, CHUNK_DATA_CRLF, CHUNK_TRAILERS };
+    ChunkState _state;
+    size_t _chunkSize;
+    size_t _chunkRead;
+};
+
 // State 4: Parsing complete
 // In this state, the entire HTTP request has been successfully parsed.
 class ParseCompleteState : public IParseState

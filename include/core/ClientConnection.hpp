@@ -14,7 +14,7 @@ private:
     ConnState _state;
     HttpParser _parser; // HTTP request parser
 public:
-    ClientConnection(int fd);
+    ClientConnection(int fd, size_t maxBodySize);
     ~ClientConnection();
 
     int getFd() const;

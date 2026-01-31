@@ -2,9 +2,10 @@
 #include "utils/Logger.hpp"
 #include <unistd.h>
 
-ClientConnection::ClientConnection(int fd)
+ClientConnection::ClientConnection(int fd, size_t maxBodySize)
     : _fd(fd), _state(READING)
 {
+    _parser.setMaxBodySize(maxBodySize);
     Logger::debug(Logger::fdMsg("ClientConnection created", fd));
 }
 

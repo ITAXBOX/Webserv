@@ -32,7 +32,8 @@ private:
 	std::string normalizeUri(const std::string &uri);
 
 	// File serving
-	HttpResponse serveFile(const std::string &filePath);
+	HttpResponse serveFile(const std::string &filePath, bool autoindex);
+	HttpResponse generateAutoIndex(const std::string &dirPath);
 
 };
 

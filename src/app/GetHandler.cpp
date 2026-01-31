@@ -1,11 +1,32 @@
 #include "app/GetHandler.hpp"
 #include "app/CgiExecutor.hpp"
 #include <sstream>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <ctime>
+#include <iomanip>
 
 HttpResponse GetHandler::handle(
     const HttpRequest &request,
     const LocationConfig &location)
 {
+    // Handle Redirection
+    if (location.hasRedirect())
+    {
+        Logger::info("Redirecting request");
+        HttpResponse response;
+        int code = location.getRedirectCode();
+        std::string reason = "Redirect";
+        if (code == 301) reason = "Moved Permanently";
+        else if (code == 302) reason = "Found";
+        else if (code == 307) reason = "Temporary Redirect";
+        else if (code == 308) reason = "Permanent Redirect";
+        
+        response.setStatus(code, reason);
+        response.addHeader("Location", location.getRedirect());
+        return response;
+    }
+
     std::string uri = request.getUri();
     std::string rootDir = location.getRoot();
     
@@ -39,7 +60,7 @@ HttpResponse GetHandler::handle(
         return executeCgi(request, filePath, location);
 
     // Serve the file
-    return serveFile(filePath);
+    return serveFile(filePath, location.getAutoindex());
 }
 
 bool GetHandler::isPathSafe(const std::string &uri)
@@ -76,7 +97,7 @@ std::string GetHandler::normalizeUri(const std::string &uri)
     return uri;
 }
 
-HttpResponse GetHandler::serveFile(const std::string &filePath)
+HttpResponse GetHandler::serveFile(const std::string &filePath, bool autoindex)
 {
     // Check if file exists
     if (!FileHandler::fileExists(filePath))
@@ -88,6 +109,9 @@ HttpResponse GetHandler::serveFile(const std::string &filePath)
     // Check if it's a directory
     if (FileHandler::isDirectory(filePath))
     {
+        if (autoindex)
+             return generateAutoIndex(filePath);
+        
         Logger::debug("Path is a directory: " + filePath);
         return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
     }
@@ -125,6 +149,74 @@ HttpResponse GetHandler::serveFile(const std::string &filePath)
 
     Logger::info("Served file: " + filePath + " (" + mimeType + ", " + toString(content.size()) + " bytes)");
 
+    return response;
+}
+
+HttpResponse GetHandler::generateAutoIndex(const std::string &dirPath)
+{
+    DIR *dir = opendir(dirPath.c_str());
+    if (dir == NULL)
+    {
+        Logger::error("Failed to open directory for autoindex: " + dirPath);
+        return StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
+    }
+
+    std::ostringstream html;
+    html << "<html><head><title>Index of " << dirPath << "</title></head><body>";
+    html << "<h1>Index of " << dirPath << "</h1><hr><pre>";
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        std::string name = entry->d_name;
+        if (name == ".") continue;
+        
+        // Add trailing slash for directories
+        std::string fullPath = dirPath;
+        if (fullPath[fullPath.length()-1] != '/') fullPath += "/";
+        fullPath += name;
+        
+        bool isDir = FileHandler::isDirectory(fullPath);
+        if (isDir) name += "/";
+        
+        // Date and Size
+        struct stat st;
+        std::string dateStr = "                   "; // 19 spaces
+        std::string sizeStr = "        -";
+        
+        if (stat(fullPath.c_str(), &st) == 0)
+        {
+            char buf[100];
+            struct tm *tm = std::localtime(&st.st_mtime);
+            std::strftime(buf, sizeof(buf), "%d-%b-%Y %H:%M", tm);
+            dateStr = std::string(buf);
+            if (dateStr.length() < 19) dateStr.resize(19, ' ');
+            
+            if (!isDir)
+                sizeStr = toString(static_cast<unsigned long>(st.st_size));
+        }
+
+        // Output link (adjust spacing as needed)
+        // <a href="name">name</a>      date       size
+        html << "<a href=\"" << name << "\">" << name << "</a>";
+        
+        // Padding
+        int pad = 50 - name.length();
+        if (pad < 0) pad = 0;
+        html << std::string(pad, ' ');
+        
+        html << dateStr << "       " << sizeStr << "\n";
+    }
+
+    html << "</pre><hr></body></html>";
+    closedir(dir);
+
+    HttpResponse response;
+    response.setStatus(HTTP_OK, "OK");
+    response.setBody(html.str());
+    response.addHeader("Content-Type", "text/html");
+    response.addHeader("Content-Length", toString(html.str().length()));
+    
     return response;
 }
 

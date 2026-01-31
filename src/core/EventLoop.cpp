@@ -145,7 +145,11 @@ void EventLoop::handleNewConnection(int serverFd)
     if (clientFd < 0)
         return;
     
-    _clients[clientFd] = new ClientConnection(clientFd);
+    size_t maxBodySize = MAX_BODY_SIZE;
+    if (_serverConfigs.find(serverFd) != _serverConfigs.end())
+        maxBodySize = _serverConfigs[serverFd].getClientMaxBodySize();
+
+    _clients[clientFd] = new ClientConnection(clientFd, maxBodySize);
     _clientToServer[clientFd] = serverFd;
 
     // Add client to poller (watch for EPOLLIN - incoming data)
@@ -227,8 +231,17 @@ void EventLoop::handleClientRead(int clientFd)
     {
         Logger::error(Logger::connMsg("HTTP parsing error: " + client->getParser().getErrorMessage(), clientFd));
         
-        // Send 400 Bad Request
-        HttpResponse response = StatusCodes::createErrorResponse(HTTP_BAD_REQUEST, "Bad Request");
+        // Determine Error Code
+        int code = HTTP_BAD_REQUEST;
+        std::string msg = "Bad Request";
+        if (client->getParser().getErrorMessage() == "Payload Too Large")
+        {
+             code = 413;
+             msg = "Payload Too Large";
+        }
+
+        // Send Error Response
+        HttpResponse response = StatusCodes::createErrorResponse(code, msg);
         client->appendToWriteBuffer(response.build());
         client->setState(WRITING);
         
