@@ -34,6 +34,10 @@ private:
 
 	// File serving
 	HttpResponse serveFile(const std::string &filePath);
+
+    // CGI Handling
+    bool isCgiRequest(const std::string &path);
+    HttpResponse executeCgi(const HttpRequest &request, const std::string &path);
 };
 
 #endif
