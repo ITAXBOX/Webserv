@@ -85,8 +85,8 @@ bool WebServer::loadConfiguration()
 {
 	if (_configFile.empty())
 	{
-		Logger::warn("No configuration file provided. Using defaults.");
-		return true;
+		Logger::error("No configuration file provided.");
+		return false;
 	}
 
 	Logger::info(std::string("Loading configuration from: ") + _configFile);
@@ -135,11 +135,11 @@ bool WebServer::loadConfiguration()
 
 bool WebServer::setupServers()
 {
-	// If no config loaded, use default server
+	// If no config loaded, return error
 	if (_serverConfigs.empty())
 	{
-		Logger::info("No config servers found, using default");
-		return setupDefaultServer();
+		Logger::error("No server configurations found in file.");
+		return false;
 	}
 
 	// Create servers from config
@@ -191,35 +191,6 @@ bool WebServer::setupServers()
 		}
 	}
 
-	return true;
-}
-
-bool WebServer::setupDefaultServer()
-{
-	// Create a default server listening on DEFAULT_HOST:DEFAULT_PORT
-	ServerSocket *srv = new ServerSocket();
-	if (!srv)
-	{
-		Logger::error("Failed to allocate ServerSocket");
-		return false;
-	}
-
-	if (!srv->init(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_BACKLOG))
-	{
-		Logger::error(std::string("Failed to initialize default server on ") + DEFAULT_HOST);
-		delete srv;
-		return false;
-	}
-
-	_servers.push_back(srv);
-	
-	ServerConfig config;
-	config.setHost(DEFAULT_HOST);
-	config.setPort(DEFAULT_PORT);
-
-	_eventLoop->addServer(srv, config);
-
-	Logger::info(std::string("Default server configured: ") + DEFAULT_HOST + ":" + toString(DEFAULT_PORT));
 	return true;
 }
 

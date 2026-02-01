@@ -32,7 +32,6 @@ private:
 
 	bool loadConfiguration();
 	bool setupServers();
-	bool setupDefaultServer();
 	void cleanup();
 
 	WebServer(const WebServer &);

@@ -52,6 +52,7 @@ public:
 
 	// Utility
 	void clear();
+    void clearAllowedMethods();
 	bool isValid() const;
 };
 

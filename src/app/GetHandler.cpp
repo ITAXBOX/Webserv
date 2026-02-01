@@ -47,12 +47,31 @@ HttpResponse GetHandler::handle(
     std::string safeUri = normalizeUri(uri);
 
     // Build file path
-    std::string defaultIndex = DEFAULT_INDEX;
-    const std::vector<std::string> &indices = location.getIndex();
-    if (!indices.empty())
-        defaultIndex = indices[0];
+    // We initially build the path without the index file
+    std::string filePath = buildFilePath(safeUri, rootDir, "");
+    
+    // If it's a directory, check if we should serve the index file
+    if (FileHandler::isDirectory(filePath))
+    {
+        std::string defaultIndex = DEFAULT_INDEX;
+        const std::vector<std::string> &indices = location.getIndex();
+        if (!indices.empty())
+            defaultIndex = indices[0];
+            
+        std::string indexPath = filePath;
+        if (!indexPath.empty() && indexPath[indexPath.size()-1] != '/') 
+            indexPath += "/";
+        indexPath += defaultIndex;
+        
+        // If the index file exists, we serve that instead of the directory
+        if (FileHandler::fileExists(indexPath))
+        {
+            filePath = indexPath;
+        }
+        // Otherwise, we keep filePath as the directory path, which will trigger autoindex (if enabled)
+        // or a 404/403 in serveFile
+    }
 
-    std::string filePath = buildFilePath(safeUri, rootDir, defaultIndex);
     Logger::debug("Resolved file path: " + filePath);
 
     // Check for CGI

@@ -7,13 +7,13 @@ int main(int argc, char **argv)
 
 	printWebservStartup();
 
-	if (argc > 2)
+	if (argc != 2)
 	{
-		Logger::error(std::string("Usage: ") + argv[0] + " [config_file]");
+		Logger::error(std::string("Usage: ") + argv[0] + " <config_file>");
 		return 1;
 	}
 
-	std::string configFile = (argc == 2) ? argv[1] : "";
+	std::string configFile = argv[1];
 
 	// Create and initialize WebServer (Facade pattern)
 	WebServer server;

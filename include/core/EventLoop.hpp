@@ -23,12 +23,19 @@ private:
     std::map<int, ServerConfig> _serverConfigs;        // Map server FD to its config
     std::map<int, ClientConnection*> _clients;
     std::map<int, int> _clientToServer;                // Map client FD to server FD (to look up config)
+    std::map<int, int> _cgiToClient;                   // Map CGI pipe FD to client FD
     RequestHandler* _requestHandler;                   // Strategy pattern handler
 
     void handleNewConnection(int serverFd);
     void handleClientRead(int clientFd);
     void handleClientWrite(int clientFd);
     void handleClientDisconnect(int fd);
+
+    // CGI Handling
+    void startCgi(int clientFd, ClientConnection* client, const HttpRequest& request, const HttpResponse& response);
+    void handleCgiRead(int pipeFd);
+    void handleCgiWrite(int pipeFd);
+    void handleCgiHangup(int pipeFd); // Child finished
 
 public:
     EventLoop();

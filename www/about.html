@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ - Architecture</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Server Architecture</h1>
+            <p class="subtitle">How WebServ Processes Requests</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="methods.html">Methods</a>
+            <a href="cgi.html">CGI Tests</a>
+            <a href="about.html" class="active">Architecture</a>
+        </nav>
+
+        <div class="card-grid">
+            <div class="card">
+                <h2>1. Event Loop</h2>
+                <p>WebServ uses a single-threaded event loop based on <code>epoll</code> (Linux) or <code>kqueue</code> (BSD/macOS). This allows handling multiple connections simultaneously without the overhead of threads.</p>
+            </div>
+            
+            <div class="card">
+                <h2>2. Config Parsing</h2>
+                <p>Nginx-style configuration files are tokenized and parsed into a structured C++ object model, supporting multiple server blocks and location directives.</p>
+            </div>
+
+            <div class="card">
+                <h2>3. HTTP Strategy</h2>
+                <p>We use the Strategy Pattern to handle different HTTP methods. The <code>RequestHandler</code> delegates execution to specific handlers (GetHandler, PostHandler, DeleteHandler).</p>
+            </div>
+
+            <div class="card">
+                <h2>4. CGI Interface</h2>
+                <p>Dynamic content is handled by forking a child process and setting up pipes. Environment variables are passed according to the CGI 1.1 RFC.</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 30px;">
+            <h3>Project Specs</h3>
+            <ul class="feature-list">
+                <li>Language: C++98 Standard</li>
+                <li>I/O Model: Non-blocking I/O with Multiplexing</li>
+                <li>Parsing: Custom State Machine HTTP Parser</li>
+                <li>No External Libraries (Boost, etc.)</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>WebServ Project &copy; 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

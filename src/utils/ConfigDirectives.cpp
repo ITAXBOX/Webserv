@@ -151,6 +151,9 @@ bool ConfigDirectives::parseAllowedMethods(std::vector<Token> &tokens, size_t &p
 {
 	advance(tokens, pos); // Consume 'allowed_methods'
 	
+    // Clear default methods (GET, HEAD) so we only allow what is explicitly specified
+    location.clearAllowedMethods();
+
 	// Can have multiple methods
 	while (peek(tokens, pos).type == TOKEN_WORD)
 	{

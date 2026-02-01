@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ - CGI Tests</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CGI Playground</h1>
+            <p class="subtitle">Test Common Gateway Interface Support</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="methods.html">Methods</a>
+            <a href="cgi-bin/file_manager.py">File Manager</a>
+            <a href="cgi.html" class="active">CGI Tests</a>
+        </nav>
+
+        <div class="card-grid">
+            <div class="card">
+                <h2>Simple GET Scripts</h2>
+                <p>Execute scripts that output dynamic HTML.</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <a href="cgi-bin/hello.py" class="btn">Python Hello</a>
+                    <a href="cgi-bin/hello.sh" class="btn">Bash Hello</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Interactive Tools</h2>
+                <p>Test complex CGI logic with form submissions.</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                    <a href="cgi-bin/calculator.py" class="btn" style="background-color: var(--accent-color);">🧮 Calculator (POST)</a>
+                    <a href="cgi-bin/environ.py" class="btn" style="background-color: var(--secondary-color); color: var(--text-color);">Inspect Env</a>
+                </div>
+            </div>
+
+             <div class="card" style="grid-column: 1 / -1;">
+                <h2>POST Request Test</h2>
+                <p>Submit a form to send data to a Python script via POST method.</p>
+                
+                <form action="cgi-bin/post_test.py" method="POST" style="margin-top: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <label for="name" style="display: block; margin-bottom: 5px; font-weight: 600;">Your Name:</label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label for="message" style="display: block; margin-bottom: 5px; font-weight: 600;">Message:</label>
+                        <textarea id="message" name="message" rows="4" placeholder="Hello Server!" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit;"></textarea>
+                    </div>
+
+                    <button type="submit">Send POST Request</button>
+                </form>
+            </div>
+        </div>
+
+        <footer>
+            <p>WebServ Project &copy; 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -33,7 +33,7 @@ private:
 	// Handle file upload (multipart/form-data)
 	HttpResponse handleFileUpload(
 		const HttpRequest &request,
-		const std::string &rootDir);
+		const LocationConfig &location);
 
 	// Handle regular form submission
 	HttpResponse handleFormSubmission(

@@ -46,9 +46,8 @@ bool Poller::addFd(int fd, int events)
 
 	struct epoll_event ev;
 	std::memset(&ev, 0, sizeof(ev));
-	// Edge-triggered
-	// EPOLLET is used to avoid repeated notifications until the condition changes
-	ev.events = events | EPOLLET;
+	// Level-triggered (default) is safer and sufficient
+	ev.events = events;
 	ev.data.fd = fd;
 
 	// epoll_ctl to add fd
@@ -73,8 +72,8 @@ bool Poller::modifyFd(int fd, int events)
 
 	struct epoll_event ev;
 	std::memset(&ev, 0, sizeof(ev));
-	// Edge-triggered
-	ev.events = events | EPOLLET;
+	// Level-triggered
+	ev.events = events;
 	ev.data.fd = fd;
 
 	if (epoll_ctl(_epollFd, EPOLL_CTL_MOD, fd, &ev) < 0)

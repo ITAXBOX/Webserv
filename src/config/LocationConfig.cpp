@@ -56,6 +56,11 @@ LocationConfig &LocationConfig::addIndex(const std::string &indexFile)
 	return *this;
 }
 
+void LocationConfig::clearAllowedMethods()
+{
+    allowedMethods.clear();
+}
+
 LocationConfig &LocationConfig::addAllowedMethod(const std::string &method)
 {
 	allowedMethods.insert(method);

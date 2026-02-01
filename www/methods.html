@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ - HTTP Methods</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HTTP Methods Info</h1>
+            <p class="subtitle">Test PUT and HEAD Methods</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="methods.html" class="active">Methods</a>
+            <a href="cgi-bin/file_manager.py">File Manager</a>
+            <a href="cgi.html">CGI Tests</a>
+        </nav>
+
+        <div class="card-grid">
+            <!-- PUT Test -->
+            <div class="card">
+                <h2>PUT Method</h2>
+                <p>Create or update a file on the server using the PUT method.</p>
+                
+                <div style="margin-top: 15px;">
+                    <input type="text" id="put-filename" placeholder="newfile.txt" style="width: 100%; margin-bottom: 10px; padding: 8px;">
+                    <textarea id="put-content" rows="4" placeholder="File content goes here..." style="width: 100%; margin-bottom: 10px; padding: 8px;"></textarea>
+                    <button onclick="sendPut()" class="btn">Send PUT Request</button>
+                </div>
+                <div id="put-result" style="margin-top: 10px; font-weight: bold;"></div>
+            </div>
+
+            <!-- HEAD Test -->
+            <div class="card">
+                <h2>HEAD Method</h2>
+                <p>Retrieve headers for a resource without the body.</p>
+                
+                <div style="margin-top: 15px;">
+                    <input type="text" id="head-url" value="/index.html" placeholder="/path/to/resource" style="width: 100%; margin-bottom: 10px; padding: 8px;">
+                    <button onclick="sendHead()" class="btn" style="background-color: var(--secondary-color); color: var(--text-color);">Send HEAD Request</button>
+                </div>
+                <pre id="head-result" style="margin-top: 15px; display: none;"></pre>
+            </div>
+        </div>
+
+        <script>
+        async function sendPut() {
+            const filename = document.getElementById('put-filename').value;
+            const content = document.getElementById('put-content').value;
+            const resultDiv = document.getElementById('put-result');
+            
+            if (!filename) {
+                alert('Please enter a filename');
+                return;
+            }
+
+            try {
+                const response = await fetch('/uploads/' + filename, {
+                    method: 'PUT',
+                    body: content
+                });
+
+                if (response.ok) {
+                    resultDiv.style.color = 'green';
+                    resultDiv.innerText = 'Success: File created/updated!';
+                    setTimeout(() => resultDiv.innerText = '', 3000);
+                } else {
+                    resultDiv.style.color = 'red';
+                    resultDiv.innerText = 'Error: ' + response.status + ' ' + response.statusText;
+                }
+            } catch (err) {
+                resultDiv.style.color = 'red';
+                resultDiv.innerText = 'Error: ' + err.message;
+            }
+        }
+
+        async function sendHead() {
+            const url = document.getElementById('head-url').value;
+            const pre = document.getElementById('head-result');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'HEAD'
+                });
+
+                let output = `Status: ${response.status} ${response.statusText}\n`;
+                for (let [key, value] of response.headers) {
+                    output += `${key}: ${value}\n`;
+                }
+
+                pre.innerText = output;
+                pre.style.display = 'block';
+            } catch (err) {
+                pre.innerText = 'Error: ' + err.message;
+                pre.style.display = 'block';
+            }
+        }
+        </script>
+
+        <footer>
+            <p>WebServ Project &copy; 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

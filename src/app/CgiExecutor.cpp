@@ -2,6 +2,7 @@
 #include "utils/Logger.hpp"
 #include "utils/defines.hpp"
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,37 +13,45 @@ CgiExecutor::CgiExecutor() {}
 
 CgiExecutor::~CgiExecutor() {}
 
-std::string CgiExecutor::execute(const HttpRequest &request, const std::string &scriptPath, const std::string &interpreterPath)
+void CgiExecutor::start(const HttpRequest &request, const std::string &scriptPath, const std::string &interpreterPath, CgiState& state)
 {
-    int pipeIn[2];  // Parent writes to child stdin
-    int pipeOut[2]; // Child writes to parent stdout
-
-    if (pipe(pipeIn) == -1 || pipe(pipeOut) == -1)
+    if (pipe(state.pipeIn) == -1 || pipe(state.pipeOut) == -1)
     {
         Logger::error("Failed to create pipes for CGI");
-        return "";
+        state.active = false;
+        return;
     }
 
     pid_t pid = fork();
     if (pid == -1)
     {
         Logger::error("Failed to fork for CGI");
-        return "";
+        state.closePipes();
+        state.active = false;
+        return;
     }
 
     if (pid == 0)
     {
-        // Close unused ends
-        close(pipeIn[1]);
-        close(pipeOut[0]);
+        // Child Process
 
-        // Redirect stdin
-        dup2(pipeIn[0], STDIN_FILENO);
-        close(pipeIn[0]);
+        // Close unused ends (Parent's ends)
+        close(state.pipeIn[1]); // Parent writes to this
+        close(state.pipeOut[0]); // Parent reads from this
 
-        // Redirect stdout
-        dup2(pipeOut[1], STDOUT_FILENO);
-        close(pipeOut[1]);
+        // Redirect stdin from pipeIn[0]
+        if (dup2(state.pipeIn[0], STDIN_FILENO) == -1) {
+            Logger::error("dup2 stdin failed");
+            exit(1);
+        }
+        close(state.pipeIn[0]);
+
+        // Redirect stdout to pipeOut[1]
+        if (dup2(state.pipeOut[1], STDOUT_FILENO) == -1) {
+             Logger::error("dup2 stdout failed");
+             exit(1);
+        }
+        close(state.pipeOut[1]);
 
         // Create environment and args
         char **envp = createEnvp(request, scriptPath);
@@ -53,38 +62,28 @@ std::string CgiExecutor::execute(const HttpRequest &request, const std::string &
         
         // If execve returns, it failed
         Logger::error("execve failed for: " + scriptPath);
+        freeArray(envp);
+        freeArray(argv);
         exit(1);
     }
     else
     {
-        // Close unused ends
-        close(pipeIn[0]);
-        close(pipeOut[1]);
+        // Parent Process
+        state.pid = pid;
+        state.active = true;
+        state.requestBody = request.getBody();
 
-        // Write request body to CGI (if POST)
-        std::string body = request.getBody();
-        if (!body.empty())
-            write(pipeIn[1], body.c_str(), body.size());
+        // Close unused ends (Child's ends)
+        close(state.pipeIn[0]);
+        close(state.pipeOut[1]);
+        state.pipeIn[0] = -1;
+        state.pipeOut[1] = -1;
 
-        close(pipeIn[1]); // Close to signal EOF to child
-
-        // Read CGI output
-        std::string output;
-        char buffer[4096];
-        ssize_t bytesRead;
-        while ((bytesRead = read(pipeOut[0], buffer, sizeof(buffer))) > 0)
-            output.append(buffer, bytesRead);
-
-        close(pipeOut[0]);
-
-        // Wait for child
-        int status;
-        waitpid(pid, &status, 0);
+        // Set non-blocking on remaining ends
+        fcntl(state.pipeIn[1], F_SETFL, O_NONBLOCK);
+        fcntl(state.pipeOut[0], F_SETFL, O_NONBLOCK);
         
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-            Logger::error("CGI script exited with error code");
-
-        return output;
+        Logger::debug(Logger::fdMsg("CGI started, pid", pid));
     }
 }
 
@@ -138,6 +137,24 @@ char **CgiExecutor::createEnvp(const HttpRequest &request, const std::string &sc
     std::string contentType = request.getHeader("Content-Type");
     if (!contentType.empty())
         env["CONTENT_TYPE"] = contentType;
+
+    // Add all other headers as HTTP_ variables
+    const std::map<std::string, std::string>& headers = request.getHeaders();
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+    {
+        std::string key = it->first;
+        // Skip Content-Length and Content-Type as they are already set
+        if (key == "Content-Length" || key == "Content-Type") continue;
+
+        std::string envKey = "HTTP_";
+        for (size_t j = 0; j < key.length(); ++j)
+        {
+            char c = key[j];
+            if (c == '-') envKey += '_';
+            else envKey += std::toupper(c);
+        }
+        env[envKey] = it->second;
+    }
         
     // Convert to char**
     char **envp = new char*[env.size() + 1];

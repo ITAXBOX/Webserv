@@ -81,6 +81,11 @@ std::string HttpRequest::getHeader(const std::string &key) const
 	return "";
 }
 
+const std::map<std::string, std::string>& HttpRequest::getHeaders() const
+{
+	return headers;
+}
+
 std::string HttpRequest::getBody() const
 {
 	return body;

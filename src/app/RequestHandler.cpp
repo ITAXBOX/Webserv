@@ -50,6 +50,13 @@ HttpResponse RequestHandler::handleRequest(
 
 	Logger::info("RequestHandler routing: " + methodStr + " " + request.getUri());
 
+	// Check if method is allowed in this location
+	if (!location.isMethodAllowed(methodStr))
+	{
+		Logger::warn("Method not allowed: " + methodStr + " for URI: " + request.getUri());
+		return StatusCodes::createErrorResponse(HTTP_METHOD_NOT_ALLOWED, "Method Not Allowed");
+	}
+
 	// Find the appropriate handler (Strategy)
 	std::map<HttpMethod, IMethodHandler *>::iterator it = handlers.find(method);
 

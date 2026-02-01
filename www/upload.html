@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ - Upload</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Simple JS to show filename when selected
+        function updateFileName(input) {
+            const label = document.getElementById('file-label-text');
+            if (input.files && input.files.length > 0) {
+                label.innerText = input.files[0].name;
+                document.getElementById('upload-zone').style.borderColor = '#4a90e2';
+                document.getElementById('upload-zone').style.backgroundColor = '#f0f7ff';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>File Upload</h1>
+            <p class="subtitle">Test Multipart/Form-Data Parsing</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="methods.html">Methods</a>
+            <a href="cgi-bin/file_manager.py">File Manager</a>
+            <a href="cgi.html">CGI Tests</a>
+        </nav>
+
+        <div class="card">
+            <h2 style="text-align: center;">Select a File</h2>
+            <p style="text-align: center; color: var(--text-light); margin-bottom: 30px;">
+                Files will be saved to the <code>/uploads</code> directory on the server.
+            </p>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                 <a href="cgi-bin/file_manager.py" class="btn" style="background-color: var(--secondary-color); color: var(--text-color);">View & Manage Uploads</a>
+            </div>
+
+            <form action="/uploads" method="POST" enctype="multipart/form-data">
+                <div id="upload-zone" class="upload-zone">
+                    <input type="file" name="file" id="file" class="file-input" onchange="updateFileName(this)" required>
+                    <label for="file" class="file-label">
+                        <span id="file-label-text">Choose a file...</span>
+                    </label>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-light);">
+                        or drag and drop it here (visual only)
+                    </p>
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit">Start Upload</button>
+                </div>
+            </form>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+             <a href="uploads/" class="btn" style="background-color: var(--text-light);">View Uploaded Files Directory</a>
+        </div>
+
+        <footer>
+            <p>WebServ Project &copy; 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

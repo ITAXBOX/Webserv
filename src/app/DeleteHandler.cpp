@@ -26,6 +26,7 @@ HttpResponse DeleteHandler::handle(
     HttpResponse res;
     res.setStatus(HTTP_OK, "File deleted")
        .addHeader("Content-Type", "text/plain")
+       .addHeader("Connection", "close")
        .setBody("File successfully deleted");
 
     return res;

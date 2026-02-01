@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 ClientConnection::ClientConnection(int fd, size_t maxBodySize)
-    : _fd(fd), _state(READING)
+    : _fd(fd), _state(READING), _shouldClose(false)
 {
     _parser.setMaxBodySize(maxBodySize);
     Logger::debug(Logger::fdMsg("ClientConnection created", fd));
@@ -38,6 +38,16 @@ ConnState ClientConnection::getState() const
 void ClientConnection::setState(ConnState state)
 {
     _state = state;
+}
+
+void ClientConnection::setShouldClose(bool close)
+{
+    _shouldClose = close;
+}
+
+bool ClientConnection::shouldClose() const
+{
+    return _shouldClose;
 }
 
 void ClientConnection::appendToWriteBuffer(const std::string& data)

@@ -2,6 +2,7 @@
 #define CGIEXECUTOR_HPP
 
 #include "http/HttpRequest.hpp"
+#include "core/CgiState.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -12,7 +13,8 @@ public:
     CgiExecutor();
     ~CgiExecutor();
 
-    std::string execute(const HttpRequest &request, const std::string &scriptPath, const std::string &interpreterPath);
+    // Starts CGI process and initializes CgiState pipes
+    void start(const HttpRequest &request, const std::string &scriptPath, const std::string &interpreterPath, CgiState& state);
 
 private:
     char **createEnvp(const HttpRequest &request, const std::string &scriptPath);

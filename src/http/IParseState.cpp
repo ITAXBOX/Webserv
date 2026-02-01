@@ -176,7 +176,7 @@ size_t ParseHeadersState::getContentLength(HttpParser &parser)
 		return 0;
 
 	// what we are doing here is converting the Content-Length header value to size_t
-	return static_cast<size_t>(std::atoi(clHeader.c_str()));
+	return static_cast<size_t>(std::strtoul(clHeader.c_str(), NULL, 10));
 }
 
 // ============================================================================

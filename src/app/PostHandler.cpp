@@ -50,7 +50,7 @@ HttpResponse PostHandler::handle(
 
 	// Handle multipart/form-data (file uploads)
 	if (contentType.find("multipart/form-data") != std::string::npos)
-		return handleFileUpload(request, rootDir);
+		return handleFileUpload(request, location);
 
 	// Handle application/x-www-form-urlencoded (regular forms)
 	else if (contentType.find("application/x-www-form-urlencoded") != std::string::npos)
@@ -105,8 +105,11 @@ HttpResponse PostHandler::handleFormSubmission(
 
 HttpResponse PostHandler::handleFileUpload(
 	const HttpRequest &request,
-	const std::string &rootDir)
+	const LocationConfig &location)
 {
+    std::string rootDir = location.getRoot();
+    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+
 	Logger::info("Processing file upload");
 
 	std::string body = request.getBody();
@@ -155,8 +158,17 @@ HttpResponse PostHandler::handleFileUpload(
 	// Extract file content
 	std::string fileContent = body.substr(fileStart, fileEnd - fileStart - 2); // -2 for \r\n
 
-	// Create uploads directory if it doesn't exist
-	std::string uploadDir = rootDir + "/uploads";
+	// Use configured upload path or default to root/uploads
+	std::string uploadDir = location.getUploadPath();
+    if (uploadDir.empty())
+        uploadDir = rootDir + "/uploads";
+
+    // Check if directory exists (we are not allowed to mkdir)
+    if (!FileHandler::isDirectory(uploadDir))
+    {
+         Logger::error("Upload directory does not exist: " + uploadDir);
+         return StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
+    }
 
 	// Save file
 	bool saved = saveUploadedFile(filename, fileContent, uploadDir);
