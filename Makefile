@@ -14,7 +14,9 @@ SRC_FILES   = main.cpp \
 			  core/Poller.cpp \
 			  core/ServerSocket.cpp \
 			  core/EventLoop.cpp \
+			  core/ConnectionManager.cpp \
 			  core/ClientConnection.cpp \
+			  core/CgiHandler.cpp \
 			  http/HttpResponse.cpp \
 			  http/HttpRequest.cpp \
 			  http/HttpParser.cpp \
