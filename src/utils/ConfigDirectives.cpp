@@ -2,6 +2,7 @@
 #include "utils/Logger.hpp"
 #include <sstream>
 #include <cstdlib>
+#include <cctype>
 
 // ============================================================================
 // Utility Functions
@@ -52,18 +53,74 @@ bool ConfigDirectives::parseListen(std::vector<Token> &tokens, size_t &pos, Serv
 	
 	if (value.type != TOKEN_WORD)
 	{
-		setError(error, "Expected port number after 'listen'", value.line);
+		setError(error, "Expected port number or host:port after 'listen'", value.line);
 		return false;
 	}
 	
-	int port = std::atoi(value.value.c_str());
-	if (port <= 0 || port > 65535)
+	std::string val = value.value;
+	size_t colonPos = val.find(':');
+
+	if (colonPos != std::string::npos)
 	{
-		setError(error, "Invalid port number: " + value.value, value.line);
+		// Format: host:port
+		std::string host = val.substr(0, colonPos);
+		std::string portStr = val.substr(colonPos + 1);
+		
+		server.setHost(host);
+		
+		int port = std::atoi(portStr.c_str());
+		if (port <= 0 || port > 65535)
+		{
+			setError(error, "Invalid port number: " + portStr, value.line);
+			return false;
+		}
+		server.setPort(port);
+	}
+	else
+	{
+		// Format: port OR host
+		bool isPort = true;
+		for (size_t i = 0; i < val.length(); i++)
+		{
+			if (!std::isdigit(static_cast<unsigned char>(val[i])))
+			{
+				isPort = false;
+				break;
+			}
+		}
+
+		if (isPort)
+		{
+			int port = std::atoi(val.c_str());
+			if (port <= 0 || port > 65535)
+			{
+				setError(error, "Invalid port number: " + val, value.line);
+				return false;
+			}
+			server.setPort(port);
+		}
+		else
+		{
+			// Treat as host only (e.g. "localhost" or "127.0.0.1")
+			server.setHost(val);
+		}
+	}
+	
+	return expectSemicolon(tokens, pos, error);
+}
+
+bool ConfigDirectives::parseHost(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error)
+{
+	advance(tokens, pos); // Consume 'host'
+	Token value = advance(tokens, pos);
+	
+	if (value.type != TOKEN_WORD)
+	{
+		setError(error, "Expected host address after 'host'", value.line);
 		return false;
 	}
 	
-	server.setPort(port);
+	server.setHost(value.value);
 	return expectSemicolon(tokens, pos, error);
 }
 

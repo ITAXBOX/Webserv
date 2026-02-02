@@ -39,7 +39,7 @@
 // or any other IP assigned to the machine
 #define DEFAULT_HOST "0.0.0.0"
 #define DEFAULT_PORT 8080
-#define DEFAULT_ROOT "./tests"
+#define DEFAULT_ROOT "./www"
 #define DEFAULT_INDEX "index.html"
 #define DEFAULT_BACKLOG 128
 
