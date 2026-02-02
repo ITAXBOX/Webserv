@@ -36,7 +36,7 @@ HttpResponse PostHandler::handle(
 
 	// Check for CGI
 	if (isCgiRequest(filePath, location))
-		return executeCgi(request, filePath, location);
+		return executeCgi(filePath, location);
 
 	// Check if request has a body
 	if (request.getHeader("Content-Length") == "")

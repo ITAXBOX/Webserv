@@ -11,9 +11,8 @@ bool BaseMethodHandler::isCgiRequest(const std::string &path, const LocationConf
     return !config.getCgiPath(extension).empty();
 }
 
-HttpResponse BaseMethodHandler::executeCgi(const HttpRequest &request, const std::string &path, const LocationConfig &config)
+HttpResponse BaseMethodHandler::executeCgi(const std::string &path, const LocationConfig &config)
 {
-    (void)request;
     Logger::info("CGI Request detected: " + path);
     
     // Determine interpreter

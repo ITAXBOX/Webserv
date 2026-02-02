@@ -76,7 +76,7 @@ HttpResponse GetHandler::handle(
 
     // Check for CGI
     if (isCgiRequest(filePath, location))
-        return executeCgi(request, filePath, location);
+        return executeCgi(filePath, location);
 
     // Serve the file
     return serveFile(filePath, location.getAutoindex());

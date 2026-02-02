@@ -43,7 +43,7 @@ all: $(NAME)
 $(NAME): $(OBJ_FILES)
 	@echo "Linking $(NAME)..."
 	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJ_FILES)
-	@echo "✅ Build complete: ./$(NAME)"
+	@echo "✅ Build complete: ./$(NAME) <config_file>"
 
 debug:
 	@$(MAKE) CXXFLAGS="$(CXXFLAGS) -DLOGGER_DEBUG" all

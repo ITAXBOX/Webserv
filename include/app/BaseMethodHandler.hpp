@@ -21,7 +21,7 @@ public:
 protected:
     // Shared CGI logic
     bool isCgiRequest(const std::string &path, const LocationConfig &config);
-    HttpResponse executeCgi(const HttpRequest &request, const std::string &path, const LocationConfig &config);
+    HttpResponse executeCgi(const std::string &path, const LocationConfig &config);
 };
 
 #endif
