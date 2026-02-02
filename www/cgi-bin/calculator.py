@@ -8,7 +8,7 @@ print("<link rel='stylesheet' href='../style.css'>")
 print("<style>.calc-form input { padding: 10px; margin: 5px; width: 80px; } .result { font-size: 2em; color: var(--primary-color); font-weight: bold; }</style>")
 print("</head><body>")
 print("<div class='container'>")
-print("<header><h1>CGI Calculator</h1><p class='subtitle'>Server-side arithmetic via POST</p></header>")
+print("<header><h1>CGI Calculator</h1><p class='subtitle'>Server-side arithmetic via POST/GET</p></header>")
 print("<nav><a href='../index.html'>Dashboard</a><a href='../cgi.html'>CGI Tests</a></nav>")
 
 # Helper to read POST body

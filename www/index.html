@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>WebServ</h1>
+            <h1>Web<span>Serv</span></h1>
             <p class="subtitle">A High-Performance C++ HTTP Server</p>
         </header>
 
@@ -18,6 +18,7 @@
             <a href="methods.html">Methods</a>
             <a href="cgi-bin/file_manager.py">File Manager</a>
             <a href="cgi.html">CGI Tests</a>
+            <a href="sessions.html">Sessions</a>
         </nav>
 
         <div class="card-grid">
@@ -34,38 +35,45 @@
             <div class="card">
                 <h2>⚡ CGI Execution</h2>
                 <p>Run dynamic scripts via CGI protocol. Test GET and POST methods.</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="flex gap-3 flex-wrap mt-4">
                     <a href="cgi.html" class="btn">Open CGI Playground</a>
-                    <a href="cgi-bin/calculator.py" class="btn" style="background-color: var(--accent-color);">Calculator</a>
+                    <a href="cgi-bin/calculator.py" class="btn" style="background: var(--accent);">Calculator</a>
                 </div>
             </div>
 
             <div class="card">
                 <h2>📂 File Manager</h2>
                 <p>Full-featured file management. Test multipart uploads, file listing, and DELETE method.</p>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <a href="cgi-bin/file_manager.py" class="btn" style="width: 100%; text-align: center;">Open File Manager</a>
+                <div class="mt-4">
+                    <a href="cgi-bin/file_manager.py" class="btn" style="width: 100%; justify-content: center;">Open File Manager</a>
                 </div>
             </div>
 
             <div class="card">
                 <h2>🔍 HTTP Methods</h2>
                 <p>Test advanced HTTP methods like HEAD and PUT directly.</p>
-                 <a href="methods.html" class="btn" style="background-color: var(--text-light);">Test Methods</a>
+                <a href="methods.html" class="btn mt-4" style="background: var(--text-muted);">Test Methods</a>
             </div>
 
             <div class="card">
                 <h2>🛑 Error Handling</h2>
                 <p>Robust error page generation for various HTTP statuses.</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="missing-page" class="btn" style="background-color: var(--accent-color);">Trigger 404</a>
-                    <!-- Assuming there's a way to trigger 405 or others, but 404 is easiest -->
+                <div class="flex gap-3 flex-wrap mt-4">
+                    <a href="missing-page" class="btn" style="background: var(--accent);">Trigger 404</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🍪 Sessions</h2>
+                <p>Test session persistence and cookie management.</p>
+                <div class="mt-4">
+                    <a href="sessions.html" class="btn">Session Manager</a>
                 </div>
             </div>
         </div>
 
         <footer>
-            <p>WebServ Project &copy; 2026. Running on C++98.</p>
+            <p>WebServ Project © 2026 · Running on C++98</p>
         </footer>
     </div>
 </body>

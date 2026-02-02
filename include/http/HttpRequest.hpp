@@ -23,6 +23,7 @@ private:
 	std::string version; // 1.1
 	std::map<std::string, std::string> headers; // metadata about the request - like the Host, Content-Type, etc.
 	std::string body;
+	std::map<std::string, std::string> cookies;
 
 public:
 	HttpRequest();
@@ -33,6 +34,7 @@ public:
 	HttpRequest &setVersion(const std::string &version);
 	HttpRequest &addHeader(const std::string &key, const std::string &value);
 	HttpRequest &setBody(const std::string &body);
+	void parseCookies();
 
 	HttpMethod getMethod() const;
 	std::string getMethodString() const;
@@ -41,6 +43,7 @@ public:
 	std::string getHeader(const std::string &key) const;
 	const std::map<std::string, std::string>& getHeaders() const;
 	std::string getBody() const;
+	std::string getCookie(const std::string &key) const;
 
 	void clear();
 };

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebServ - Sessions</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Session <span>Management</span></h1>
+            <p class="subtitle">State Persistence with Cookies</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Dashboard</a>
+            <a href="methods.html">Methods</a>
+            <a href="cgi-bin/file_manager.py">File Manager</a>
+            <a href="cgi.html">CGI Tests</a>
+            <a href="sessions.html" class="active">Sessions</a>
+        </nav>
+
+        <div class="card-grid">
+            <div class="card">
+                <h2>🍪 Cookie Mechanism</h2>
+                <p>The server issues a <code>SESSIONID</code> cookie upon first visit to the session endpoint.</p>
+                <ul class="feature-list">
+                    <li>Cookie Parsing</li>
+                    <li>Session Generation</li>
+                    <li>In-Memory Storage</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🧪 Live Test</h2>
+                <p>Interact with the session handler. Values are stored in the server's memory linked to your cookie.</p>
+                <div class="mt-4">
+                    <a href="/session_test" class="btn" style="background: var(--accent);">Launch Session Test</a>
+                </div>
+                <p class="text-muted mt-4" style="font-size: 0.875rem;">
+                    Note: This will open the internal handler which displays current session data and allows modifying it.
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>🍪 Cookies Test</h2>
+                <p>Test setting and getting cookies directly.</p>
+                
+                <div class="mt-4">
+                    <input type="text" id="cookie-name" placeholder="Cookie Name" class="mb-4">
+                    <input type="text" id="cookie-value" placeholder="Cookie Value" class="mb-4">
+                    <div class="flex gap-3 flex-wrap">
+                        <button onclick="setCookie()" style="flex: 1;">Set Cookie</button>
+                        <button onclick="getCookies()" style="flex: 1; background: linear-gradient(135deg, var(--secondary), var(--secondary-light)); color: white;">Show Cookies</button>
+                        <button onclick="clearCookies()" style="flex: 1; background: var(--accent);">Clear All</button>
+                    </div>
+                </div>
+                <pre id="cookie-result" class="mt-4" style="display: none;"></pre>
+            </div>
+        </div>
+
+        <script>
+        function setCookie() {
+            const name = document.getElementById('cookie-name').value;
+            const value = document.getElementById('cookie-value').value;
+            const resultDiv = document.getElementById('cookie-result');
+            
+            if (!name || !value) {
+                alert('Please enter both name and value');
+                return;
+            }
+
+            document.cookie = `${name}=${value}; path=/`;
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = `Cookie set: ${name}=${value}`;
+            
+            document.getElementById('cookie-name').value = '';
+            document.getElementById('cookie-value').value = '';
+        }
+
+        function getCookies() {
+            const resultDiv = document.getElementById('cookie-result');
+            resultDiv.style.display = 'block';
+            
+            if (document.cookie) {
+                resultDiv.innerText = 'Current Cookies:\n\n' + document.cookie.split(';').map(c => c.trim()).join('\n');
+            } else {
+                resultDiv.innerText = 'No cookies found';
+            }
+        }
+
+        function clearCookies() {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i];
+                const eqPos = cookie.indexOf("=");
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+            }
+            
+            const resultDiv = document.getElementById('cookie-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = 'All cookies cleared!';
+        }
+        </script>
+
+        <footer>
+            <p>WebServ Project © 2026</p>
+        </footer>
+    </div>
+</body>
+</html>

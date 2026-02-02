@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 class HttpResponse
 {
@@ -16,6 +17,7 @@ private:
     bool _isCgi;
     std::string _cgiScriptPath;
     std::string _cgiInterpreterPath;
+    std::vector<std::string> cookies;
 
 public:
     HttpResponse();
@@ -24,6 +26,7 @@ public:
     HttpResponse &setStatus(int code, const std::string &reason);
     HttpResponse &addHeader(const std::string &key, const std::string &value);
     HttpResponse &setBody(const std::string &body);
+    HttpResponse &addCookie(const std::string &key, const std::string &value, int maxAge = 0);
     std::string getHeader(const std::string &key) const;
 
     void setCgi(bool isCgi);

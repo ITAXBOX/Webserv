@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>CGI Playground</h1>
+            <h1>CGI <span>Playground</span></h1>
             <p class="subtitle">Test Common Gateway Interface Support</p>
         </header>
 
@@ -18,49 +18,80 @@
             <a href="methods.html">Methods</a>
             <a href="cgi-bin/file_manager.py">File Manager</a>
             <a href="cgi.html" class="active">CGI Tests</a>
+            <a href="sessions.html">Sessions</a>
         </nav>
 
-        <div class="card-grid">
-            <div class="card">
-                <h2>Simple GET Scripts</h2>
-                <p>Execute scripts that output dynamic HTML.</p>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <a href="cgi-bin/hello.py" class="btn">Python Hello</a>
-                    <a href="cgi-bin/hello.sh" class="btn">Bash Hello</a>
+        <div class="card">
+            <h2 class="text-center">Manual CGI Execution</h2>
+            <p class="text-center text-muted mb-4" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+                Enter the path to your CGI script (e.g., <code>cgi-bin/hello.py</code>). You can also provide data arguments which will be sent as a Query String (GET) or Body (POST).
+            </p>
+            
+            <div style="max-width: 500px; margin: 0 auto;">
+                <div class="mb-4">
+                    <label for="scriptPath">Script Path</label>
+                    <input type="text" id="scriptPath" value="cgi-bin/hello.py" placeholder="cgi-bin/script.py">
                 </div>
-            </div>
-
-            <div class="card">
-                <h2>Interactive Tools</h2>
-                <p>Test complex CGI logic with form submissions.</p>
-                <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                    <a href="cgi-bin/calculator.py" class="btn" style="background-color: var(--accent-color);">🧮 Calculator (POST)</a>
-                    <a href="cgi-bin/environ.py" class="btn" style="background-color: var(--secondary-color); color: var(--text-color);">Inspect Env</a>
-                </div>
-            </div>
-
-             <div class="card" style="grid-column: 1 / -1;">
-                <h2>POST Request Test</h2>
-                <p>Submit a form to send data to a Python script via POST method.</p>
                 
-                <form action="cgi-bin/post_test.py" method="POST" style="margin-top: 20px;">
-                    <div style="margin-bottom: 15px;">
-                        <label for="name" style="display: block; margin-bottom: 5px; font-weight: 600;">Your Name:</label>
-                        <input type="text" id="name" name="name" placeholder="John Doe" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box;">
-                    </div>
-                    
-                    <div style="margin-bottom: 15px;">
-                        <label for="message" style="display: block; margin-bottom: 5px; font-weight: 600;">Message:</label>
-                        <textarea id="message" name="message" rows="4" placeholder="Hello Server!" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-family: inherit;"></textarea>
-                    </div>
+                <div class="mb-4">
+                    <label for="data">Data Arguments (Optional)</label>
+                    <input type="text" id="data" placeholder="key=value&name=test">
+                </div>
 
-                    <button type="submit">Send POST Request</button>
-                </form>
+                <div class="flex gap-3">
+                    <button onclick="execGet()" style="flex: 1;">Execute with GET</button>
+                    <button onclick="execPost()" style="flex: 1; background: var(--accent);">Execute with POST</button>
+                </div>
             </div>
         </div>
 
+        <script>
+            function execGet() {
+                const path = document.getElementById('scriptPath').value;
+                const data = document.getElementById('data').value;
+                if (!path) { alert('Please enter a script path'); return; }
+                
+                let url = path;
+                if (data) {
+                    url += (url.includes('?') ? '&' : '?') + data;
+                }
+                window.location.href = url;
+            }
+
+            function execPost() {
+                const path = document.getElementById('scriptPath').value;
+                const data = document.getElementById('data').value;
+                if (!path) { alert('Please enter a script path'); return; }
+                
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = path;
+                form.style.display = 'none';
+                
+                if (data) {
+                    const pairs = data.split('&');
+                    pairs.forEach(pair => {
+                        const parts = pair.split('=');
+                        const key = parts[0];
+                        const value = parts.length > 1 ? parts.slice(1).join('=') : ''; 
+                        
+                        if (key.trim()) {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = key.trim();
+                            input.value = value;
+                            form.appendChild(input);
+                        }
+                    });
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        </script>
+
         <footer>
-            <p>WebServ Project &copy; 2026</p>
+            <p>WebServ Project © 2026</p>
         </footer>
     </div>
 </body>

@@ -26,7 +26,7 @@ print("""<script>
 print("</head><body>")
 print("<div class='container'>")
 print("<header><h1>File Manager</h1><p class='subtitle'>Upload, View, and Manage Files</p></header>")
-print("<nav><a href='../index.html'>Dashboard</a><a href='../methods.html'>Methods</a><a href='file_manager.py' class='active'>File Manager</a><a href='../cgi.html'>CGI Tests</a></nav>")
+print("<nav><a href='../index.html'>Dashboard</a><a href='../methods.html'>Methods</a><a href='file_manager.py' class='active'>File Manager</a><a href='../cgi.html'>CGI Tests</a><a href='../sessions.html'>Sessions</a></nav>")
 
 print("<div class='card-grid'>")
 

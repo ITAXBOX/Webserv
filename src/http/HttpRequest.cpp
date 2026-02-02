@@ -39,6 +39,47 @@ HttpRequest &HttpRequest::setBody(const std::string &b)
 	return *this;
 }
 
+void HttpRequest::parseCookies()
+{
+    cookies.clear();
+    std::string cookieHeader = getHeader("Cookie");
+    if (cookieHeader.empty())
+        return;
+
+    size_t pos = 0;
+    while (pos < cookieHeader.length())
+    {
+        size_t end = cookieHeader.find(';', pos);
+        if (end == std::string::npos)
+            end = cookieHeader.length();
+
+        std::string pair = cookieHeader.substr(pos, end - pos);
+        size_t eq = pair.find('=');
+        if (eq != std::string::npos)
+        {
+            std::string key = pair.substr(0, eq);
+            std::string val = pair.substr(eq + 1);
+            
+            // Trim whitespace
+            size_t first = key.find_first_not_of(" ");
+            if (first != std::string::npos)
+                key = key.substr(first);
+                
+            cookies[key] = val;
+        }
+
+        pos = end + 1;
+    }
+}
+
+std::string HttpRequest::getCookie(const std::string &key) const
+{
+    std::map<std::string, std::string>::const_iterator it = cookies.find(key);
+    if (it != cookies.end())
+        return it->second;
+    return "";
+}
+
 HttpMethod HttpRequest::getMethod() const
 {
 	return method;

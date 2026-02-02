@@ -56,6 +56,12 @@ private:
 	friend class ParseCompleteState;
 	friend class ParseErrorState;
 
+	// Allow states to access private members
+	friend class RequestLineState;
+	friend class HeaderState;
+	friend class BodyState;
+	friend class ChunkedBodyState;
+
 	// Non-copyable
 	HttpParser(const HttpParser &);
 	HttpParser &operator=(const HttpParser &);

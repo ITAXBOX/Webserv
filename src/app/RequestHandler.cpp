@@ -1,4 +1,7 @@
 #include "app/RequestHandler.hpp"
+#include "app/PutHandler.hpp"
+#include "app/HeadHandler.hpp"
+#include "app/SessionHandler.hpp" // Added include
 
 RequestHandler::RequestHandler()
 {
@@ -49,6 +52,13 @@ HttpResponse RequestHandler::handleRequest(
 	std::string methodStr = request.getMethodString();
 
 	Logger::info("RequestHandler routing: " + methodStr + " " + request.getUri());
+
+	// Check for special session test path
+	if (request.getUri() == "/session_test")
+	{
+		SessionHandler handler;
+		return handler.handle(request);
+	}
 
 	// Check if method is allowed in this location
 	if (!location.isMethodAllowed(methodStr))

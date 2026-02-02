@@ -32,7 +32,9 @@ SRC_FILES   = main.cpp \
 			  app/PostHandler.cpp \
 			  app/DeleteHandler.cpp \
 			  app/PutHandler.cpp \
-			  app/HeadHandler.cpp
+			  app/HeadHandler.cpp \
+			  app/SessionHandler.cpp \
+			  utils/SessionManager.cpp
 OBJ_DIR     = obj
 OBJ_FILES   = $(addprefix $(OBJ_DIR)/,$(SRC_FILES:.cpp=.o))
 CXX         = c++

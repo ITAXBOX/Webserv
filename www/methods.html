@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>HTTP Methods Info</h1>
+            <h1>HTTP <span>Methods</span></h1>
             <p class="subtitle">Test PUT and HEAD Methods</p>
         </header>
 
@@ -18,20 +18,58 @@
             <a href="methods.html" class="active">Methods</a>
             <a href="cgi-bin/file_manager.py">File Manager</a>
             <a href="cgi.html">CGI Tests</a>
+            <a href="sessions.html">Sessions</a>
         </nav>
 
         <div class="card-grid">
+            <!-- GET Test -->
+            <div class="card">
+                <h2>GET Method</h2>
+                <p>Retrieve content from the server.</p>
+                
+                <div class="mt-4">
+                    <input type="text" id="get-url" value="/index.html" placeholder="/path/to/resource" class="mb-4">
+                    <button onclick="sendGet()">Send GET Request</button>
+                    <pre id="get-result" class="mt-4" style="display: none;"></pre>
+                </div>
+            </div>
+
+            <!-- POST Test -->
+            <div class="card">
+                <h2>POST Method</h2>
+                <p>Submit data to the server (e.g., form submissions, file uploads, or CGI scripts).</p>
+                
+                <div class="mt-4">
+                    <input type="text" id="post-url" value="/cgi-bin/post_test.py" placeholder="/path/to/resource" class="mb-4">
+                    <textarea id="post-content" rows="3" placeholder="Data to post..." class="mb-4"></textarea>
+                    <button onclick="sendPost()">Send POST Request</button>
+                    <pre id="post-result" class="mt-4" style="display: none;"></pre>
+                </div>
+            </div>
+
             <!-- PUT Test -->
             <div class="card">
                 <h2>PUT Method</h2>
                 <p>Create or update a file on the server using the PUT method.</p>
                 
-                <div style="margin-top: 15px;">
-                    <input type="text" id="put-filename" placeholder="newfile.txt" style="width: 100%; margin-bottom: 10px; padding: 8px;">
-                    <textarea id="put-content" rows="4" placeholder="File content goes here..." style="width: 100%; margin-bottom: 10px; padding: 8px;"></textarea>
-                    <button onclick="sendPut()" class="btn">Send PUT Request</button>
+                <div class="mt-4">
+                    <input type="text" id="put-filename" placeholder="newfile.txt" class="mb-4">
+                    <textarea id="put-content" rows="4" placeholder="File content goes here..." class="mb-4"></textarea>
+                    <button onclick="sendPut()">Send PUT Request</button>
+                    <div id="put-result" class="mt-4" style="font-weight: 600;"></div>
                 </div>
-                <div id="put-result" style="margin-top: 10px; font-weight: bold;"></div>
+            </div>
+
+            <!-- DELETE Test -->
+            <div class="card">
+                <h2>DELETE Method</h2>
+                <p>Delete a file from the server.</p>
+                
+                <div class="mt-4">
+                    <input type="text" id="delete-filename" placeholder="file_to_delete.txt" class="mb-4">
+                    <button onclick="sendDelete()" style="background: var(--accent);">Send DELETE Request</button>
+                    <div id="delete-result" class="mt-4" style="font-weight: 600;"></div>
+                </div>
             </div>
 
             <!-- HEAD Test -->
@@ -39,15 +77,77 @@
                 <h2>HEAD Method</h2>
                 <p>Retrieve headers for a resource without the body.</p>
                 
-                <div style="margin-top: 15px;">
-                    <input type="text" id="head-url" value="/index.html" placeholder="/path/to/resource" style="width: 100%; margin-bottom: 10px; padding: 8px;">
-                    <button onclick="sendHead()" class="btn" style="background-color: var(--secondary-color); color: var(--text-color);">Send HEAD Request</button>
+                <div class="mt-4">
+                    <input type="text" id="head-url" value="/index.html" placeholder="/path/to/resource" class="mb-4">
+                    <button onclick="sendHead()" style="background: linear-gradient(135deg, var(--secondary), var(--secondary-light)); color: white;">Send HEAD Request</button>
+                    <pre id="head-result" class="mt-4" style="display: none;"></pre>
                 </div>
-                <pre id="head-result" style="margin-top: 15px; display: none;"></pre>
             </div>
         </div>
 
         <script>
+        async function sendGet() {
+            const url = document.getElementById('get-url').value;
+            const pre = document.getElementById('get-result');
+            
+            try {
+                const response = await fetch(url, { method: 'GET' });
+                const text = await response.text();
+                pre.innerText = `Status: ${response.status}\n\n${text.substring(0, 500)}${text.length > 500 ? '...' : ''}`;
+                pre.style.display = 'block';
+            } catch (err) {
+                pre.innerText = 'Error: ' + err.message;
+                pre.style.display = 'block';
+            }
+        }
+
+        async function sendPost() {
+            const url = document.getElementById('post-url').value;
+            const content = document.getElementById('post-content').value;
+            const pre = document.getElementById('post-result');
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: content
+                });
+                const text = await response.text();
+                pre.innerText = `Status: ${response.status}\n\n${text}`;
+                pre.style.display = 'block';
+            } catch (err) {
+                pre.innerText = 'Error: ' + err.message;
+                pre.style.display = 'block';
+            }
+        }
+
+        async function sendDelete() {
+            const filename = document.getElementById('delete-filename').value;
+            const resultDiv = document.getElementById('delete-result');
+            
+            if (!filename) {
+                alert('Please enter a filename');
+                return;
+            }
+
+            try {
+                const response = await fetch('/uploads/' + filename, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    resultDiv.style.color = 'var(--secondary)';
+                    resultDiv.innerText = '✓ Success: File deleted!';
+                    setTimeout(() => resultDiv.innerText = '', 3000);
+                } else {
+                    resultDiv.style.color = 'var(--accent)';
+                    resultDiv.innerText = '✗ Error: ' + response.status + ' ' + response.statusText;
+                }
+            } catch (err) {
+                resultDiv.style.color = 'var(--accent)';
+                resultDiv.innerText = '✗ Error: ' + err.message;
+            }
+        }
+
         async function sendPut() {
             const filename = document.getElementById('put-filename').value;
             const content = document.getElementById('put-content').value;
@@ -65,16 +165,16 @@
                 });
 
                 if (response.ok) {
-                    resultDiv.style.color = 'green';
-                    resultDiv.innerText = 'Success: File created/updated!';
+                    resultDiv.style.color = 'var(--secondary)';
+                    resultDiv.innerText = '✓ Success: File created/updated!';
                     setTimeout(() => resultDiv.innerText = '', 3000);
                 } else {
-                    resultDiv.style.color = 'red';
-                    resultDiv.innerText = 'Error: ' + response.status + ' ' + response.statusText;
+                    resultDiv.style.color = 'var(--accent)';
+                    resultDiv.innerText = '✗ Error: ' + response.status + ' ' + response.statusText;
                 }
             } catch (err) {
-                resultDiv.style.color = 'red';
-                resultDiv.innerText = 'Error: ' + err.message;
+                resultDiv.style.color = 'var(--accent)';
+                resultDiv.innerText = '✗ Error: ' + err.message;
             }
         }
 
@@ -102,7 +202,7 @@
         </script>
 
         <footer>
-            <p>WebServ Project &copy; 2026</p>
+            <p>WebServ Project © 2026</p>
         </footer>
     </div>
 </body>

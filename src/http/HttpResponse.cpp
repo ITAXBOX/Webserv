@@ -27,6 +27,16 @@ HttpResponse &HttpResponse::setBody(const std::string &bodyContent)
     return *this;
 }
 
+HttpResponse &HttpResponse::addCookie(const std::string &key, const std::string &value, int maxAge)
+{
+    std::stringstream ss;
+    ss << key << "=" << value << "; Path=/";
+    if (maxAge > 0)
+        ss << "; Max-Age=" << maxAge;
+    cookies.push_back(ss.str());
+    return *this;
+}
+
 std::string HttpResponse::getHeader(const std::string &key) const
 {
     std::map<std::string, std::string>::const_iterator it = headers.find(key);
@@ -54,6 +64,12 @@ std::string HttpResponse::build() const
     // Headers
     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); it++)
         response << it->first << ": " << it->second << "\r\n";
+
+    // Add cookies
+    for (size_t i = 0; i < cookies.size(); i++)
+    {
+        response << "Set-Cookie: " << cookies[i] << "\r\n";
+    }
 
     // Empty line between headers and body
     response << "\r\n";

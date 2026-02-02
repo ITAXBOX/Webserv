@@ -82,6 +82,8 @@ void HttpParser::setComplete()
 {
 	_isComplete = true;
 	Logger::info("HTTP request parsing complete");
+    // Parse cookies now that headers are fully available
+    _request.parseCookies();
 }
 
 void HttpParser::setError(const std::string &message)
