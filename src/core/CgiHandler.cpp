@@ -179,11 +179,30 @@ void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection* client, Poller& p
         state.active = false;
 
         // Ensure child process is terminated and reaped
-        kill(state.pid, SIGKILL);
-        waitpid(state.pid, NULL, WNOHANG);
+        int status;
+        pid_t wpid = waitpid(state.pid, &status, WNOHANG);
 
-        Logger::info("CGI Finished, processing response");
-        processCgiResponse(client);
+        if (wpid == 0)
+        {
+            kill(state.pid, SIGKILL);
+            waitpid(state.pid, &status, 0);
+        }
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+        {
+            Logger::error("CGI process exited with error code");
+            client->appendToWriteBuffer(StatusCodes::createErrorResponse(502, "Bad Gateway").build());
+        }
+        else if (WIFSIGNALED(status))
+        {
+            Logger::error("CGI process killed by signal");
+            client->appendToWriteBuffer(StatusCodes::createErrorResponse(500, "Internal Server Error").build());
+        }
+        else
+        {
+            Logger::info("CGI Finished, processing response");
+            processCgiResponse(client);
+        }
         
         client->setState(WRITING);
         client->getParser().reset();
