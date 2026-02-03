@@ -14,7 +14,7 @@ private:
 	std::string path;						 // Location path (e.g., "/", "/api", "/images")
 	std::string root;						 // Root directory for this location (overrides server root)
 	std::vector<std::string> index;			 // Index files for this location
-	std::set<std::string> allowedMethods;	 // Allowed HTTP methods (GET, POST, DELETE)
+	std::set<std::string> allowedMethods;	 // Allowed HTTP methods (GET, POST, PUT, DELETE, HEAD)
 	bool autoindex;							 // Enable directory listing
 	std::string uploadPath;					 // Directory for file uploads
     std::map<std::string, std::string> cgiHandlers; // Map extension -> interpreter path

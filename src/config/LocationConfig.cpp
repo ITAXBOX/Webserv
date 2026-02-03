@@ -8,16 +8,7 @@ LocationConfig::LocationConfig()
 	  redirect(""),
 	  redirectCode(0)
 {
-	// Default: Allow GET and HEAD methods
-	// The GET method is included by default because:
-	// 1. It is the most common method for retrieving resources.
-	// 2. It is safe, meaning it can be called multiple times without different outcomes.
-	// 3. It allows clients to retrieve the resource representation without side effects.
-	// The HEAD method is included by default because:
-	// 1. It is safe and does not modify server state.
-	// 2. It allows clients to check resource metadata without downloading the body.
-	allowedMethods.insert("GET");
-	allowedMethods.insert("HEAD");
+	// No default methods - will be set explicitly
 }
 
 LocationConfig::LocationConfig(const std::string &p)
@@ -28,9 +19,7 @@ LocationConfig::LocationConfig(const std::string &p)
 	  redirect(""),
 	  redirectCode(0)
 {
-	// Default: Allow GET and HEAD methods
-	allowedMethods.insert("GET");
-	allowedMethods.insert("HEAD");
+	// No default methods - will be set explicitly
 }
 
 LocationConfig::~LocationConfig()

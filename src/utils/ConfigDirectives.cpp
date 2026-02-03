@@ -207,9 +207,6 @@ bool ConfigDirectives::parseErrorPage(std::vector<Token> &tokens, size_t &pos, S
 bool ConfigDirectives::parseAllowedMethods(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {
 	advance(tokens, pos); // Consume 'allowed_methods'
-	
-    // Clear default methods (GET, HEAD) so we only allow what is explicitly specified
-    location.clearAllowedMethods();
 
 	// Valid HTTP/1.1 methods that are implemented in this server
 	std::set<std::string> validMethods;
