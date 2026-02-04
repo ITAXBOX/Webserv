@@ -14,7 +14,7 @@ void printWebservStartup()
 	std::cout << "🔥  WEB SERV INITIALIZATION SEQUENCE STARTED  🔥" << std::endl;
 	std::cout << "===============================================" << std::endl;
 	std::cout << "     Team: Cache Me If You Can" << std::endl;
-	std::cout << "     Engineers: mal-moha & aitawi" << std::endl;
+	std::cout << "     Engineers: fel-khat & mal-moha & aitawi" << std::endl;
 	std::cout << std::endl;
 }
 
@@ -39,20 +39,6 @@ std::string trim(const std::string &str)
 size_t findCRLF(const std::string &str, size_t start)
 {
 	return str.find("\r\n", start);
-}
-
-std::string toString(size_t n)
-{
-	std::ostringstream os;
-	os << n;
-	return os.str();
-}
-
-std::string toString(int n)
-{
-	std::ostringstream os;
-	os << n;
-	return os.str();
 }
 
 // ============================================================================
