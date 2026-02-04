@@ -207,15 +207,37 @@ bool ConfigDirectives::parseErrorPage(std::vector<Token> &tokens, size_t &pos, S
 bool ConfigDirectives::parseAllowedMethods(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {
 	advance(tokens, pos); // Consume 'allowed_methods'
-	
-    // Clear default methods (GET, HEAD) so we only allow what is explicitly specified
-    location.clearAllowedMethods();
+
+	// Valid HTTP/1.1 methods that are implemented in this server
+	std::set<std::string> validMethods;
+	validMethods.insert("GET");
+	validMethods.insert("POST");
+	validMethods.insert("PUT");
+	validMethods.insert("DELETE");
+	validMethods.insert("HEAD");
 
 	// Can have multiple methods
+	bool hasAtLeastOne = false;
 	while (peek(tokens, pos).type == TOKEN_WORD)
 	{
 		Token method = advance(tokens, pos);
+		
+		// Validate that the method is one of the implemented ones
+		if (validMethods.find(method.value) == validMethods.end())
+		{
+			setError(error, "Invalid HTTP method '" + method.value + "'. Allowed methods: GET, POST, PUT, DELETE, HEAD", method.line);
+			return false;
+		}
+		
 		location.addAllowedMethod(method.value);
+		hasAtLeastOne = true;
+	}
+	
+	// Ensure at least one method was specified
+	if (!hasAtLeastOne)
+	{
+		setError(error, "Expected at least one HTTP method after 'allowed_methods'", peek(tokens, pos).line);
+		return false;
 	}
 	
 	return expectSemicolon(tokens, pos, error);

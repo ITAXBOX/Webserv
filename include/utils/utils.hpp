@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include "http/HttpRequest.hpp"
 
 void printWebservStartup();
@@ -10,8 +11,15 @@ void printWebservStartup();
 // String utilities
 std::string trim(const std::string &str);
 size_t findCRLF(const std::string &str, size_t start = 0);
-std::string toString(size_t n);
-std::string toString(int n);
+
+// Template for numeric to string conversion
+template <typename T>
+std::string toString(T n)
+{
+	std::ostringstream os;
+	os << n;
+	return os.str();
+}
 
 // Config parsing utilities
 void skipWhitespace(const std::string &input, size_t &pos, int &line);
