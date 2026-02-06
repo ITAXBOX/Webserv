@@ -136,11 +136,11 @@ bool WebServer::setupServers()
 	for (size_t i = 0; i < _serverConfigs.size(); i++)
 	{
 		const ServerConfig &config = _serverConfigs[i];
-		
+
 		std::string host = config.getHost();
 		if (host.empty())
 			host = DEFAULT_HOST;
-		
+
 		int port = config.getPort();
 		if (port == 0)
 			port = DEFAULT_PORT;

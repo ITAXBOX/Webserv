@@ -17,19 +17,19 @@ private:
 	std::vector<Token> _tokens;			// All tokens from tokenizer
 	size_t _pos;						// Current position in tokens
 	std::string _error;					// Error message if parsing fails
-	std::vector<ServerConfig> _servers;	// Parsed server configurations
+	std::vector<ServerConfig> _servers; // Parsed server configurations
 
 	// Helper methods
-	Token peek() const;					// Look at current token without consuming
-	Token advance();					// Consume and return current token
-	bool expect(TokenType type);		// Check if current token matches type
-	
+	Token peek() const;			 // Look at current token without consuming
+	Token advance();			 // Consume and return current token
+	bool expect(TokenType type); // Check if current token matches type
+
 	// Parsing methods
-	bool parseServer();					// Parse a server block
+	bool parseServer(); // Parse a server block
 	bool parseServerDirective(ServerConfig &server);
 	bool parseLocation(ServerConfig &server);
 	bool parseLocationDirective(LocationConfig &location);
-	
+
 	// Utility
 	void setError(const std::string &msg, int line);
 	bool isServerDirective(const std::string &word) const;
@@ -43,7 +43,7 @@ public:
 	bool parse(const std::vector<Token> &tokens);
 
 	// Get parsed servers
-	const std::vector<ServerConfig>& getServers() const;
+	const std::vector<ServerConfig> &getServers() const;
 
 	// Get error message if parsing failed
 	std::string getError() const;

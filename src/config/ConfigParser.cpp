@@ -43,17 +43,17 @@ void ConfigParser::setError(const std::string &msg, int line)
 // Check if word is a server directive
 bool ConfigParser::isServerDirective(const std::string &word) const
 {
-	return word == "listen" || word == "host" || word == "server_name" || word == "root" || 
-	       word == "index" || word == "client_max_body_size" || 
-	       word == "error_page" || word == "location";
+	return word == "listen" || word == "host" || word == "server_name" || word == "root" ||
+		   word == "index" || word == "client_max_body_size" ||
+		   word == "error_page" || word == "location";
 }
 
 // Check if word is a location directive
 bool ConfigParser::isLocationDirective(const std::string &word) const
 {
-	return word == "root" || word == "index" || word == "allowed_methods" || 
-	       word == "autoindex" || word == "client_max_body_size" || 
-	       word == "upload_store" || word == "cgi_assign" || word == "return";
+	return word == "root" || word == "index" || word == "allowed_methods" ||
+		   word == "autoindex" || word == "client_max_body_size" ||
+		   word == "upload_store" || word == "cgi_assign" || word == "return";
 }
 
 // ============================================================================
@@ -64,30 +64,30 @@ bool ConfigParser::isLocationDirective(const std::string &word) const
 bool ConfigParser::parseServer()
 {
 	Token token = advance(); // Consume 'server'
-	
+
 	if (!expect(TOKEN_OPEN_BRACE))
 		return false;
 	advance(); // Consume '{'
-	
+
 	ServerConfig server;
-	
+
 	// Parse directives inside server block
 	while (true)
 	{
 		token = peek();
-		
+
 		if (token.type == TOKEN_CLOSE_BRACE)
 		{
 			advance(); // Consume '}'
 			break;
 		}
-		
+
 		if (token.type == TOKEN_EOF)
 		{
 			setError("Unexpected EOF while parsing server block", token.line);
 			return false;
 		}
-		
+
 		if (token.type == TOKEN_WORD)
 		{
 			if (token.value == "location")
@@ -112,7 +112,7 @@ bool ConfigParser::parseServer()
 			return false;
 		}
 	}
-	
+
 	_servers.push_back(server);
 	return true;
 }
@@ -121,7 +121,7 @@ bool ConfigParser::parseServer()
 bool ConfigParser::parseServerDirective(ServerConfig &server)
 {
 	Token directive = peek();
-	
+
 	if (directive.value == "listen")
 		return ConfigDirectives::parseListen(_tokens, _pos, server, _error);
 	else if (directive.value == "host")
@@ -136,7 +136,7 @@ bool ConfigParser::parseServerDirective(ServerConfig &server)
 		return ConfigDirectives::parseClientMaxBodySize(_tokens, _pos, server, _error);
 	else if (directive.value == "error_page")
 		return ConfigDirectives::parseErrorPage(_tokens, _pos, server, _error);
-	
+
 	return true;
 }
 
@@ -144,37 +144,37 @@ bool ConfigParser::parseServerDirective(ServerConfig &server)
 bool ConfigParser::parseLocation(ServerConfig &server)
 {
 	Token token = advance(); // Consume 'location'
-	
+
 	Token path = advance();
 	if (path.type != TOKEN_WORD)
 	{
 		setError("Expected path after 'location'", path.line);
 		return false;
 	}
-	
+
 	if (!expect(TOKEN_OPEN_BRACE))
 		return false;
 	advance(); // Consume '{'
-	
+
 	LocationConfig location(path.value);
-	
+
 	// Parse directives inside location block
 	while (true)
 	{
 		token = peek();
-		
+
 		if (token.type == TOKEN_CLOSE_BRACE)
 		{
 			advance(); // Consume '}'
 			break;
 		}
-		
+
 		if (token.type == TOKEN_EOF)
 		{
 			setError("Unexpected EOF while parsing location block", token.line);
 			return false;
 		}
-		
+
 		if (token.type == TOKEN_WORD)
 		{
 			if (isLocationDirective(token.value))
@@ -194,7 +194,7 @@ bool ConfigParser::parseLocation(ServerConfig &server)
 			return false;
 		}
 	}
-	
+
 	server.addLocation(location);
 	return true;
 }
@@ -203,7 +203,7 @@ bool ConfigParser::parseLocation(ServerConfig &server)
 bool ConfigParser::parseLocationDirective(LocationConfig &location)
 {
 	Token directive = peek();
-	
+
 	if (directive.value == "allowed_methods")
 		return ConfigDirectives::parseAllowedMethods(_tokens, _pos, location, _error);
 	else if (directive.value == "root")
@@ -220,7 +220,7 @@ bool ConfigParser::parseLocationDirective(LocationConfig &location)
 		return ConfigDirectives::parseCgiAssign(_tokens, _pos, location, _error);
 	else if (directive.value == "return")
 		return ConfigDirectives::parseReturn(_tokens, _pos, location, _error);
-	
+
 	return true;
 }
 
@@ -235,12 +235,12 @@ bool ConfigParser::parse(const std::vector<Token> &tokens)
 	_pos = 0;
 	_error = "";
 	_servers.clear();
-	
+
 	// Parse all server blocks
 	while (peek().type != TOKEN_EOF)
 	{
 		Token token = peek();
-		
+
 		if (token.type == TOKEN_WORD && token.value == "server")
 		{
 			if (!parseServer())
@@ -256,19 +256,19 @@ bool ConfigParser::parse(const std::vector<Token> &tokens)
 			return false;
 		}
 	}
-	
+
 	if (_servers.empty())
 	{
 		_error = "No server blocks found in configuration";
 		Logger::error("Config parse error: " + _error);
 		return false;
 	}
-	
+
 	return true;
 }
 
 // Get parsed servers
-const std::vector<ServerConfig>& ConfigParser::getServers() const
+const std::vector<ServerConfig> &ConfigParser::getServers() const
 {
 	return _servers;
 }

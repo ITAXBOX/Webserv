@@ -1,7 +1,7 @@
 #include "core/EventLoop.hpp"
 
 EventLoop::EventLoop()
-    : _running(true), 
+    : _running(true),
       _requestHandler(new RequestHandler()),
       _connManager(*_requestHandler, _cgiHandler)
 {
@@ -18,7 +18,7 @@ EventLoop::~EventLoop()
 {
     // ConnectionManager owns clients and cleans them up
     // However, it doesn't own ServerSockets, we do.
-    
+
     // Cleanup servers
     for (std::map<int, ServerSocket *>::iterator it = _servers.begin(); it != _servers.end(); ++it)
     {
@@ -82,9 +82,9 @@ void EventLoop::run()
             // 2. Handle Client Connections
             if (_connManager.hasClient(ev.fd))
             {
-                 if (ev.readable)
+                if (ev.readable)
                     _connManager.handleRead(ev.fd, _poller);
-                
+
                 // Note: handleRead might have closed the connection or started CGI
                 // so we check hasClient again if needed
                 if (_connManager.hasClient(ev.fd) && ev.writable)
@@ -92,13 +92,13 @@ void EventLoop::run()
 
                 if ((ev.error || ev.hangup) && !_connManager.hasClient(ev.fd))
                 {
-                     // Already handled
-                } 
+                    // Already handled
+                }
                 else if ((ev.error || ev.hangup) && !ev.readable)
                 {
-                     _connManager.handleDisconnect(ev.fd, _poller);
+                    _connManager.handleDisconnect(ev.fd, _poller);
                 }
-                
+
                 continue;
             }
 
@@ -106,8 +106,8 @@ void EventLoop::run()
             if (_cgiHandler.hasCgiPipe(ev.fd))
             {
                 int clientFd = _cgiHandler.getClientFd(ev.fd);
-                ClientConnection* client = _connManager.getClient(clientFd);
-                
+                ClientConnection *client = _connManager.getClient(clientFd);
+
                 if (client)
                 {
                     if (ev.readable)

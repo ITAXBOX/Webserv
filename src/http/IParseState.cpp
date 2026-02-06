@@ -30,7 +30,7 @@ void ParseRequestLineState::parse(HttpParser &parser)
 
 	// Transition to headers state
 	parser.setState(new ParseHeadersState());
-	
+
 	// Continue parsing if buffer has data
 	if (!parser._buffer.empty())
 		parser._currentState->parse(parser);
@@ -120,7 +120,7 @@ void ParseHeadersState::parse(HttpParser &parser)
 			{
 				Logger::debug("Content-Length detected, transitioning to body parsing");
 				parser.setState(new ParseBodyState(contentLength));
-				
+
 				// Continue parsing body if buffer has data
 				if (!parser._buffer.empty())
 					parser._currentState->parse(parser);
@@ -206,7 +206,7 @@ void ParseBodyState::parse(HttpParser &parser)
 		std::string currentBody = parser._request.getBody();
 		currentBody.append(parser._buffer.substr(0, toRead));
 		parser._request.setBody(currentBody);
-		
+
 		parser._buffer.erase(0, toRead);
 		_bytesRead += toRead;
 
@@ -231,111 +231,112 @@ void ParseBodyState::parse(HttpParser &parser)
 ParseChunkedBodyState::ParseChunkedBodyState()
 	: _state(CHUNK_SIZE), _chunkSize(0), _chunkRead(0)
 {
-    Logger::debug("ParseChunkedBodyState created");
+	Logger::debug("ParseChunkedBodyState created");
 }
 
 void ParseChunkedBodyState::parse(HttpParser &parser)
 {
-    while (true) // Process all available data
-    {
-        if (_state == CHUNK_SIZE)
-        {
-            size_t pos = findCRLF(parser._buffer);
-            if (pos == std::string::npos)
-                return; // Need more data for size line
+	while (true) // Process all available data
+	{
+		if (_state == CHUNK_SIZE)
+		{
+			size_t pos = findCRLF(parser._buffer);
+			if (pos == std::string::npos)
+				return; // Need more data for size line
 
-            std::string line = parser._buffer.substr(0, pos);
-            // Parse hex size
-            std::stringstream ss(line);
-            if (!(ss >> std::hex >> _chunkSize))
-            {
-                 parser.setState(new ParseErrorState());
-                 parser.setError("Invalid chunk size: " + line);
-                 return;
-            }
-            
-            parser._buffer.erase(0, pos + 2); // Consume line + CRLF
-            
-            if (_chunkSize == 0)
-            {
-                _state = CHUNK_TRAILERS;
-            }
-            else
-            {
-                _state = CHUNK_DATA;
-                _chunkRead = 0;
-            }
-        }
-        else if (_state == CHUNK_DATA)
-        {
-            size_t remaining = _chunkSize - _chunkRead;
-            if (remaining == 0) 
-            {
-                // Should not happen if transitions correct, but safety
-                _state = CHUNK_DATA_CRLF;
-                continue;
-            }
-            
-            size_t available = parser._buffer.size();
-            size_t toRead = (available < remaining) ? available : remaining;
-            
-            if (toRead == 0) return; // Need data
-            
-            std::string currentBody = parser._request.getBody();
-            // Check limits!
-            if (currentBody.size() + toRead > parser.getMaxBodySize())
-            {
-                 parser.setState(new ParseErrorState());
-                 parser.setError("Payload Too Large");
-                 return;
-            }
+			std::string line = parser._buffer.substr(0, pos);
+			// Parse hex size
+			std::stringstream ss(line);
+			if (!(ss >> std::hex >> _chunkSize))
+			{
+				parser.setState(new ParseErrorState());
+				parser.setError("Invalid chunk size: " + line);
+				return;
+			}
 
-            currentBody.append(parser._buffer.substr(0, toRead));
-            parser._request.setBody(currentBody);
-            
-            parser._buffer.erase(0, toRead);
-            _chunkRead += toRead;
-            
-            if (_chunkRead >= _chunkSize)
-            {
-                _state = CHUNK_DATA_CRLF;
-            }
-        }
-        else if (_state == CHUNK_DATA_CRLF)
-        {
-            if (parser._buffer.length() < 2)
-                return; // Need CRLF
-            
-            if (parser._buffer.substr(0, 2) != "\r\n")
-            {
-                 parser.setState(new ParseErrorState());
-                 parser.setError("Invalid chunk terminator");
-                 return;
-            }
-            parser._buffer.erase(0, 2);
-            _state = CHUNK_SIZE;
-        }
-        else if (_state == CHUNK_TRAILERS)
-        {
-            // Simple: wait for empty line (CRLF) to end message
-            // or consume headers until empty line
-            size_t pos = findCRLF(parser._buffer);
-            if (pos == std::string::npos)
-                return;
+			parser._buffer.erase(0, pos + 2); // Consume line + CRLF
 
-            std::string line = parser._buffer.substr(0, pos);
-            parser._buffer.erase(0, pos + 2);
-            
-            if (line.empty()) 
-            {
-                Logger::debug("Chunked parsing complete");
-                parser.setState(new ParseCompleteState());
-                parser.setComplete();
-                return;
-            }
-            // else: skip trailer header
-        }
-    }
+			if (_chunkSize == 0)
+			{
+				_state = CHUNK_TRAILERS;
+			}
+			else
+			{
+				_state = CHUNK_DATA;
+				_chunkRead = 0;
+			}
+		}
+		else if (_state == CHUNK_DATA)
+		{
+			size_t remaining = _chunkSize - _chunkRead;
+			if (remaining == 0)
+			{
+				// Should not happen if transitions correct, but safety
+				_state = CHUNK_DATA_CRLF;
+				continue;
+			}
+
+			size_t available = parser._buffer.size();
+			size_t toRead = (available < remaining) ? available : remaining;
+
+			if (toRead == 0)
+				return; // Need data
+
+			std::string currentBody = parser._request.getBody();
+			// Check limits!
+			if (currentBody.size() + toRead > parser.getMaxBodySize())
+			{
+				parser.setState(new ParseErrorState());
+				parser.setError("Payload Too Large");
+				return;
+			}
+
+			currentBody.append(parser._buffer.substr(0, toRead));
+			parser._request.setBody(currentBody);
+
+			parser._buffer.erase(0, toRead);
+			_chunkRead += toRead;
+
+			if (_chunkRead >= _chunkSize)
+			{
+				_state = CHUNK_DATA_CRLF;
+			}
+		}
+		else if (_state == CHUNK_DATA_CRLF)
+		{
+			if (parser._buffer.length() < 2)
+				return; // Need CRLF
+
+			if (parser._buffer.substr(0, 2) != "\r\n")
+			{
+				parser.setState(new ParseErrorState());
+				parser.setError("Invalid chunk terminator");
+				return;
+			}
+			parser._buffer.erase(0, 2);
+			_state = CHUNK_SIZE;
+		}
+		else if (_state == CHUNK_TRAILERS)
+		{
+			// Simple: wait for empty line (CRLF) to end message
+			// or consume headers until empty line
+			size_t pos = findCRLF(parser._buffer);
+			if (pos == std::string::npos)
+				return;
+
+			std::string line = parser._buffer.substr(0, pos);
+			parser._buffer.erase(0, pos + 2);
+
+			if (line.empty())
+			{
+				Logger::debug("Chunked parsing complete");
+				parser.setState(new ParseCompleteState());
+				parser.setComplete();
+				return;
+			}
+			// else: skip trailer header
+		}
+	}
 }
 
 // ============================================================================

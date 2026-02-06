@@ -14,7 +14,7 @@ Token Tokenizer::readWord()
 	size_t start = _pos;
 	while (_pos < _input.length() && ::isWordChar(_input[_pos]))
 		_pos++;
-	
+
 	std::string value = _input.substr(start, _pos - start);
 	return Token(TOKEN_WORD, value, _line);
 }
@@ -25,14 +25,14 @@ Token Tokenizer::readToken()
 	while (true)
 	{
 		::skipWhitespace(_input, _pos, _line);
-		
+
 		// Check for comment
 		if (_pos < _input.length() && _input[_pos] == '#')
 		{
 			::skipComment(_input, _pos);
 			continue; // Loop back to skip more whitespace
 		}
-		
+
 		break; // No more whitespace or comments
 	}
 
@@ -83,7 +83,7 @@ bool Tokenizer::tokenize(const std::string &input)
 
 		if (token.type == TOKEN_EOF)
 			break;
-		
+
 		if (token.type == TOKEN_ERROR)
 			return false;
 	}
@@ -92,7 +92,7 @@ bool Tokenizer::tokenize(const std::string &input)
 }
 
 // Get all tokens
-const std::vector<Token>& Tokenizer::getTokens() const
+const std::vector<Token> &Tokenizer::getTokens() const
 {
 	return _tokens;
 }
@@ -102,18 +102,18 @@ std::string Tokenizer::getError() const
 {
 	if (_tokens.empty())
 		return "No tokens generated";
-	
+
 	// Find first error token
 	for (size_t i = 0; i < _tokens.size(); i++)
 	{
 		if (_tokens[i].type == TOKEN_ERROR)
 		{
 			std::ostringstream os;
-			os << "Unexpected character '" << _tokens[i].value 
+			os << "Unexpected character '" << _tokens[i].value
 			   << "' at line " << _tokens[i].line;
 			return os.str();
 		}
 	}
-	
+
 	return "Unknown tokenization error";
 }

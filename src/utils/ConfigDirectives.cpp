@@ -46,13 +46,13 @@ bool ConfigDirectives::parseListen(std::vector<Token> &tokens, size_t &pos, Serv
 {
 	Token directive = advance(tokens, pos); // Consume 'listen'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected port number or host:port after 'listen'", value.line);
 		return false;
 	}
-	
+
 	std::string val = value.value;
 	size_t colonPos = val.find(':');
 
@@ -61,9 +61,9 @@ bool ConfigDirectives::parseListen(std::vector<Token> &tokens, size_t &pos, Serv
 		// Format: host:port
 		std::string host = val.substr(0, colonPos);
 		std::string portStr = val.substr(colonPos + 1);
-		
+
 		server.setHost(host);
-		
+
 		int port = std::atoi(portStr.c_str());
 		if (port <= 0 || port > 65535)
 		{
@@ -101,7 +101,7 @@ bool ConfigDirectives::parseListen(std::vector<Token> &tokens, size_t &pos, Serv
 			server.setHost(val);
 		}
 	}
-	
+
 	return expectSemicolon(tokens, pos, error);
 }
 
@@ -109,13 +109,13 @@ bool ConfigDirectives::parseHost(std::vector<Token> &tokens, size_t &pos, Server
 {
 	advance(tokens, pos); // Consume 'host'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected host address after 'host'", value.line);
 		return false;
 	}
-	
+
 	server.setHost(value.value);
 	return expectSemicolon(tokens, pos, error);
 }
@@ -123,14 +123,14 @@ bool ConfigDirectives::parseHost(std::vector<Token> &tokens, size_t &pos, Server
 bool ConfigDirectives::parseServerName(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error)
 {
 	advance(tokens, pos); // Consume 'server_name'
-	
+
 	// Can have multiple server names
 	while (peek(tokens, pos).type == TOKEN_WORD)
 	{
 		Token name = advance(tokens, pos);
 		server.addServerName(name.value);
 	}
-	
+
 	return expectSemicolon(tokens, pos, error);
 }
 
@@ -138,13 +138,13 @@ bool ConfigDirectives::parseRoot(std::vector<Token> &tokens, size_t &pos, Server
 {
 	advance(tokens, pos); // Consume 'root'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected path after 'root'", value.line);
 		return false;
 	}
-	
+
 	server.setRoot(value.value);
 	return expectSemicolon(tokens, pos, error);
 }
@@ -152,14 +152,14 @@ bool ConfigDirectives::parseRoot(std::vector<Token> &tokens, size_t &pos, Server
 bool ConfigDirectives::parseIndex(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error)
 {
 	advance(tokens, pos); // Consume 'index'
-	
+
 	// Can have multiple index files
 	while (peek(tokens, pos).type == TOKEN_WORD)
 	{
 		Token indexFile = advance(tokens, pos);
 		server.addIndex(indexFile.value);
 	}
-	
+
 	return expectSemicolon(tokens, pos, error);
 }
 
@@ -167,13 +167,13 @@ bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t
 {
 	advance(tokens, pos); // Consume 'client_max_body_size'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected size after 'client_max_body_size'", value.line);
 		return false;
 	}
-	
+
 	size_t size = std::atol(value.value.c_str());
 	server.setClientMaxBodySize(size);
 	return expectSemicolon(tokens, pos, error);
@@ -184,13 +184,13 @@ bool ConfigDirectives::parseErrorPage(std::vector<Token> &tokens, size_t &pos, S
 	Token directive = advance(tokens, pos); // Consume 'error_page'
 	Token code = advance(tokens, pos);
 	Token path = advance(tokens, pos);
-	
+
 	if (code.type != TOKEN_WORD || path.type != TOKEN_WORD)
 	{
 		setError(error, "Expected 'error_page <code> <path>;'", directive.line);
 		return false;
 	}
-	
+
 	int statusCode = std::atoi(code.value.c_str());
 	server.addErrorPage(statusCode, path.value);
 	return expectSemicolon(tokens, pos, error);
@@ -217,25 +217,25 @@ bool ConfigDirectives::parseAllowedMethods(std::vector<Token> &tokens, size_t &p
 	while (peek(tokens, pos).type == TOKEN_WORD)
 	{
 		Token method = advance(tokens, pos);
-		
+
 		// Validate that the method is one of the implemented ones
 		if (validMethods.find(method.value) == validMethods.end())
 		{
 			setError(error, "Invalid HTTP method '" + method.value + "'. Allowed methods: GET, POST, PUT, DELETE, HEAD", method.line);
 			return false;
 		}
-		
+
 		location.addAllowedMethod(method.value);
 		hasAtLeastOne = true;
 	}
-	
+
 	// Ensure at least one method was specified
 	if (!hasAtLeastOne)
 	{
 		setError(error, "Expected at least one HTTP method after 'allowed_methods'", peek(tokens, pos).line);
 		return false;
 	}
-	
+
 	return expectSemicolon(tokens, pos, error);
 }
 
@@ -243,13 +243,13 @@ bool ConfigDirectives::parseLocationRoot(std::vector<Token> &tokens, size_t &pos
 {
 	advance(tokens, pos); // Consume 'root'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected path after 'root'", value.line);
 		return false;
 	}
-	
+
 	location.setRoot(value.value);
 	return expectSemicolon(tokens, pos, error);
 }
@@ -257,14 +257,14 @@ bool ConfigDirectives::parseLocationRoot(std::vector<Token> &tokens, size_t &pos
 bool ConfigDirectives::parseLocationIndex(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {
 	advance(tokens, pos); // Consume 'index'
-	
+
 	// Can have multiple index files
 	while (peek(tokens, pos).type == TOKEN_WORD)
 	{
 		Token indexFile = advance(tokens, pos);
 		location.addIndex(indexFile.value);
 	}
-	
+
 	return expectSemicolon(tokens, pos, error);
 }
 
@@ -272,13 +272,13 @@ bool ConfigDirectives::parseAutoindex(std::vector<Token> &tokens, size_t &pos, L
 {
 	advance(tokens, pos); // Consume 'autoindex'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected 'on' or 'off' after 'autoindex'", value.line);
 		return false;
 	}
-	
+
 	bool enabled = (value.value == "on");
 	location.setAutoindex(enabled);
 	return expectSemicolon(tokens, pos, error);
@@ -287,13 +287,13 @@ bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t
 {
 	advance(tokens, pos); // Consume 'client_max_body_size'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected size after 'client_max_body_size'", value.line);
 		return false;
 	}
-	
+
 	size_t size = std::atol(value.value.c_str());
 	location.setClientMaxBodySize(size);
 	return expectSemicolon(tokens, pos, error);
@@ -303,13 +303,13 @@ bool ConfigDirectives::parseUploadStore(std::vector<Token> &tokens, size_t &pos,
 {
 	advance(tokens, pos); // Consume 'upload_store'
 	Token value = advance(tokens, pos);
-	
+
 	if (value.type != TOKEN_WORD)
 	{
 		setError(error, "Expected path after 'upload_store'", value.line);
 		return false;
 	}
-	
+
 	location.setUploadStore(value.value);
 	return expectSemicolon(tokens, pos, error);
 }
@@ -318,14 +318,14 @@ bool ConfigDirectives::parseCgiAssign(std::vector<Token> &tokens, size_t &pos, L
 {
 	advance(tokens, pos); // Consume 'cgi_assign'
 	Token extension = advance(tokens, pos);
-    Token path = advance(tokens, pos);
-	
+	Token path = advance(tokens, pos);
+
 	if (extension.type != TOKEN_WORD || path.type != TOKEN_WORD)
 	{
 		setError(error, "Expected extension and path after 'cgi_assign'", extension.line);
 		return false;
 	}
-	
+
 	location.addCgiHandler(extension.value, path.value);
 	return expectSemicolon(tokens, pos, error);
 }
@@ -335,13 +335,13 @@ bool ConfigDirectives::parseReturn(std::vector<Token> &tokens, size_t &pos, Loca
 	Token directive = advance(tokens, pos); // Consume 'return'
 	Token code = advance(tokens, pos);
 	Token url = advance(tokens, pos);
-	
+
 	if (code.type != TOKEN_WORD || url.type != TOKEN_WORD)
 	{
 		setError(error, "Expected 'return <code> <url>;'", directive.line);
 		return false;
 	}
-	
+
 	int redirectCode = std::atoi(code.value.c_str());
 	location.setRedirect(url.value, redirectCode);
 	return expectSemicolon(tokens, pos, error);

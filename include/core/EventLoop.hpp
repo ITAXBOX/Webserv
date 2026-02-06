@@ -30,9 +30,9 @@ class EventLoop
 {
 private:
     bool _running;
-    Poller _poller;                                    // Using Poller instead of raw poll()
-    std::map<int, ServerSocket*> _servers;
-    RequestHandler* _requestHandler;                   // Strategy pattern handler
+    Poller _poller; // Using Poller instead of raw poll()
+    std::map<int, ServerSocket *> _servers;
+    RequestHandler *_requestHandler; // Strategy pattern handler
     CgiHandler _cgiHandler;
     ConnectionManager _connManager;
 
@@ -40,7 +40,7 @@ public:
     EventLoop();
     ~EventLoop();
 
-    void addServer(ServerSocket* server, const ServerConfig& config);
+    void addServer(ServerSocket *server, const ServerConfig &config);
     void run();
     void stop();
 };

@@ -15,7 +15,7 @@ class SessionHandler
 public:
     SessionHandler();
     ~SessionHandler();
-    
+
     HttpResponse handle(const HttpRequest &request);
 };
 

@@ -6,17 +6,6 @@ ErrorPageGenerator &ErrorPageGenerator::getInstance()
     return instance;
 }
 
-void ErrorPageGenerator::setErrorPage(int statusCode, const std::string &filePath)
-{
-    // CACHE IMPROVEMENT: Read file immediately into memory
-    if (FileHandler::fileExists(filePath) && !FileHandler::isDirectory(filePath))
-    {
-        std::string content = FileHandler::readFile(filePath);
-        if (!content.empty())
-            errorPages_[statusCode] = content; // Store content, not path
-    }
-}
-
 void ErrorPageGenerator::clearErrorPage(int statusCode)
 {
     errorPages_.erase(statusCode);
@@ -59,11 +48,6 @@ std::string ErrorPageGenerator::getErrorPage(int statusCode, const std::string &
     }
 
     return content;
-}
-
-bool ErrorPageGenerator::hasCustomPage(int statusCode) const
-{
-    return errorPages_.find(statusCode) != errorPages_.end();
 }
 
 std::string ErrorPageGenerator::generateDefaultPage() const

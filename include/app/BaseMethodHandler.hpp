@@ -14,7 +14,7 @@ class BaseMethodHandler : public IMethodHandler
 {
 public:
     virtual ~BaseMethodHandler() {}
-    
+
     // Abstract methods from IMethodHandler still need to be implemented by children
     // virtual HttpResponse handle(...) = 0;
     // virtual std::string getName() const = 0;

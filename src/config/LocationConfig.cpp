@@ -29,12 +29,6 @@ LocationConfig::~LocationConfig()
 }
 
 // Setters (Builder pattern)
-LocationConfig &LocationConfig::setPath(const std::string &p)
-{
-	path = p;
-	return *this;
-}
-
 LocationConfig &LocationConfig::setRoot(const std::string &r)
 {
 	root = r;
@@ -45,11 +39,6 @@ LocationConfig &LocationConfig::addIndex(const std::string &indexFile)
 {
 	index.push_back(indexFile);
 	return *this;
-}
-
-void LocationConfig::clearAllowedMethods()
-{
-    allowedMethods.clear();
 }
 
 LocationConfig &LocationConfig::addAllowedMethod(const std::string &method)
@@ -105,11 +94,6 @@ const std::vector<std::string> &LocationConfig::getIndex() const
 	return index;
 }
 
-const std::set<std::string> &LocationConfig::getAllowedMethods() const
-{
-	return allowedMethods;
-}
-
 bool LocationConfig::isMethodAllowed(const std::string &method) const
 {
 	return allowedMethods.find(method) != allowedMethods.end();
@@ -133,14 +117,9 @@ std::string LocationConfig::getUploadStore() const
 std::string LocationConfig::getCgiPath(const std::string &extension) const
 {
 	std::map<std::string, std::string>::const_iterator it = cgiHandlers.find(extension);
-    if (it != cgiHandlers.end())
-        return it->second;
-    return "";
-}
-
-const std::map<std::string, std::string> &LocationConfig::getCgiHandlers() const
-{
-    return cgiHandlers;
+	if (it != cgiHandlers.end())
+		return it->second;
+	return "";
 }
 
 std::string LocationConfig::getRedirect() const
@@ -179,10 +158,10 @@ bool LocationConfig::isValid() const
 	// Path must start with /
 	if (path.empty() || path[0] != '/')
 		return false;
-	
+
 	// If redirect is set, redirect code must be valid
 	if (!redirect.empty() && (redirectCode < 300 || redirectCode > 399))
 		return false;
-	
+
 	return true;
 }

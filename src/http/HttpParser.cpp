@@ -56,7 +56,7 @@ const HttpRequest &HttpParser::getRequest() const
 void HttpParser::reset()
 {
 	Logger::debug("Resetting HttpParser");
-	
+
 	_request.clear();
 	_buffer.clear();
 	_isComplete = false;
@@ -79,8 +79,8 @@ void HttpParser::setComplete()
 {
 	_isComplete = true;
 	Logger::info("HTTP request parsing complete");
-    // Parse cookies now that headers are fully available
-    _request.parseCookies();
+	// Parse cookies now that headers are fully available
+	_request.parseCookies();
 }
 
 void HttpParser::setError(const std::string &message)

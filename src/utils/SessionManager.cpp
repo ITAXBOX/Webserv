@@ -52,31 +52,11 @@ Session *SessionManager::getSession(const std::string &id)
             _sessions.erase(it);
             return NULL;
         }
-        
+
         it->second.lastAccessed = std::time(0);
         return &(it->second);
     }
     return NULL;
-}
-
-void SessionManager::cleanupSessions()
-{
-    std::time_t now = std::time(0);
-    std::map<std::string, Session>::iterator it = _sessions.begin();
-    while (it != _sessions.end())
-    {
-        if (std::difftime(now, it->second.lastAccessed) > SESSION_TIMEOUT)
-        {
-            Logger::debug("Cleaning up expired session: " + it->first);
-            std::map<std::string, Session>::iterator eraseIt = it;
-            ++it;
-            _sessions.erase(eraseIt);
-        }
-        else
-        {
-            ++it;
-        }
-    }
 }
 
 void SessionManager::destroySession(const std::string &id)
@@ -96,16 +76,4 @@ void SessionManager::setSessionData(const std::string &id, const std::string &ke
     {
         session->data[key] = value;
     }
-}
-
-std::string SessionManager::getSessionData(const std::string &id, const std::string &key)
-{
-    Session *session = getSession(id);
-    if (session)
-    {
-        std::map<std::string, std::string>::iterator it = session->data.find(key);
-        if (it != session->data.end())
-            return it->second;
-    }
-    return "";
 }

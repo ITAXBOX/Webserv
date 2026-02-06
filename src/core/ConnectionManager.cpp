@@ -1,6 +1,6 @@
 #include "core/ConnectionManager.hpp"
 
-ConnectionManager::ConnectionManager(RequestHandler& requestHandler, CgiHandler& cgiHandler)
+ConnectionManager::ConnectionManager(RequestHandler &requestHandler, CgiHandler &cgiHandler)
     : _requestHandler(requestHandler), _cgiHandler(cgiHandler)
 {
 }
@@ -8,18 +8,18 @@ ConnectionManager::ConnectionManager(RequestHandler& requestHandler, CgiHandler&
 ConnectionManager::~ConnectionManager()
 {
     // Note: Clients should be cleaned up via closeAllConnections or in destructor
-    for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    for (std::map<int, ClientConnection *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
         delete it->second;
     }
 }
 
-void ConnectionManager::addServerConfig(int serverFd, const ServerConfig& config)
+void ConnectionManager::addServerConfig(int serverFd, const ServerConfig &config)
 {
     _serverConfigs[serverFd] = config;
 }
 
-ClientConnection* ConnectionManager::getClient(int fd)
+ClientConnection *ConnectionManager::getClient(int fd)
 {
     if (_clients.find(fd) != _clients.end())
         return _clients[fd];
@@ -31,7 +31,7 @@ bool ConnectionManager::hasClient(int fd) const
     return _clients.find(fd) != _clients.end();
 }
 
-void ConnectionManager::acceptNewConnection(int serverFd, ServerSocket* server, Poller& poller)
+void ConnectionManager::acceptNewConnection(int serverFd, ServerSocket *server, Poller &poller)
 {
     int clientFd = server->acceptClient();
     if (clientFd < 0)
@@ -54,7 +54,7 @@ void ConnectionManager::acceptNewConnection(int serverFd, ServerSocket* server, 
         }
     }
 
-    ClientConnection* client = new ClientConnection(clientFd, maxBodySize);
+    ClientConnection *client = new ClientConnection(clientFd, maxBodySize);
     _clients[clientFd] = client;
     _clientToServer[clientFd] = serverFd;
 
@@ -73,7 +73,7 @@ void ConnectionManager::acceptNewConnection(int serverFd, ServerSocket* server, 
     Logger::info(Logger::connMsg("New client connected", clientFd));
 }
 
-void ConnectionManager::handleRead(int clientFd, Poller& poller)
+void ConnectionManager::handleRead(int clientFd, Poller &poller)
 {
     char buffer[BUFFER_SIZE];
     int n = recv(clientFd, buffer, sizeof(buffer), 0);
@@ -108,12 +108,12 @@ void ConnectionManager::handleRead(int clientFd, Poller& poller)
 
         // Resolve Config
         int serverFd = _clientToServer[clientFd];
-        
+
         // Default config if not found (should not happen if addServerConfig used correctly)
         ServerConfig defaultConfig;
-        const ServerConfig &config = (_serverConfigs.find(serverFd) != _serverConfigs.end()) 
-                                     ? _serverConfigs[serverFd] 
-                                     : defaultConfig;
+        const ServerConfig &config = (_serverConfigs.find(serverFd) != _serverConfigs.end())
+                                         ? _serverConfigs[serverFd]
+                                         : defaultConfig;
 
         // Resolve Location
         const LocationConfig *locationPtr = config.matchLocation(request.getUri());
@@ -157,7 +157,7 @@ void ConnectionManager::handleRead(int clientFd, Poller& poller)
 
         if (response.isCgi())
         {
-             _cgiHandler.startCgi(client, request, response, poller);
+            _cgiHandler.startCgi(client, request, response, poller);
         }
         else
         {
@@ -199,10 +199,11 @@ void ConnectionManager::handleRead(int clientFd, Poller& poller)
     // else: Still parsing, wait for more data
 }
 
-void ConnectionManager::handleWrite(int clientFd, Poller& poller)
+void ConnectionManager::handleWrite(int clientFd, Poller &poller)
 {
-    if (_clients.find(clientFd) == _clients.end()) return;
-    
+    if (_clients.find(clientFd) == _clients.end())
+        return;
+
     ClientConnection *c = _clients[clientFd];
     const std::string &data = c->getWriteBuffer();
 
@@ -240,7 +241,7 @@ void ConnectionManager::handleWrite(int clientFd, Poller& poller)
     poller.modifyFd(clientFd, EPOLLIN);
 }
 
-void ConnectionManager::handleDisconnect(int fd, Poller& poller)
+void ConnectionManager::handleDisconnect(int fd, Poller &poller)
 {
     Logger::info(Logger::connMsg("Client disconnected", fd));
 
@@ -262,14 +263,14 @@ void ConnectionManager::handleDisconnect(int fd, Poller& poller)
     delete client;
 }
 
-void ConnectionManager::closeAllConnections(Poller& poller)
+void ConnectionManager::closeAllConnections(Poller &poller)
 {
     std::vector<int> fds;
-    for (std::map<int, ClientConnection*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    for (std::map<int, ClientConnection *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
         fds.push_back(it->first);
     }
-    
+
     for (size_t i = 0; i < fds.size(); ++i)
     {
         handleDisconnect(fds[i], poller);

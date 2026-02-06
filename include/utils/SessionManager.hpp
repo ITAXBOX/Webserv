@@ -28,24 +28,18 @@ private:
 
 public:
     static SessionManager *getInstance();
-    
+
     // Create new session
     std::string createSession();
-    
+
     // Get session by ID, updating last accessed time
     Session *getSession(const std::string &id);
-    
-    // Clean up expired sessions
-    void cleanupSessions();
-    
+
     // Destroy a specific session
     void destroySession(const std::string &id);
-    
+
     // Add data to session
     void setSessionData(const std::string &id, const std::string &key, const std::string &value);
-    
-    // Get data from session
-    std::string getSessionData(const std::string &id, const std::string &key);
 };
 
 #endif

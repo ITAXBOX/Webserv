@@ -1,15 +1,15 @@
 #include "config/ServerConfig.hpp"
 
 ServerConfig::ServerConfig()
-	: host(DEFAULT_HOST),			// Listen on all interfaces by default
-	  port(DEFAULT_PORT),			// Default port
-	  root(DEFAULT_ROOT),			// Default web root
-	  clientMaxBodySize(MAX_BODY_SIZE)	// 1MB default
+	: host(DEFAULT_HOST),			   // Listen on all interfaces by default
+	  port(DEFAULT_PORT),			   // Default port
+	  root(DEFAULT_ROOT),			   // Default web root
+	  clientMaxBodySize(MAX_BODY_SIZE) // 1MB default
 {
 	// Default index files
 	index.push_back(DEFAULT_INDEX);
 	index.push_back("index.htm");
-	
+
 	// Default server name
 	serverNames.push_back("localhost");
 }
@@ -113,28 +113,28 @@ const std::vector<LocationConfig> &ServerConfig::getLocations() const
 
 const LocationConfig *ServerConfig::matchLocation(const std::string &uri) const
 {
-    const LocationConfig *bestMatch = NULL;
-    size_t bestLen = 0;
+	const LocationConfig *bestMatch = NULL;
+	size_t bestLen = 0;
 
-    for (size_t i = 0; i < locations.size(); ++i)
-    {
-        const std::string &path = locations[i].getPath();
-        // Check if URI starts with path
-        if (uri.compare(0, path.length(), path) == 0)
-        {
-            // Ensure full path component match (e.g. /img matches /img/foo but not /images)
-            if (path == "/" || uri.length() == path.length() || uri[path.length()] == '/')
-            {
-                // Longest prefix match
-                if (path.length() > bestLen || bestMatch == NULL)
-                {
-                    bestMatch = &locations[i];
-                    bestLen = path.length();
-                }
-            }
-        }
-    }
-    return bestMatch;
+	for (size_t i = 0; i < locations.size(); ++i)
+	{
+		const std::string &path = locations[i].getPath();
+		// Check if URI starts with path
+		if (uri.compare(0, path.length(), path) == 0)
+		{
+			// Ensure full path component match (e.g. /img matches /img/foo but not /images)
+			if (path == "/" || uri.length() == path.length() || uri[path.length()] == '/')
+			{
+				// Longest prefix match
+				if (path.length() > bestLen || bestMatch == NULL)
+				{
+					bestMatch = &locations[i];
+					bestLen = path.length();
+				}
+			}
+		}
+	}
+	return bestMatch;
 }
 
 // Utility
@@ -158,14 +158,14 @@ bool ServerConfig::isValid() const
 	// Port must be in valid range
 	if (port < 1 || port > 65535)
 		return false;
-	
+
 	// Host must not be empty
 	if (host.empty())
 		return false;
-	
+
 	// Root must not be empty
 	if (root.empty())
 		return false;
-	
+
 	return true;
 }

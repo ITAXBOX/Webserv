@@ -11,17 +11,17 @@ SessionHandler::~SessionHandler()
 HttpResponse SessionHandler::handle(const HttpRequest &request)
 {
     Logger::info("Handling session request");
-    
+
     HttpResponse response;
     SessionManager *sm = SessionManager::getInstance();
     std::string sessionId = request.getCookie("SESSIONID");
     std::string action = request.getHeader("X-Action"); // Simple way to signal action
-    
+
     std::string body = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><title>WebServ - Session Test</title><link rel='stylesheet' href='style.css'></head><body>";
     body += "<div class='container'><header><h1>Session Test Environment</h1><p class='subtitle'>Live Session Data Inspector</p></header>";
     body += "<nav><a href='index.html'>Dashboard</a><a href='methods.html'>Methods</a><a href='cgi-bin/file_manager.py'>File Manager</a><a href='cgi.html'>CGI Tests</a><a href='sessions.html' class='active'>Sessions</a></nav>";
     body += "<div class='card-grid'>";
-    
+
     // Status Card
     body += "<div class='card'><h2>Session Status</h2>";
     if (sessionId.empty() || !sm->getSession(sessionId))
@@ -36,28 +36,33 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
     {
         body += "<div style='padding: 10px; background: #e8f5e9; border-radius: 5px; color: #2e7d32;'><strong>Session Active</strong></div>";
         body += "<p style='margin-top:10px'>ID: <code>" + sessionId + "</code></p>";
-        
+
         // Handle simple data storage
         if (request.getMethod() == HTTP_POST)
         {
             // Parse simple form data (key=value)
             std::string reqBody = request.getBody();
-            
+
             // Simple URL-encoded body parser
             std::map<std::string, std::string> params;
             size_t pos = 0;
-            while (pos < reqBody.length()) {
+            while (pos < reqBody.length())
+            {
                 size_t amp = reqBody.find('&', pos);
-                if (amp == std::string::npos) amp = reqBody.length();
-                
+                if (amp == std::string::npos)
+                    amp = reqBody.length();
+
                 std::string pair = reqBody.substr(pos, amp - pos);
                 size_t eq_local = pair.find('=');
-                if (eq_local != std::string::npos) {
+                if (eq_local != std::string::npos)
+                {
                     std::string k = pair.substr(0, eq_local);
                     std::string v = pair.substr(eq_local + 1);
-                    
+
                     // Simple Decode: + to space
-                    for (size_t i = 0; i < v.length(); ++i) if (v[i] == '+') v[i] = ' ';
+                    for (size_t i = 0; i < v.length(); ++i)
+                        if (v[i] == '+')
+                            v[i] = ' ';
                     // Decode URL percent encoding if needed (basic implementation)
                     // ...
 
@@ -67,7 +72,8 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
             }
 
             // Check for destroy action first
-            if (params.count("action") && params["action"] == "destroy") {
+            if (params.count("action") && params["action"] == "destroy")
+            {
                 sm->destroySession(sessionId);
                 // Redirect to self to clear cookie/get new session
                 response.setStatus(302, "Found");
@@ -76,11 +82,13 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
                 return response;
             }
 
-            if (params.count("key") && params.count("value")) {
+            if (params.count("key") && params.count("value"))
+            {
                 std::string key = params["key"];
                 std::string value = params["value"];
-                
-                if (!key.empty() && !value.empty()) {
+
+                if (!key.empty() && !value.empty())
+                {
                     sm->setSessionData(sessionId, key, value);
                     body += "<div style='padding: 10px; background: #e3f2fd; border-radius: 5px; color: #1976d2; margin-bottom: 20px;'><strong>Data Saved</strong></div>";
                     body += "<p style='color: green'>Saved: " + key + " = " + value + "</p>";
@@ -116,18 +124,18 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
     body += "<div style='margin-bottom: 15px;'><label style='display:block; margin-bottom:5px; font-weight:600'>Value</label><input type='text' name='value' style='width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;' required></div>";
     body += "<button type='submit' class='btn' style='width: 100%; background-color: var(--secondary-color); color: var(--text-color); border:none; cursor:pointer;'>Save to Session</button>";
     body += "</form>";
-    
+
     // Add Destroy Session Button
     body += "<form method='POST' action='/session_test' style='margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;'>";
     body += "<input type='hidden' name='action' value='destroy'>";
     body += "<button type='submit' class='btn' style='width: 100%; background-color: #e74c3c; color: white; border: none; cursor:pointer;'>Destroy Session</button>";
     body += "</form>";
-    
+
     body += "</div>";
-    
+
     body += "</div>"; // End card-grid
     body += "</div></body></html>";
-    
+
     response.setStatus(HTTP_OK, "OK");
     response.setBody(body);
     response.addHeader("Content-Type", "text/html");

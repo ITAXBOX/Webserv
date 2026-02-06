@@ -2,34 +2,36 @@
 
 HttpResponse PostHandler::handle(
 	const HttpRequest &request,
-    const LocationConfig &location)
+	const LocationConfig &location)
 {
-    std::string rootDir = location.getRoot();
-    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
-    std::string defaultIndex = DEFAULT_INDEX;
-    if (!location.getIndex().empty()) defaultIndex = location.getIndex()[0];
+	std::string rootDir = location.getRoot();
+	if (rootDir.empty())
+		rootDir = DEFAULT_ROOT;
+	std::string defaultIndex = DEFAULT_INDEX;
+	if (!location.getIndex().empty())
+		defaultIndex = location.getIndex()[0];
 
 	std::string uri = request.getUri();
-    Logger::info("PostHandler processing: " + uri);
+	Logger::info("PostHandler processing: " + uri);
 
-    // Normalize URI (remove query strings, fragments)
-    size_t endPos = uri.find_first_of("?#");
-    if (endPos != std::string::npos)
-        uri = uri.substr(0, endPos);
+	// Normalize URI (remove query strings, fragments)
+	size_t endPos = uri.find_first_of("?#");
+	if (endPos != std::string::npos)
+		uri = uri.substr(0, endPos);
 
-    // Build file path (Simple manual construction for now)
-    std::string filePath = rootDir;
-    if (!filePath.empty() && filePath[filePath.size() - 1] != '/' && !uri.empty() && uri[0] != '/')
-        filePath += "/";
-    filePath += uri;
+	// Build file path (Simple manual construction for now)
+	std::string filePath = rootDir;
+	if (!filePath.empty() && filePath[filePath.size() - 1] != '/' && !uri.empty() && uri[0] != '/')
+		filePath += "/";
+	filePath += uri;
 
-    // Handle Directory Index
-    if (FileHandler::isDirectory(filePath))
-    {
-        if (filePath[filePath.size() - 1] != '/')
-            filePath += "/";
-        filePath += defaultIndex;
-    }
+	// Handle Directory Index
+	if (FileHandler::isDirectory(filePath))
+	{
+		if (filePath[filePath.size() - 1] != '/')
+			filePath += "/";
+		filePath += defaultIndex;
+	}
 
 	// Check for CGI
 	if (isCgiRequest(filePath, location))
@@ -104,8 +106,9 @@ HttpResponse PostHandler::handleFileUpload(
 	const HttpRequest &request,
 	const LocationConfig &location)
 {
-    std::string rootDir = location.getRoot();
-    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+	std::string rootDir = location.getRoot();
+	if (rootDir.empty())
+		rootDir = DEFAULT_ROOT;
 
 	Logger::info("Processing file upload");
 
@@ -157,15 +160,15 @@ HttpResponse PostHandler::handleFileUpload(
 
 	// Use configured upload path or default to root/uploads
 	std::string uploadDir = location.getUploadStore();
-    if (uploadDir.empty())
-        uploadDir = rootDir + "/uploads";
+	if (uploadDir.empty())
+		uploadDir = rootDir + "/uploads";
 
-    // Check if directory exists (we are not allowed to mkdir)
-    if (!FileHandler::isDirectory(uploadDir))
-    {
-         Logger::error("Upload directory does not exist: " + uploadDir);
-         return StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
-    }
+	// Check if directory exists (we are not allowed to mkdir)
+	if (!FileHandler::isDirectory(uploadDir))
+	{
+		Logger::error("Upload directory does not exist: " + uploadDir);
+		return StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
+	}
 
 	// Save file
 	bool saved = saveUploadedFile(filename, fileContent, uploadDir);

@@ -17,7 +17,7 @@ bool CgiHandler::hasCgiPipe(int pipeFd) const
     return _pipeToClient.count(pipeFd) > 0;
 }
 
-void CgiHandler::startCgi(ClientConnection* client, const HttpRequest& request, const HttpResponse& response, Poller& poller)
+void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, const HttpResponse &response, Poller &poller)
 {
     // Reset CGI state for new execution
     client->getCgiState() = CgiState();
@@ -60,8 +60,8 @@ void CgiHandler::startCgi(ClientConnection* client, const HttpRequest& request, 
         if (!poller.addFd(state.pipeOut[0], EPOLLIN))
         {
             Logger::error("Failed to add CGI output pipe to poller");
-             cleanupCgi(client, poller);
-             return;
+            cleanupCgi(client, poller);
+            return;
         }
         else
         {
@@ -73,7 +73,7 @@ void CgiHandler::startCgi(ClientConnection* client, const HttpRequest& request, 
     Logger::info(Logger::connMsg("CGI Started asynchronously", clientFd));
 }
 
-void CgiHandler::cleanupCgi(ClientConnection* client, Poller& poller)
+void CgiHandler::cleanupCgi(ClientConnection *client, Poller &poller)
 {
     CgiState &state = client->getCgiState();
     if (state.active)
@@ -98,7 +98,7 @@ void CgiHandler::cleanupCgi(ClientConnection* client, Poller& poller)
     }
 }
 
-void CgiHandler::handleCgiRead(int pipeFd, ClientConnection* client, Poller& poller)
+void CgiHandler::handleCgiRead(int pipeFd, ClientConnection *client, Poller &poller)
 {
     CgiState &state = client->getCgiState();
 
@@ -119,7 +119,7 @@ void CgiHandler::handleCgiRead(int pipeFd, ClientConnection* client, Poller& pol
     }
 }
 
-void CgiHandler::handleCgiWrite(int pipeFd, ClientConnection* client, Poller& poller)
+void CgiHandler::handleCgiWrite(int pipeFd, ClientConnection *client, Poller &poller)
 {
     CgiState &state = client->getCgiState();
 
@@ -146,7 +146,7 @@ void CgiHandler::handleCgiWrite(int pipeFd, ClientConnection* client, Poller& po
     }
 }
 
-void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection* client, Poller& poller)
+void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection *client, Poller &poller)
 {
     CgiState &state = client->getCgiState();
 
@@ -195,14 +195,14 @@ void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection* client, Poller& p
             Logger::info("CGI Finished, processing response");
             processCgiResponse(client);
         }
-        
+
         client->setState(WRITING);
         client->getParser().reset();
         poller.modifyFd(client->getFd(), EPOLLOUT);
     }
 }
 
-void CgiHandler::processCgiResponse(ClientConnection* client)
+void CgiHandler::processCgiResponse(ClientConnection *client)
 {
     CgiState &state = client->getCgiState();
     HttpResponse response;

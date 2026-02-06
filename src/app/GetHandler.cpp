@@ -11,11 +11,15 @@ HttpResponse GetHandler::handle(
         HttpResponse response;
         int code = location.getRedirectCode();
         std::string reason = "Redirect";
-        if (code == 301) reason = "Moved Permanently";
-        else if (code == 302) reason = "Found";
-        else if (code == 307) reason = "Temporary Redirect";
-        else if (code == 308) reason = "Permanent Redirect";
-        
+        if (code == 301)
+            reason = "Moved Permanently";
+        else if (code == 302)
+            reason = "Found";
+        else if (code == 307)
+            reason = "Temporary Redirect";
+        else if (code == 308)
+            reason = "Permanent Redirect";
+
         response.setStatus(code, reason);
         response.addHeader("Location", location.getRedirect());
         return response;
@@ -23,9 +27,10 @@ HttpResponse GetHandler::handle(
 
     std::string uri = request.getUri();
     std::string rootDir = location.getRoot();
-    
+
     // Default to a sane default if root is empty (should ideally be handled in config validation)
-    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+    if (rootDir.empty())
+        rootDir = DEFAULT_ROOT;
 
     Logger::debug("GetHandler processing: " + uri);
 
@@ -43,7 +48,7 @@ HttpResponse GetHandler::handle(
     // Build file path
     // We initially build the path without the index file
     std::string filePath = buildFilePath(safeUri, rootDir, "");
-    
+
     // If it's a directory, check if we should serve the index file
     if (FileHandler::isDirectory(filePath))
     {
@@ -51,12 +56,12 @@ HttpResponse GetHandler::handle(
         const std::vector<std::string> &indices = location.getIndex();
         if (!indices.empty())
             defaultIndex = indices[0];
-            
+
         std::string indexPath = filePath;
-        if (!indexPath.empty() && indexPath[indexPath.size()-1] != '/') 
+        if (!indexPath.empty() && indexPath[indexPath.size() - 1] != '/')
             indexPath += "/";
         indexPath += defaultIndex;
-        
+
         // If the index file exists, we serve that instead of the directory
         if (FileHandler::fileExists(indexPath))
         {
@@ -123,8 +128,8 @@ HttpResponse GetHandler::serveFile(const std::string &filePath, bool autoindex)
     if (FileHandler::isDirectory(filePath))
     {
         if (autoindex)
-             return generateAutoIndex(filePath);
-        
+            return generateAutoIndex(filePath);
+
         Logger::debug("Path is a directory: " + filePath);
         return StatusCodes::createErrorResponse(HTTP_FORBIDDEN, "Forbidden");
     }
@@ -158,7 +163,6 @@ HttpResponse GetHandler::serveFile(const std::string &filePath, bool autoindex)
         .addHeader("Content-Type", mimeType)
         .addHeader("Content-Length", toString(content.size()))
         .setBody(content);
-    
 
     Logger::info("Served file: " + filePath + " (" + mimeType + ", " + toString(content.size()) + " bytes)");
 
@@ -182,29 +186,33 @@ HttpResponse GetHandler::generateAutoIndex(const std::string &dirPath)
     while ((entry = readdir(dir)) != NULL)
     {
         std::string name = entry->d_name;
-        if (name == ".") continue;
-        
+        if (name == ".")
+            continue;
+
         // Add trailing slash for directories
         std::string fullPath = dirPath;
-        if (fullPath[fullPath.length()-1] != '/') fullPath += "/";
+        if (fullPath[fullPath.length() - 1] != '/')
+            fullPath += "/";
         fullPath += name;
-        
+
         bool isDir = FileHandler::isDirectory(fullPath);
-        if (isDir) name += "/";
-        
+        if (isDir)
+            name += "/";
+
         // Date and Size
         struct stat st;
         std::string dateStr = "                   "; // 19 spaces
         std::string sizeStr = "        -";
-        
+
         if (stat(fullPath.c_str(), &st) == 0)
         {
             char buf[100];
             struct tm *tm = std::localtime(&st.st_mtime);
             std::strftime(buf, sizeof(buf), "%d-%b-%Y %H:%M", tm);
             dateStr = std::string(buf);
-            if (dateStr.length() < 19) dateStr.resize(19, ' ');
-            
+            if (dateStr.length() < 19)
+                dateStr.resize(19, ' ');
+
             if (!isDir)
                 sizeStr = toString(static_cast<unsigned long>(st.st_size));
         }
@@ -212,12 +220,13 @@ HttpResponse GetHandler::generateAutoIndex(const std::string &dirPath)
         // Output link (adjust spacing as needed)
         // <a href="name">name</a>      date       size
         html << "<a href=\"" << name << "\">" << name << "</a>";
-        
+
         // Padding
         int pad = 50 - name.length();
-        if (pad < 0) pad = 0;
+        if (pad < 0)
+            pad = 0;
         html << std::string(pad, ' ');
-        
+
         html << dateStr << "       " << sizeStr << "\n";
     }
 
@@ -229,8 +238,6 @@ HttpResponse GetHandler::generateAutoIndex(const std::string &dirPath)
     response.setBody(html.str());
     response.addHeader("Content-Type", "text/html");
     response.addHeader("Content-Length", toString(html.str().length()));
-    
+
     return response;
 }
-
-

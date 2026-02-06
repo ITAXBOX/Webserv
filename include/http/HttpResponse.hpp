@@ -15,7 +15,7 @@ private:
     std::string reasonPhrase;
     std::map<std::string, std::string> headers;
     std::string body;
-    
+
     bool _isCgi;
     std::string _cgiScriptPath;
     std::string _cgiInterpreterPath;

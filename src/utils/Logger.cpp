@@ -49,16 +49,16 @@ void Logger::log(Logger::Level lvl, const std::string &msg)
 
 	// build a string piece by piece (like a mini "formatter") instead of concatenating multiple strings.
 	std::ostringstream line;
-	
+
 	if (s_showColors)
 		line << levelColor(lvl);
-	
+
 	if (s_showTimestamp)
 	{
 		line << "[" << now() << "] ";
 	}
 	line << levelName(lvl) << " " << msg;
-	
+
 	if (s_showColors)
 		line << "\033[0m"; // Reset color
 

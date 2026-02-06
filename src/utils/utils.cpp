@@ -73,8 +73,8 @@ void skipComment(const std::string &input, size_t &pos)
 // Check if character is valid for a word (alphanumeric, -, _, ., /, :)
 bool isWordChar(char c)
 {
-	return std::isalnum(static_cast<unsigned char>(c)) || 
-	       c == '-' || c == '_' || c == '.' || c == '/' || c == ':';
+	return std::isalnum(static_cast<unsigned char>(c)) ||
+		   c == '-' || c == '_' || c == '.' || c == '/' || c == ':';
 }
 
 // ============================================================================

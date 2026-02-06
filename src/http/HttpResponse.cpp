@@ -1,7 +1,7 @@
 #include "http/HttpResponse.hpp"
 
 HttpResponse::HttpResponse()
-    : statusCode(HTTP_OK), version("HTTP/1.1"), reasonPhrase("OK"), body(""), 
+    : statusCode(HTTP_OK), version("HTTP/1.1"), reasonPhrase("OK"), body(""),
       _isCgi(false), _cgiScriptPath(""), _cgiInterpreterPath("") {}
 
 HttpResponse::~HttpResponse() {}
@@ -45,7 +45,8 @@ std::string HttpResponse::getHeader(const std::string &key) const
 
 void HttpResponse::setCgi(bool isCgi) { _isCgi = isCgi; }
 bool HttpResponse::isCgi() const { return _isCgi; }
-void HttpResponse::setCgiInfo(const std::string &script, const std::string &interpreter) {
+void HttpResponse::setCgiInfo(const std::string &script, const std::string &interpreter)
+{
     _cgiScriptPath = script;
     _cgiInterpreterPath = interpreter;
 }

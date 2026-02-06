@@ -36,7 +36,6 @@ private:
 	// File serving
 	HttpResponse serveFile(const std::string &filePath, bool autoindex);
 	HttpResponse generateAutoIndex(const std::string &dirPath);
-
 };
 
 #endif

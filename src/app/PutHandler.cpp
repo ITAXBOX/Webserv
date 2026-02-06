@@ -5,7 +5,8 @@ HttpResponse PutHandler::handle(
     const LocationConfig &location)
 {
     std::string rootDir = location.getRoot();
-    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+    if (rootDir.empty())
+        rootDir = DEFAULT_ROOT;
 
     std::string path = buildFilePath(request.getUri(), rootDir, "");
 

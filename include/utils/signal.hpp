@@ -10,7 +10,7 @@ class WebServer;
 // Signal handling utilities
 namespace SignalHandler
 {
-	void setup(WebServer* server);
+	void setup(WebServer *server);
 	void handle(int signum);
 }
 

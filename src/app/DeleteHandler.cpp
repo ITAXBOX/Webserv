@@ -5,7 +5,8 @@ HttpResponse DeleteHandler::handle(
     const LocationConfig &location)
 {
     std::string rootDir = location.getRoot();
-    if (rootDir.empty()) rootDir = DEFAULT_ROOT;
+    if (rootDir.empty())
+        rootDir = DEFAULT_ROOT;
 
     std::string path = buildFilePath(request.getUri(), rootDir, "");
     Logger::info("DELETE request for: " + path);
@@ -25,9 +26,9 @@ HttpResponse DeleteHandler::handle(
 
     HttpResponse res;
     res.setStatus(HTTP_OK, "File deleted")
-       .addHeader("Content-Type", "text/plain")
-       .addHeader("Connection", "close")
-       .setBody("File successfully deleted");
+        .addHeader("Content-Type", "text/plain")
+        .addHeader("Connection", "close")
+        .setBody("File successfully deleted");
 
     return res;
 }

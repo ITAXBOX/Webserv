@@ -144,7 +144,7 @@ int Poller::wait(int timeout_ms)
 	return n;
 }
 
-const std::vector<PollEvent>& Poller::getEvents() const
+const std::vector<PollEvent> &Poller::getEvents() const
 {
 	return _events;
 }
@@ -155,7 +155,7 @@ void Poller::convertEvents(int count)
 
 	for (int i = 0; i < count; i++)
 	{
-		const struct epoll_event& ev = _rawEvents[i];
+		const struct epoll_event &ev = _rawEvents[i];
 		PollEvent pe;
 
 		pe.fd = ev.data.fd;
@@ -169,10 +169,14 @@ void Poller::convertEvents(int count)
 		// Debug log events
 		std::ostringstream os;
 		os << "Event on fd=" << pe.fd << ": ";
-		if (pe.readable) os << "READ ";
-		if (pe.writable) os << "WRITE ";
-		if (pe.error) os << "ERROR ";
-		if (pe.hangup) os << "HANGUP ";
+		if (pe.readable)
+			os << "READ ";
+		if (pe.writable)
+			os << "WRITE ";
+		if (pe.error)
+			os << "ERROR ";
+		if (pe.hangup)
+			os << "HANGUP ";
 		Logger::debug(os.str());
 	}
 }

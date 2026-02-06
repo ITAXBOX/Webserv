@@ -33,7 +33,7 @@ void RequestHandler::cleanup()
 
 HttpResponse RequestHandler::handleRequest(
 	const HttpRequest &request,
-    const LocationConfig &location)
+	const LocationConfig &location)
 {
 	HttpMethod method = request.getMethod();
 	std::string methodStr = request.getMethodString();

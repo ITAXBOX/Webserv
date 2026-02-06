@@ -19,8 +19,8 @@ class HttpRequest
 {
 private:
 	HttpMethod method;
-	std::string uri; // The Uniform Resource Identifier - the path requested
-	std::string version; // 1.1
+	std::string uri;							// The Uniform Resource Identifier - the path requested
+	std::string version;						// 1.1
 	std::map<std::string, std::string> headers; // metadata about the request - like the Host, Content-Type, etc.
 	std::string body;
 	std::map<std::string, std::string> cookies;
@@ -39,9 +39,8 @@ public:
 	HttpMethod getMethod() const;
 	std::string getMethodString() const;
 	std::string getUri() const;
-	std::string getVersion() const;
 	std::string getHeader(const std::string &key) const;
-	const std::map<std::string, std::string>& getHeaders() const;
+	const std::map<std::string, std::string> &getHeaders() const;
 	std::string getBody() const;
 	std::string getCookie(const std::string &key) const;
 

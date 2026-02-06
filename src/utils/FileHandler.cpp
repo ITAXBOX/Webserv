@@ -29,7 +29,7 @@ std::string FileHandler::readFile(const std::string &path)
     std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
     if (!file)
         return "";
-    
+
     std::ostringstream content;
     content << file.rdbuf();
     file.close();

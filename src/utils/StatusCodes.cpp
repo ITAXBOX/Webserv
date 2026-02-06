@@ -23,17 +23,6 @@ void StatusCodes::clearAllErrorPages()
     ErrorPageGenerator::getInstance().clearAllErrorPages();
 }
 
-HttpResponse StatusCodes::createNotFoundResponse()
-{
-    return createErrorResponse(HTTP_NOT_FOUND, "Not Found");
-}
-
-HttpResponse StatusCodes::createServerErrorResponse()
-{
-    return createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error");
-}
-
-
 HttpResponse StatusCodes::createErrorResponse(int code, const std::string &reason)
 {
     std::string body = ErrorPageGenerator::getInstance().getErrorPage(code, reason);

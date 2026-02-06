@@ -28,10 +28,6 @@ public:
 	{
 		return _fd >= 0;
 	}
-	std::string getIp() const
-	{
-		return _ip;
-	}
 	int getPort() const
 	{
 		return _port;

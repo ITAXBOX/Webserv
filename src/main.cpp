@@ -1,4 +1,7 @@
-#include "../include/webserv.hpp"
+#include "core/core.hpp"
+#include "utils/Logger.hpp"
+#include "utils/signal.hpp"
+#include "utils/utils.hpp"
 
 int main(int argc, char **argv)
 {
@@ -17,10 +20,10 @@ int main(int argc, char **argv)
 
 	// Create and initialize WebServer (Facade pattern)
 	WebServer server;
-	
+
 	// Setup signal handlers (Ctrl+C, Ctrl+Z, Ctrl+\)
 	SignalHandler::setup(&server);
-	
+
 	if (!server.init(configFile))
 	{
 		Logger::error("WebServer initialization failed");

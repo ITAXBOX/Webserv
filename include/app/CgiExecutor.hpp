@@ -23,13 +23,13 @@ public:
     ~CgiExecutor();
 
     // Starts CGI process and initializes CgiState pipes
-    void start(const HttpRequest &request, const std::string &scriptPath, const std::string &interpreterPath, CgiState& state);
+    void start(const HttpRequest &request, const std::string &scriptPath, const std::string &interpreterPath, CgiState &state);
 
 private:
     char **createEnvp(const HttpRequest &request, const std::string &scriptPath);
     char **createArgv(const std::string &scriptPath, const std::string &interpreterPath);
     void freeArray(char **array);
-    
+
     std::string _programName; // argv[0]
 };
 

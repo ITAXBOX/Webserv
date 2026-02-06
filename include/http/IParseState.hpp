@@ -96,10 +96,16 @@ public:
 	virtual std::string getName() const { return "ParseChunkedBody"; }
 
 private:
-    enum ChunkState { CHUNK_SIZE, CHUNK_DATA, CHUNK_DATA_CRLF, CHUNK_TRAILERS };
-    ChunkState _state;
-    size_t _chunkSize;
-    size_t _chunkRead;
+	enum ChunkState
+	{
+		CHUNK_SIZE,
+		CHUNK_DATA,
+		CHUNK_DATA_CRLF,
+		CHUNK_TRAILERS
+	};
+	ChunkState _state;
+	size_t _chunkSize;
+	size_t _chunkRead;
 };
 
 // State 4: Parsing complete

@@ -13,14 +13,14 @@ class LocationConfig;
 class ServerConfig
 {
 private:
-	std::string host;						   // IP address to bind to (e.g., "0.0.0.0", "127.0.0.1")
-	int port;								   // Port to listen on (e.g., 8080)
-	std::vector<std::string> serverNames;	   // Server names (e.g., "example.com", "www.example.com")
-	std::string root;						   // Root directory for serving files
-	std::vector<std::string> index;			   // Default index files (e.g., ["index.html", "index.htm"])
-	size_t clientMaxBodySize;				   // Maximum request body size in bytes
-	std::map<int, std::string> errorPages;	   // Custom error pages (status code -> file path)
-	std::vector<LocationConfig> locations;	   // Location blocks for this server
+	std::string host;					   // IP address to bind to (e.g., "0.0.0.0", "127.0.0.1")
+	int port;							   // Port to listen on (e.g., 8080)
+	std::vector<std::string> serverNames;  // Server names (e.g., "example.com", "www.example.com")
+	std::string root;					   // Root directory for serving files
+	std::vector<std::string> index;		   // Default index files (e.g., ["index.html", "index.htm"])
+	size_t clientMaxBodySize;			   // Maximum request body size in bytes
+	std::map<int, std::string> errorPages; // Custom error pages (status code -> file path)
+	std::vector<LocationConfig> locations; // Location blocks for this server
 
 public:
 	ServerConfig();
@@ -45,7 +45,7 @@ public:
 	size_t getClientMaxBodySize() const;
 	std::string getErrorPage(int statusCode) const;
 	const std::vector<LocationConfig> &getLocations() const;
-    const LocationConfig *matchLocation(const std::string &uri) const;
+	const LocationConfig *matchLocation(const std::string &uri) const;
 
 	// Utility
 	void clear();
