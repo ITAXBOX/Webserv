@@ -2,15 +2,16 @@
 #define REQUESTHANDLER_HPP
 
 #include "app/IMethodHandler.hpp"
-#include "app/GetHandler.hpp"
-#include "app/PostHandler.hpp"
-#include "app/PutHandler.hpp"
+#include "app/SessionHandler.hpp"
 #include "app/DeleteHandler.hpp"
+#include "app/PostHandler.hpp"
 #include "app/HeadHandler.hpp"
+#include "app/GetHandler.hpp"
+#include "app/PutHandler.hpp"
 #include "config/LocationConfig.hpp"
-#include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
+#include "utils/Logger.hpp"
 #include <map>
 
 // RequestHandler - Context (Strategy Pattern)
@@ -28,10 +29,6 @@ public:
 	HttpResponse handleRequest(
 		const HttpRequest &request,
 		const LocationConfig &location);
-
-	// Register custom handler for specific HTTP method
-	// Takes ownership of the handler pointer
-	void registerHandler(HttpMethod method, IMethodHandler *handler);
 
 private:
 	// Strategy map: HTTP method -> Handler

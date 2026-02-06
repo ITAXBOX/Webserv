@@ -13,11 +13,6 @@ namespace
     }
 }
 
-void StatusCodes::configureErrorPage(int statusCode, const std::string &filePath)
-{
-    ErrorPageGenerator::getInstance().setErrorPage(statusCode, filePath);
-}
-
 void StatusCodes::clearErrorPage(int statusCode)
 {
     ErrorPageGenerator::getInstance().clearErrorPage(statusCode);
@@ -26,26 +21,6 @@ void StatusCodes::clearErrorPage(int statusCode)
 void StatusCodes::clearAllErrorPages()
 {
     ErrorPageGenerator::getInstance().clearAllErrorPages();
-}
-
-HttpResponse StatusCodes::createOkResponse(const std::string &filePath)
-{
-    if (!FileHandler::fileExists(filePath))
-        return createNotFoundResponse();
-    
-    if (FileHandler::isDirectory(filePath))
-        return createNotFoundResponse();
-    
-    if (!FileHandler::isReadable(filePath))
-        return createErrorResponse(HTTP_FORBIDDEN, "Forbidden");
-
-    std::string body = FileHandler::readFile(filePath);
-    if (body.empty())
-        return createServerErrorResponse();
-    
-    std::string contentType = MimeTypes::getMimeType(filePath);
-         
-    return buildResponse(HTTP_OK, "OK", body, contentType);
 }
 
 HttpResponse StatusCodes::createNotFoundResponse()

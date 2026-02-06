@@ -35,19 +35,6 @@ bool ConfigParser::expect(TokenType type)
 	return true;
 }
 
-bool ConfigParser::expectWord(const std::string &word)
-{
-	Token token = peek();
-	if (token.type != TOKEN_WORD || token.value != word)
-	{
-		std::ostringstream os;
-		os << "Expected '" << word << "' but got '" << token.value << "'";
-		setError(os.str(), token.line);
-		return false;
-	}
-	return true;
-}
-
 void ConfigParser::setError(const std::string &msg, int line)
 {
 	ConfigDirectives::setError(_error, msg, line);

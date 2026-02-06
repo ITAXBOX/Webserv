@@ -31,16 +31,6 @@ void RequestHandler::cleanup()
 	handlers.clear();
 }
 
-void RequestHandler::registerHandler(HttpMethod method, IMethodHandler *handler)
-{
-	// If handler already exists for this method, delete it first
-	if (handlers.count(method))
-		delete handlers[method];
-
-	handlers[method] = handler;
-	Logger::debug("Registered custom handler for method: " + toString(static_cast<int>(method)));
-}
-
 HttpResponse RequestHandler::handleRequest(
 	const HttpRequest &request,
     const LocationConfig &location)

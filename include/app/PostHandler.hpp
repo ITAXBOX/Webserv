@@ -2,11 +2,7 @@
 #define POSTHANDLER_HPP
 
 #include "app/BaseMethodHandler.hpp"
-#include "app/CgiExecutor.hpp"
-#include "utils/StatusCodes.hpp"
 #include "utils/FileHandler.hpp"
-#include "utils/defines.hpp"
-#include "utils/Logger.hpp"
 #include "utils/utils.hpp"
 #include <fstream>
 #include <sstream>

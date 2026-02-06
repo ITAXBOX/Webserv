@@ -2,9 +2,6 @@
 #define PUTHANDLER_HPP
 
 #include "app/IMethodHandler.hpp"
-#include "app/SessionHandler.hpp"
-#include "app/HeadHandler.hpp"
-#include "app/PutHandler.hpp"
 #include "utils/FileHandler.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"

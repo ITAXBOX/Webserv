@@ -23,7 +23,6 @@ private:
 	Token peek() const;					// Look at current token without consuming
 	Token advance();					// Consume and return current token
 	bool expect(TokenType type);		// Check if current token matches type
-	bool expectWord(const std::string &word); // Check if current token is specific word
 	
 	// Parsing methods
 	bool parseServer();					// Parse a server block
