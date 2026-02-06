@@ -1,6 +1,7 @@
 #include "app/SessionHandler.hpp"
 #include "utils/SessionManager.hpp"
 #include "utils/Logger.hpp"
+#include "utils/defines.hpp"
 #include <iostream>
 
 SessionHandler::SessionHandler()
@@ -131,7 +132,7 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
     body += "</div>"; // End card-grid
     body += "</div></body></html>";
     
-    response.setStatus(200, "OK");
+    response.setStatus(HTTP_OK, "OK");
     response.setBody(body);
     response.addHeader("Content-Type", "text/html");
 

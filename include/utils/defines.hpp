@@ -8,7 +8,6 @@
 // 2xx Success
 #define HTTP_OK 200
 #define HTTP_CREATED 201
-#define HTTP_NO_CONTENT 204
 
 // 4xx Client Errors
 #define HTTP_BAD_REQUEST 400
@@ -19,6 +18,7 @@
 
 // 5xx Server Errors
 #define HTTP_INTERNAL_SERVER_ERROR 500
+#define HTTP_BAD_GATEWAY 502
 
 // ============================================================================
 // Buffer and Limit Constants

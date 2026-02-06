@@ -2,6 +2,7 @@
 #include "app/CgiExecutor.hpp"
 #include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
+#include "utils/defines.hpp"
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/epoll.h> // For EPOLLIN/EPOLLOUT
@@ -36,7 +37,7 @@ void CgiHandler::startCgi(ClientConnection* client, const HttpRequest& request, 
     if (!client->getCgiState().active)
     {
         Logger::error("Failed to start CGI");
-        client->appendToWriteBuffer(StatusCodes::createErrorResponse(500, "CGI Start Failed").build());
+        client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "CGI Start Failed").build());
         client->setState(WRITING);
         // Assuming poller is accessible or we return status to update poller
         // Here we need to update poller outside or pass it in. We passed it in.
@@ -191,12 +192,12 @@ void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection* client, Poller& p
         if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
         {
             Logger::error("CGI process exited with error code");
-            client->appendToWriteBuffer(StatusCodes::createErrorResponse(502, "Bad Gateway").build());
+            client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_BAD_GATEWAY, "Bad Gateway").build());
         }
         else if (WIFSIGNALED(status))
         {
             Logger::error("CGI process killed by signal");
-            client->appendToWriteBuffer(StatusCodes::createErrorResponse(500, "Internal Server Error").build());
+            client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error").build());
         }
         else
         {
@@ -214,7 +215,7 @@ void CgiHandler::processCgiResponse(ClientConnection* client)
 {
     CgiState &state = client->getCgiState();
     HttpResponse response;
-    response.setStatus(200, "OK");
+    response.setStatus(HTTP_OK, "OK");
 
     std::string &raw = state.responseBuffer;
     // Support both CRLF and LF for headers

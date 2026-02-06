@@ -191,7 +191,7 @@ void ConnectionManager::handleRead(int clientFd, Poller& poller)
         std::string msg = "Bad Request";
         if (client->getParser().getErrorMessage() == "Payload Too Large")
         {
-            code = 413;
+            code = HTTP_PAYLOAD_TOO_LARGE;
             msg = "Payload Too Large";
         }
 
