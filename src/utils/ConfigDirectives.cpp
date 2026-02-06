@@ -303,6 +303,21 @@ bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t
 	return expectSemicolon(tokens, pos, error);
 }
 
+bool ConfigDirectives::parseUploadStore(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
+{
+	advance(tokens, pos); // Consume 'upload_store'
+	Token value = advance(tokens, pos);
+	
+	if (value.type != TOKEN_WORD)
+	{
+		setError(error, "Expected path after 'upload_store'", value.line);
+		return false;
+	}
+	
+	location.setUploadStore(value.value);
+	return expectSemicolon(tokens, pos, error);
+}
+
 bool ConfigDirectives::parseCgiAssign(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {
 	advance(tokens, pos); // Consume 'cgi_assign'

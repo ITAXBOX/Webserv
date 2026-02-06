@@ -5,6 +5,7 @@ LocationConfig::LocationConfig()
 	  root(""),
 	  autoindex(false),
 	  clientMaxBodySize(0), // 0 means not set (inherit from server)
+	  uploadStore(""),
 	  redirect(""),
 	  redirectCode(0)
 {
@@ -16,6 +17,7 @@ LocationConfig::LocationConfig(const std::string &p)
 	  root(""),
 	  autoindex(false),
 	  clientMaxBodySize(0), // 0 means not set (inherit from server)
+	  uploadStore(""),
 	  redirect(""),
 	  redirectCode(0)
 {
@@ -68,6 +70,12 @@ LocationConfig &LocationConfig::setClientMaxBodySize(size_t size)
 	return *this;
 }
 
+LocationConfig &LocationConfig::setUploadStore(const std::string &p)
+{
+	uploadStore = p;
+	return *this;
+}
+
 LocationConfig &LocationConfig::addCgiHandler(const std::string &extension, const std::string &interpreterPath)
 {
 	cgiHandlers[extension] = interpreterPath;
@@ -117,6 +125,11 @@ size_t LocationConfig::getClientMaxBodySize() const
 	return clientMaxBodySize;
 }
 
+std::string LocationConfig::getUploadStore() const
+{
+	return uploadStore;
+}
+
 std::string LocationConfig::getCgiPath(const std::string &extension) const
 {
 	std::map<std::string, std::string>::const_iterator it = cgiHandlers.find(extension);
@@ -155,6 +168,7 @@ void LocationConfig::clear()
 	allowedMethods.insert("GET");
 	allowedMethods.insert("HEAD");
 	autoindex = false;
+	uploadStore.clear();
 	cgiHandlers.clear();
 	redirect.clear();
 	redirectCode = 0;

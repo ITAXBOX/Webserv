@@ -159,7 +159,9 @@ HttpResponse PostHandler::handleFileUpload(
 	std::string fileContent = body.substr(fileStart, fileEnd - fileStart - 2); // -2 for \r\n
 
 	// Use configured upload path or default to root/uploads
-	std::string uploadDir = rootDir + "/uploads";
+	std::string uploadDir = location.getUploadStore();
+    if (uploadDir.empty())
+        uploadDir = rootDir + "/uploads";
 
     // Check if directory exists (we are not allowed to mkdir)
     if (!FileHandler::isDirectory(uploadDir))
