@@ -132,7 +132,7 @@ HttpResponse GetHandler::serveFile(const std::string &filePath, bool autoindex)
              return generateAutoIndex(filePath);
         
         Logger::debug("Path is a directory: " + filePath);
-        return StatusCodes::createErrorResponse(HTTP_NOT_FOUND, "Not Found");
+        return StatusCodes::createErrorResponse(HTTP_FORBIDDEN, "Forbidden");
     }
 
     // Check if file is readable

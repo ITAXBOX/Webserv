@@ -300,6 +300,3 @@ std::string PostHandler::generateUploadResponse(
 
 	return html.str();
 }
-
-
-
