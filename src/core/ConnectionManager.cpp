@@ -9,9 +9,7 @@ ConnectionManager::~ConnectionManager()
 {
     // Note: Clients should be cleaned up via closeAllConnections or in destructor
     for (std::map<int, ClientConnection *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
         delete it->second;
-    }
 }
 
 void ConnectionManager::addServerConfig(int serverFd, const ServerConfig &config)
@@ -122,43 +120,31 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
         LocationConfig location;
 
         if (locationPtr)
-        {
             location = *locationPtr;
-        }
         else
-        {
             location = LocationConfig("/");
-        }
 
         // Inherit root if not specified in location
         if (location.getRoot().empty())
-        {
             location.setRoot(config.getRoot());
-        }
 
         // Inherit index if not specified in location
         if (location.getIndex().empty())
         {
             const std::vector<std::string> &serverIndices = config.getIndex();
             for (size_t i = 0; i < serverIndices.size(); ++i)
-            {
                 location.addIndex(serverIndices[i]);
-            }
         }
 
         // Inherit clientMaxBodySize if not specified in location (0 means inherit)
         if (location.getClientMaxBodySize() == 0)
-        {
             location.setClientMaxBodySize(config.getClientMaxBodySize());
-        }
 
         // Delegate to RequestHandler
         HttpResponse response = _requestHandler.handleRequest(request, location);
 
         if (response.isCgi())
-        {
             _cgiHandler.startCgi(client, request, response, poller);
-        }
         else
         {
             // Check if we should close the connection after this response
@@ -254,9 +240,7 @@ void ConnectionManager::handleDisconnect(int fd, Poller &poller)
 
     // Cleanup CGI if active
     if (client->getCgiState().active)
-    {
         _cgiHandler.cleanupCgi(client, poller);
-    }
 
     _clients.erase(fd);
     _clientToServer.erase(fd);
@@ -267,12 +251,8 @@ void ConnectionManager::closeAllConnections(Poller &poller)
 {
     std::vector<int> fds;
     for (std::map<int, ClientConnection *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
         fds.push_back(it->first);
-    }
 
     for (size_t i = 0; i < fds.size(); ++i)
-    {
         handleDisconnect(fds[i], poller);
-    }
 }

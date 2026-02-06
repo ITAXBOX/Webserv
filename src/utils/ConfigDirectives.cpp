@@ -95,11 +95,9 @@ bool ConfigDirectives::parseListen(std::vector<Token> &tokens, size_t &pos, Serv
 			}
 			server.setPort(port);
 		}
+		// Treat as host only (e.g. "localhost" or "127.0.0.1")
 		else
-		{
-			// Treat as host only (e.g. "localhost" or "127.0.0.1")
 			server.setHost(val);
-		}
 	}
 
 	return expectSemicolon(tokens, pos, error);

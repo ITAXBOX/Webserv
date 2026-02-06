@@ -35,9 +35,7 @@ private:
 		const LocationConfig &location);
 
 	// Handle regular form submission
-	HttpResponse handleFormSubmission(
-		const HttpRequest &request,
-		const std::string &rootDir);
+	HttpResponse handleFormSubmission(const HttpRequest &request);
 
 	// Save uploaded file
 	bool saveUploadedFile(

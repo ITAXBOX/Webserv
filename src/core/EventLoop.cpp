@@ -21,9 +21,7 @@ EventLoop::~EventLoop()
 
     // Cleanup servers
     for (std::map<int, ServerSocket *>::iterator it = _servers.begin(); it != _servers.end(); ++it)
-    {
         delete it->second;
-    }
     _servers.clear();
 
     delete _requestHandler;
@@ -90,14 +88,8 @@ void EventLoop::run()
                 if (_connManager.hasClient(ev.fd) && ev.writable)
                     _connManager.handleWrite(ev.fd, _poller);
 
-                if ((ev.error || ev.hangup) && !_connManager.hasClient(ev.fd))
-                {
-                    // Already handled
-                }
-                else if ((ev.error || ev.hangup) && !ev.readable)
-                {
+                if ((ev.error || ev.hangup) && !ev.readable && _connManager.hasClient(ev.fd))
                     _connManager.handleDisconnect(ev.fd, _poller);
-                }
 
                 continue;
             }

@@ -45,7 +45,6 @@ HttpResponse GetHandler::handle(
     // NOTE: normalized URI is used for file lookups, but raw URI with query string is passed to CGI
     std::string safeUri = normalizeUri(uri);
 
-    // Build file path
     // We initially build the path without the index file
     std::string filePath = buildFilePath(safeUri, rootDir, "");
 
@@ -64,9 +63,7 @@ HttpResponse GetHandler::handle(
 
         // If the index file exists, we serve that instead of the directory
         if (FileHandler::fileExists(indexPath))
-        {
             filePath = indexPath;
-        }
         // Otherwise, we keep filePath as the directory path, which will trigger autoindex (if enabled)
         // or a 404/403 in serveFile
     }
@@ -226,7 +223,6 @@ HttpResponse GetHandler::generateAutoIndex(const std::string &dirPath)
         if (pad < 0)
             pad = 0;
         html << std::string(pad, ' ');
-
         html << dateStr << "       " << sizeStr << "\n";
     }
 

@@ -64,7 +64,6 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
                         if (v[i] == '+')
                             v[i] = ' ';
                     // Decode URL percent encoding if needed (basic implementation)
-                    // ...
 
                     params[k] = v;
                 }
@@ -105,15 +104,11 @@ HttpResponse SessionHandler::handle(const HttpRequest &request)
     {
         body += "<ul class='feature-list'>";
         for (std::map<std::string, std::string>::iterator it = session->data.begin(); it != session->data.end(); ++it)
-        {
             body += "<li><strong>" + it->first + ":</strong> " + it->second + "</li>";
-        }
         body += "</ul>";
     }
     else
-    {
         body += "<p style='color: #7f8c8d'>No data stored in this session yet.</p>";
-    }
     body += "</div>";
 
     // Action Card

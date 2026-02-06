@@ -66,9 +66,7 @@ std::string HttpResponse::build() const
 
     // Add cookies
     for (size_t i = 0; i < cookies.size(); i++)
-    {
         response << "Set-Cookie: " << cookies[i] << "\r\n";
-    }
 
     // Empty line between headers and body
     response << "\r\n";

@@ -176,9 +176,7 @@ bool WebServer::setupServers()
 			Logger::info("Server configured: " + host + ":" + toString(port) + " (" + nameList + ")");
 		}
 		else
-		{
 			Logger::info("Server configured: " + host + ":" + toString(port));
-		}
 	}
 
 	return true;

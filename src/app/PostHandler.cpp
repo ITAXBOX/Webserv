@@ -53,7 +53,7 @@ HttpResponse PostHandler::handle(
 
 	// Handle application/x-www-form-urlencoded (regular forms)
 	else if (contentType.find("application/x-www-form-urlencoded") != std::string::npos)
-		return handleFormSubmission(request, rootDir);
+		return handleFormSubmission(request);
 
 	// Unsupported content type
 	else
@@ -63,12 +63,8 @@ HttpResponse PostHandler::handle(
 	}
 }
 
-HttpResponse PostHandler::handleFormSubmission(
-	const HttpRequest &request,
-	const std::string &rootDir)
+HttpResponse PostHandler::handleFormSubmission(const HttpRequest &request)
 {
-	(void)rootDir;
-
 	std::string body = request.getBody();
 	Logger::debug("Form data received: " + body);
 

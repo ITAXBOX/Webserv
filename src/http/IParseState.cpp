@@ -64,10 +64,7 @@ bool ParseRequestLineState::parseRequestLine(HttpParser &parser, const std::stri
 
 	// Validate HTTP version
 	if (version != "HTTP/1.1" && version != "HTTP/1.0")
-	{
-		Logger::warn("Unsupported HTTP version: " + version);
-		// Continue anyway for compatibility
-	}
+		Logger::warn("Unsupported HTTP version: " + version); // Continue anyway for compatibility
 
 	Logger::debug("Request: " + method + " " + uri + " " + version);
 	return true;
@@ -257,9 +254,7 @@ void ParseChunkedBodyState::parse(HttpParser &parser)
 			parser._buffer.erase(0, pos + 2); // Consume line + CRLF
 
 			if (_chunkSize == 0)
-			{
 				_state = CHUNK_TRAILERS;
-			}
 			else
 			{
 				_state = CHUNK_DATA;
@@ -298,9 +293,7 @@ void ParseChunkedBodyState::parse(HttpParser &parser)
 			_chunkRead += toRead;
 
 			if (_chunkRead >= _chunkSize)
-			{
 				_state = CHUNK_DATA_CRLF;
-			}
 		}
 		else if (_state == CHUNK_DATA_CRLF)
 		{

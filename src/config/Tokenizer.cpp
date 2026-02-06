@@ -12,7 +12,7 @@ Tokenizer::~Tokenizer()
 Token Tokenizer::readWord()
 {
 	size_t start = _pos;
-	while (_pos < _input.length() && ::isWordChar(_input[_pos]))
+	while (_pos < _input.length() && isWordChar(_input[_pos]))
 		_pos++;
 
 	std::string value = _input.substr(start, _pos - start);
@@ -24,12 +24,12 @@ Token Tokenizer::readToken()
 {
 	while (true)
 	{
-		::skipWhitespace(_input, _pos, _line);
+		skipWhitespace(_input, _pos, _line);
 
 		// Check for comment
 		if (_pos < _input.length() && _input[_pos] == '#')
 		{
-			::skipComment(_input, _pos);
+			skipComment(_input, _pos);
 			continue; // Loop back to skip more whitespace
 		}
 
@@ -60,7 +60,7 @@ Token Tokenizer::readToken()
 	}
 
 	// Word token (identifier, keyword, value)
-	if (::isWordChar(c))
+	if (isWordChar(c))
 		return readWord();
 
 	// Unknown character - error

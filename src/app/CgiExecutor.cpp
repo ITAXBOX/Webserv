@@ -24,8 +24,6 @@ void CgiExecutor::start(const HttpRequest &request, const std::string &scriptPat
 
     if (pid == 0)
     {
-        // Child Process
-
         // Close unused ends (Parent's ends)
         close(state.pipeIn[1]);  // Parent writes to this
         close(state.pipeOut[0]); // Parent reads from this
@@ -61,7 +59,6 @@ void CgiExecutor::start(const HttpRequest &request, const std::string &scriptPat
     }
     else
     {
-        // Parent Process
         state.pid = pid;
         state.active = true;
         state.requestBody = request.getBody();

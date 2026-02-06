@@ -247,9 +247,7 @@ bool ConfigParser::parse(const std::vector<Token> &tokens)
 				return false;
 		}
 		else if (token.type == TOKEN_EOF)
-		{
 			break;
-		}
 		else
 		{
 			setError("Expected 'server' directive at top level", token.line);

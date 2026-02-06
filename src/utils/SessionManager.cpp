@@ -23,9 +23,7 @@ std::string SessionManager::generateSessionId()
 
     std::string id;
     for (int i = 0; i < 32; ++i)
-    {
         id += alphanum[std::rand() % (sizeof(alphanum) - 1)];
-    }
     return id;
 }
 
@@ -73,7 +71,5 @@ void SessionManager::setSessionData(const std::string &id, const std::string &ke
 {
     Session *session = getSession(id);
     if (session)
-    {
         session->data[key] = value;
-    }
 }

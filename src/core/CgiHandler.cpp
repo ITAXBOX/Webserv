@@ -49,9 +49,7 @@ void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, 
             return;
         }
         else
-        {
             _pipeToClient[state.pipeIn[1]] = clientFd;
-        }
     }
 
     // Register pipeOut[0] for Reading (reading response from child)
@@ -64,9 +62,7 @@ void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, 
             return;
         }
         else
-        {
             _pipeToClient[state.pipeOut[0]] = clientFd;
-        }
     }
 
     client->setState(CGI_ACTIVE);
@@ -109,14 +105,9 @@ void CgiHandler::handleCgiRead(int pipeFd, ClientConnection *client, Poller &pol
     ssize_t bytes = read(pipeFd, buffer, sizeof(buffer));
 
     if (bytes > 0)
-    {
         state.responseBuffer.append(buffer, bytes);
-    }
     else
-    {
-        // EOF or Error
         handleCgiHangup(pipeFd, client, poller);
-    }
 }
 
 void CgiHandler::handleCgiWrite(int pipeFd, ClientConnection *client, Poller &poller)
@@ -131,9 +122,7 @@ void CgiHandler::handleCgiWrite(int pipeFd, ClientConnection *client, Poller &po
     {
         ssize_t bytes = write(pipeFd, body.c_str(), body.size());
         if (bytes > 0)
-        {
             state.requestBody.erase(0, bytes);
-        }
     }
 
     if (state.requestBody.empty())
@@ -214,16 +203,12 @@ void CgiHandler::processCgiResponse(ClientConnection *client)
     size_t bodyStart = 0;
 
     if (headerEnd != std::string::npos)
-    {
         bodyStart = headerEnd + 4;
-    }
     else
     {
         headerEnd = raw.find("\n\n");
         if (headerEnd != std::string::npos)
-        {
             bodyStart = headerEnd + 2;
-        }
     }
 
     if (headerEnd != std::string::npos)
@@ -256,9 +241,7 @@ void CgiHandler::processCgiResponse(ClientConnection *client)
                         response.setStatus(std::atoi(val.c_str()), "OK");
                 }
                 else
-                {
                     response.addHeader(key, val);
-                }
             }
         }
         response.setBody(body);

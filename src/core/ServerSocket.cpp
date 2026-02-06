@@ -86,7 +86,7 @@ bool ServerSocket::init(const std::string &ip, int port, int backlog)
 bool ServerSocket::createSocket()
 {
 	// AF_INET: IPv4, SOCK_STREAM: TCP, 0: default protocol (TCP for SOCK_STREAM)
-	_fd = ::socket(AF_INET, SOCK_STREAM, 0);
+	_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_fd < 0)
 	{
 		Logger::error(std::string("socket() failed: ") + std::strerror(errno));
@@ -103,7 +103,7 @@ bool ServerSocket::applySocketOptions()
 	// SO_REUSEADDR: The specific option to enable. It allows the socket to bind to a port that is still in TIME_WAIT from a previous run.
 	// &yes: A pointer to the value enabling the option (integer 1).
 	// sizeof(yes): The length of the option value data.
-	if (::setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
+	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0)
 	{
 		Logger::error(std::string("setsockopt(SO_REUSEADDR) failed: ") + std::strerror(errno));
 		return false;
@@ -133,7 +133,7 @@ bool ServerSocket::buildSockAddr(const std::string &ip, int port, struct sockadd
 	else
 	{
 		// inet_addr: Convert IPv4 address from string to binary form
-		unsigned long a = ::inet_addr(ip.c_str());
+		unsigned long a = inet_addr(ip.c_str());
 		// INADDR_NONE indicates invalid address
 		if (a == INADDR_NONE)
 		{
@@ -152,7 +152,7 @@ bool ServerSocket::bindSocket(const struct sockaddr_in &addr)
 	// reinterpret_cast<const struct sockaddr *>(&addr) is used for this purpose
 	// it tells the compiler to treat the pointer to sockaddr_in as a pointer to sockaddr
 	// dynamically converting the type without changing the actual data
-	if (::bind(_fd, reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) < 0)
+	if (bind(_fd, reinterpret_cast<const struct sockaddr *>(&addr), sizeof(addr)) < 0)
 	{
 		std::ostringstream os;
 		os << "bind(" << (_ip.empty() ? "0.0.0.0" : _ip) << ":" << _port
@@ -167,7 +167,7 @@ bool ServerSocket::startListening(int backlog)
 {
 	// listen for incoming connections on the socket
 	// backlog specifies the maximum number of pending connections
-	if (::listen(_fd, backlog) < 0)
+	if (listen(_fd, backlog) < 0)
 	{
 		Logger::error(std::string("listen() failed: ") + std::strerror(errno));
 		return false;
@@ -178,7 +178,7 @@ bool ServerSocket::startListening(int backlog)
 void ServerSocket::closeAndReset()
 {
 	if (_fd >= 0)
-		::close(_fd);
+		close(_fd);
 	_fd = -1;
 }
 
@@ -201,7 +201,7 @@ int ServerSocket::acceptClient()
 	// accept a new client connection
 	// sockaddr_in is cast to sockaddr for the accept function
 	// reinterpret_cast<struct sockaddr *>(&cli) is used for this purpose
-	int cfd = ::accept(_fd, reinterpret_cast<struct sockaddr *>(&cli), &len);
+	int cfd = accept(_fd, reinterpret_cast<struct sockaddr *>(&cli), &len);
 	if (cfd < 0)
 	{
 		// EAGAIN or EWOULDBLOCK means no pending connections (non-blocking mode)
@@ -215,7 +215,7 @@ int ServerSocket::acceptClient()
 	// Make client non-blocking too
 	if (!setNonBlocking(cfd))
 	{
-		::close(cfd);
+		close(cfd);
 		return -1;
 	}
 	return cfd;
