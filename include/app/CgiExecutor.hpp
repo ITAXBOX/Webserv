@@ -1,8 +1,17 @@
 #ifndef CGIEXECUTOR_HPP
 #define CGIEXECUTOR_HPP
 
-#include "http/HttpRequest.hpp"
 #include "core/CgiState.hpp"
+#include "http/HttpRequest.hpp"
+#include "utils/defines.hpp"
+#include "utils/Logger.hpp"
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <map>

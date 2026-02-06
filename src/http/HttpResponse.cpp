@@ -1,6 +1,4 @@
 #include "http/HttpResponse.hpp"
-#include "utils/defines.hpp"
-#include <sstream>
 
 HttpResponse::HttpResponse()
     : statusCode(HTTP_OK), version("HTTP/1.1"), reasonPhrase("OK"), body(""), 

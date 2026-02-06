@@ -7,15 +7,6 @@
 // In C (and by extension C++), a socket is just a number you read from and write to,
 // like a file, but it connects over a network.
 #include "core/ServerSocket.hpp"
-#include "utils/Logger.hpp"
-
-#include <cerrno>
-#include <cstring>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 ServerSocket::ServerSocket()
 	: _fd(-1), _ip(""), _port(-1)

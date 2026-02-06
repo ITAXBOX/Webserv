@@ -1,7 +1,4 @@
 #include "utils/signal.hpp"
-#include "core/core.hpp"
-#include "utils/Logger.hpp"
-#include <csignal>
 
 namespace SignalHandler
 {

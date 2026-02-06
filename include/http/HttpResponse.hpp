@@ -1,9 +1,11 @@
 #ifndef HTTPRESPONSE_HPP
 #define HTTPRESPONSE_HPP
 
+#include "utils/defines.hpp"
+#include <sstream>
 #include <string>
-#include <map>
 #include <vector>
+#include <map>
 
 class HttpResponse
 {

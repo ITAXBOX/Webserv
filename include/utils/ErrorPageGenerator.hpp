@@ -1,6 +1,8 @@
 #ifndef ERRORPAGEGENERATOR_HPP
 #define ERRORPAGEGENERATOR_HPP
 
+#include "utils/FileHandler.hpp"
+#include <sstream>
 #include <string>
 #include <map>
 

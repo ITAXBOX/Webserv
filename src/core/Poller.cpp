@@ -1,9 +1,4 @@
 #include "core/Poller.hpp"
-#include "utils/Logger.hpp"
-#include <unistd.h>
-#include <cstring>
-#include <cerrno>
-#include <sstream>
 
 // epoll is Linux-specific and much more efficient than poll()
 // It uses a red-black tree internally for O(1) operations

@@ -1,8 +1,9 @@
 #ifndef SERVERCONFIG_HPP
 #define SERVERCONFIG_HPP
 
-#include <map>
 #include "config/LocationConfig.hpp"
+#include "utils/defines.hpp"
+#include <map>
 
 // Forward declaration
 class LocationConfig;

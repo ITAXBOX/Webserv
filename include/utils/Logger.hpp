@@ -1,8 +1,12 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <string>
+#include <iostream>
+#include <cstring>
 #include <sstream>
+#include <cerrno>
+#include <string>
+#include <ctime>
 
 class Logger
 {

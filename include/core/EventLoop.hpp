@@ -1,17 +1,27 @@
 #ifndef EVENTLOOP_HPP
 #define EVENTLOOP_HPP
 
-#include <signal.h>
-#include <map>
-#include "core/Poller.hpp"
-#include "core/ServerSocket.hpp"
-#include "core/ClientConnection.hpp"
-#include "core/ConnectionManager.hpp"
-#include "core/CgiHandler.hpp"
-#include "http/HttpRequest.hpp"
-#include "http/HttpResponse.hpp"
-
 #include "config/ServerConfig.hpp"
+#include "app/RequestHandler.hpp"
+#include "core/Poller.hpp"
+#include "core/ConnectionManager.hpp"
+#include "core/ClientConnection.hpp"
+#include "core/ServerSocket.hpp"
+#include "http/HttpRequest.hpp"
+#include "core/CgiHandler.hpp"
+#include "http/HttpResponse.hpp"
+#include "utils/StatusCodes.hpp"
+#include "utils/defines.hpp"
+#include "utils/Logger.hpp"
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <cstring>
+#include <cerrno>
+#include <map>
 
 // Forward declaration to avoid circular dependency
 class RequestHandler;
@@ -35,4 +45,4 @@ public:
     void stop();
 };
 
-#endif // EVENTLOOP_HPP
+#endif

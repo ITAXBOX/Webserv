@@ -1,7 +1,4 @@
 #include "config/ConfigParser.hpp"
-#include "utils/ConfigDirectives.hpp"
-#include "utils/Logger.hpp"
-#include <sstream>
 
 ConfigParser::ConfigParser() : _pos(0), _error("")
 {

@@ -1,8 +1,11 @@
 #ifndef CONFIGPARSER_HPP
 #define CONFIGPARSER_HPP
 
-#include "config/Token.hpp"
+#include "utils/ConfigDirectives.hpp"
+#include "utils/Logger.hpp"
 #include "config/ServerConfig.hpp"
+#include "config/Token.hpp"
+#include <sstream>
 #include <vector>
 #include <string>
 

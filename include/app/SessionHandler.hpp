@@ -3,6 +3,10 @@
 
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
+#include "utils/SessionManager.hpp"
+#include "utils/defines.hpp"
+#include "utils/Logger.hpp"
+#include <iostream>
 
 class ClientConnection;
 

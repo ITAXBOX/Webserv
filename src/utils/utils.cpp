@@ -1,8 +1,4 @@
 #include "utils/utils.hpp"
-#include "utils/Logger.hpp"
-#include "utils/FileHandler.hpp"
-#include <cctype>
-#include <sys/stat.h>
 
 // ============================================================================
 // Webserv Startup Print

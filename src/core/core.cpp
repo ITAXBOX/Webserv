@@ -1,14 +1,4 @@
 #include "core/core.hpp"
-#include "core/EventLoop.hpp"
-#include "core/ServerSocket.hpp"
-#include "config/Tokenizer.hpp"
-#include "config/ConfigParser.hpp"
-#include "utils/MimeTypes.hpp"
-#include "utils/Logger.hpp"
-#include "utils/utils.hpp"
-#include "utils/defines.hpp"
-#include <csignal>
-#include <fstream>
 
 WebServer::WebServer()
 	: _eventLoop(NULL), _configFile(""), _initialized(false)

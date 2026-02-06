@@ -1,6 +1,4 @@
 #include "utils/ErrorPageGenerator.hpp"
-#include "utils/FileHandler.hpp"
-#include <sstream>
 
 ErrorPageGenerator &ErrorPageGenerator::getInstance()
 {

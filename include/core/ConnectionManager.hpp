@@ -1,13 +1,20 @@
 #ifndef CONNECTIONMANAGER_HPP
 #define CONNECTIONMANAGER_HPP
 
-#include <map>
+#include "app/RequestHandler.hpp"
+#include "config/ServerConfig.hpp"
 #include "core/ClientConnection.hpp"
 #include "core/ServerSocket.hpp"
-#include "config/ServerConfig.hpp"
-#include "core/Poller.hpp"
 #include "core/CgiHandler.hpp"
-#include "app/RequestHandler.hpp"
+#include "core/Poller.hpp"
+#include "utils/Logger.hpp"
+#include "utils/StatusCodes.hpp"
+#include <sys/socket.h>
+#include <unistd.h>
+#include <cstring>
+#include <cerrno>
+#include <sstream>
+#include <map>
 
 class ConnectionManager
 {

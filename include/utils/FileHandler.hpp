@@ -1,6 +1,9 @@
 #ifndef FILEHANDLER_HPP
 #define FILEHANDLER_HPP
 
+#include <sys/stat.h>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <ctime>
 

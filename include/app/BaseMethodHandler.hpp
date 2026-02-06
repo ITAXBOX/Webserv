@@ -3,11 +3,12 @@
 
 #include "app/IMethodHandler.hpp"
 #include "app/CgiExecutor.hpp"
-#include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
 #include "utils/defines.hpp"
-#include <string>
+#include "utils/Logger.hpp"
+#include <cstdlib>
 #include <sstream>
+#include <string>
 
 class BaseMethodHandler : public IMethodHandler
 {

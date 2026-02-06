@@ -1,16 +1,4 @@
 #include "core/EventLoop.hpp"
-#include "utils/Logger.hpp"
-#include "utils/defines.hpp"
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-#include <cstring>
-#include <cerrno>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include "http/HttpResponse.hpp"
-#include "utils/StatusCodes.hpp"
-#include "app/RequestHandler.hpp"
 
 EventLoop::EventLoop()
     : _running(true), 

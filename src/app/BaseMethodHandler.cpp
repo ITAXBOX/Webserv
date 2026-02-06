@@ -1,5 +1,4 @@
 #include "app/BaseMethodHandler.hpp"
-#include <cstdlib>
 
 bool BaseMethodHandler::isCgiRequest(const std::string &path, const LocationConfig &config)
 {

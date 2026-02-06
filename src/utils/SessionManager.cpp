@@ -1,7 +1,4 @@
 #include "utils/SessionManager.hpp"
-#include "utils/Logger.hpp"
-#include <cstdlib>
-#include <sstream>
 
 SessionManager *SessionManager::_instance = NULL;
 

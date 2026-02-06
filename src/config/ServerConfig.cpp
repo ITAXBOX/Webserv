@@ -1,5 +1,4 @@
 #include "config/ServerConfig.hpp"
-#include "utils/defines.hpp"
 
 ServerConfig::ServerConfig()
 	: host(DEFAULT_HOST),			// Listen on all interfaces by default

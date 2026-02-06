@@ -1,10 +1,14 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <iostream>
-#include <string>
-#include <sstream>
 #include "http/HttpRequest.hpp"
+#include "utils/FileHandler.hpp"
+#include "utils/Logger.hpp"
+#include <sys/stat.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <cctype>
 
 void printWebservStartup();
 

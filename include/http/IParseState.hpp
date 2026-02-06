@@ -1,6 +1,11 @@
 #ifndef IPARSESTATE_HPP
 #define IPARSESTATE_HPP
 
+#include "http/HttpParser.hpp"
+#include "utils/Logger.hpp"
+#include "utils/utils.hpp"
+#include <sstream>
+#include <cstdlib>
 #include <string>
 
 // Forward declaration

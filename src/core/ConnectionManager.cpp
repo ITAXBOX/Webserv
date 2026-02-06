@@ -1,11 +1,4 @@
 #include "core/ConnectionManager.hpp"
-#include "utils/Logger.hpp"
-#include "utils/StatusCodes.hpp"
-#include <unistd.h>
-#include <sys/socket.h>
-#include <cstring>
-#include <cerrno>
-#include <sstream>
 
 ConnectionManager::ConnectionManager(RequestHandler& requestHandler, CgiHandler& cgiHandler)
     : _requestHandler(requestHandler), _cgiHandler(cgiHandler)

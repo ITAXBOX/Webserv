@@ -4,8 +4,12 @@
 #include "config/Token.hpp"
 #include "config/ServerConfig.hpp"
 #include "config/LocationConfig.hpp"
+#include "utils/Logger.hpp"
+#include <sstream>
+#include <cstdlib>
 #include <string>
 #include <vector>
+#include <cctype>
 
 // Helper class for parsing config directives
 // Separates parsing logic from the main ConfigParser

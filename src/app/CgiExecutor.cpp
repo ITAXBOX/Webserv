@@ -1,13 +1,4 @@
 #include "app/CgiExecutor.hpp"
-#include "utils/Logger.hpp"
-#include "utils/defines.hpp"
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sstream>
-#include <iostream>
 
 CgiExecutor::CgiExecutor() {}
 

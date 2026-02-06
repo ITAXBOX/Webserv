@@ -1,7 +1,15 @@
 #ifndef SERVERSOCKET_HPP
 #define SERVERSOCKET_HPP
 
+#include "utils/Logger.hpp"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <cstring>
 #include <string>
+#include <cerrno>
 
 class ServerSocket
 {

@@ -1,10 +1,4 @@
 #include "app/GetHandler.hpp"
-#include "app/CgiExecutor.hpp"
-#include <sstream>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <ctime>
-#include <iomanip>
 
 HttpResponse GetHandler::handle(
     const HttpRequest &request,

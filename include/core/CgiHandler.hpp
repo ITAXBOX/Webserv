@@ -1,10 +1,19 @@
 #ifndef CGIHANDLER_HPP
 #define CGIHANDLER_HPP
 
+#include "app/CgiExecutor.hpp"
 #include "core/ClientConnection.hpp"
 #include "core/Poller.hpp"
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
+#include "utils/Logger.hpp"
+#include "utils/StatusCodes.hpp"
+#include "utils/defines.hpp"
+#include <sys/wait.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <sstream>
+#include <cstdlib>
 #include <map>
 
 class CgiHandler

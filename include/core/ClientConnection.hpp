@@ -3,6 +3,8 @@
 
 #include "http/HttpParser.hpp"
 #include "core/CgiState.hpp"
+#include "utils/Logger.hpp"
+#include <unistd.h>
 
 enum ConnState { READING, WRITING, CLOSED, CGI_ACTIVE };
 

@@ -1,7 +1,4 @@
 #include "http/HttpParser.hpp"
-#include "http/IParseState.hpp"
-#include "utils/Logger.hpp"
-#include "utils/defines.hpp"
 
 HttpParser::HttpParser()
 	: _currentState(new ParseRequestLineState()),

@@ -1,7 +1,4 @@
 #include "app/RequestHandler.hpp"
-#include "app/PutHandler.hpp"
-#include "app/HeadHandler.hpp"
-#include "app/SessionHandler.hpp" // Added include
 
 RequestHandler::RequestHandler()
 {

@@ -1,8 +1,13 @@
 #ifndef POLLER_HPP
 #define POLLER_HPP
 
-#include <vector>
+#include "utils/Logger.hpp"
 #include <sys/epoll.h>
+#include <unistd.h>
+#include <cstring>
+#include <sstream>
+#include <vector>
+#include <cerrno>
 
 // Simple event structure - what happened on which fd
 struct PollEvent

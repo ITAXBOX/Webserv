@@ -1,9 +1,12 @@
 #ifndef SESSIONMANAGER_HPP
 #define SESSIONMANAGER_HPP
 
+#include "utils/Logger.hpp"
+#include <cstdlib>
+#include <sstream>
 #include <string>
-#include <map>
 #include <ctime>
+#include <map>
 
 // Simple session storage
 struct Session

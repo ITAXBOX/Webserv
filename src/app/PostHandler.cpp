@@ -1,7 +1,4 @@
 #include "app/PostHandler.hpp"
-#include "app/CgiExecutor.hpp"
-#include "utils/FileHandler.hpp"
-#include <sstream>
 
 HttpResponse PostHandler::handle(
 	const HttpRequest &request,

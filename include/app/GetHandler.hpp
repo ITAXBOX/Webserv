@@ -2,12 +2,18 @@
 #define GETHANDLER_HPP
 
 #include "app/BaseMethodHandler.hpp"
+#include "app/CgiExecutor.hpp"
 #include "utils/FileHandler.hpp"
-#include "utils/Logger.hpp"
 #include "utils/StatusCodes.hpp"
-#include "utils/utils.hpp"
-#include "utils/defines.hpp"
 #include "utils/MimeTypes.hpp"
+#include "utils/defines.hpp"
+#include "utils/Logger.hpp"
+#include "utils/utils.hpp"
+#include <sys/stat.h>
+#include <dirent.h>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
 
 // GetHandler - Strategy for handling HTTP GET requests
 // Serves static files (HTML, CSS, images, etc.)

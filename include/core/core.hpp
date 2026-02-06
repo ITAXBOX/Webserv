@@ -2,6 +2,16 @@
 #define CORE_HPP
 
 #include "config/ServerConfig.hpp"
+#include "config/ConfigParser.hpp"
+#include "config/Tokenizer.hpp"
+#include "core/EventLoop.hpp"
+#include "core/ServerSocket.hpp"
+#include "utils/MimeTypes.hpp"
+#include "utils/Logger.hpp"
+#include "utils/utils.hpp"
+#include "utils/defines.hpp"
+#include <csignal>
+#include <fstream>
 
 class EventLoop;
 class ServerSocket;

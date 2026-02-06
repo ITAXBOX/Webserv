@@ -1,8 +1,4 @@
 #include "app/SessionHandler.hpp"
-#include "utils/SessionManager.hpp"
-#include "utils/Logger.hpp"
-#include "utils/defines.hpp"
-#include <iostream>
 
 SessionHandler::SessionHandler()
 {

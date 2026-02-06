@@ -2,6 +2,12 @@
 #define STATUSCODES_HPP
 
 #include "http/HttpResponse.hpp"
+#include "utils/ErrorPageGenerator.hpp"
+#include "utils/FileHandler.hpp"
+#include "utils/MimeTypes.hpp"
+#include "utils/defines.hpp"
+#include "utils/utils.hpp"
+#include <sstream>
 
 class StatusCodes
 {

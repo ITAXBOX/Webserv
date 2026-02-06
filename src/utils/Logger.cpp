@@ -1,9 +1,4 @@
 #include "utils/Logger.hpp"
-#include <iostream>
-#include <ctime>
-#include <sstream>
-#include <cstring>
-#include <cerrno>
 
 // if LOGGER_DEBUG macro is defined in the build, set default log level to DEBUG, else INFO
 Logger::Level Logger::s_minLevel =

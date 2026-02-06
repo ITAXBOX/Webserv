@@ -1,13 +1,4 @@
 #include "core/CgiHandler.hpp"
-#include "app/CgiExecutor.hpp"
-#include "utils/Logger.hpp"
-#include "utils/StatusCodes.hpp"
-#include "utils/defines.hpp"
-#include <unistd.h>
-#include <sys/wait.h>
-#include <sys/epoll.h> // For EPOLLIN/EPOLLOUT
-#include <sstream>
-#include <cstdlib>
 
 CgiHandler::CgiHandler() {}
 
