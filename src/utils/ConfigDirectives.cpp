@@ -287,7 +287,21 @@ bool ConfigDirectives::parseAutoindex(std::vector<Token> &tokens, size_t &pos, L
 	location.setAutoindex(enabled);
 	return expectSemicolon(tokens, pos, error);
 }
-
+bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
+{
+	advance(tokens, pos); // Consume 'client_max_body_size'
+	Token value = advance(tokens, pos);
+	
+	if (value.type != TOKEN_WORD)
+	{
+		setError(error, "Expected size after 'client_max_body_size'", value.line);
+		return false;
+	}
+	
+	size_t size = std::atol(value.value.c_str());
+	location.setClientMaxBodySize(size);
+	return expectSemicolon(tokens, pos, error);
+}
 bool ConfigDirectives::parseUploadPath(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {
 	advance(tokens, pos); // Consume 'upload_path'

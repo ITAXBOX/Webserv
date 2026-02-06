@@ -4,6 +4,7 @@ LocationConfig::LocationConfig()
 	: path("/"),
 	  root(""),
 	  autoindex(false),
+	  clientMaxBodySize(0), // 0 means not set (inherit from server)
 	  uploadPath(""),
 	  redirect(""),
 	  redirectCode(0)
@@ -15,6 +16,7 @@ LocationConfig::LocationConfig(const std::string &p)
 	: path(p),
 	  root(""),
 	  autoindex(false),
+	  clientMaxBodySize(0), // 0 means not set (inherit from server)
 	  uploadPath(""),
 	  redirect(""),
 	  redirectCode(0)
@@ -59,6 +61,12 @@ LocationConfig &LocationConfig::addAllowedMethod(const std::string &method)
 LocationConfig &LocationConfig::setAutoindex(bool enabled)
 {
 	autoindex = enabled;
+	return *this;
+}
+
+LocationConfig &LocationConfig::setClientMaxBodySize(size_t size)
+{
+	clientMaxBodySize = size;
 	return *this;
 }
 
@@ -110,6 +118,11 @@ bool LocationConfig::isMethodAllowed(const std::string &method) const
 bool LocationConfig::getAutoindex() const
 {
 	return autoindex;
+}
+
+size_t LocationConfig::getClientMaxBodySize() const
+{
+	return clientMaxBodySize;
 }
 
 std::string LocationConfig::getUploadPath() const

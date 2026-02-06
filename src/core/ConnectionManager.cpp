@@ -46,7 +46,20 @@ void ConnectionManager::acceptNewConnection(int serverFd, ServerSocket* server, 
 
     size_t maxBodySize = MAX_BODY_SIZE;
     if (_serverConfigs.find(serverFd) != _serverConfigs.end())
-        maxBodySize = _serverConfigs[serverFd].getClientMaxBodySize();
+    {
+        const ServerConfig &config = _serverConfigs[serverFd];
+        maxBodySize = config.getClientMaxBodySize();
+
+        // Check loops for all locations to find the largest body size allowed
+        // This ensures the parser doesn't reject a large request that might be valid for a specific location
+        const std::vector<LocationConfig> &locations = config.getLocations();
+        for (size_t i = 0; i < locations.size(); ++i)
+        {
+            size_t locSize = locations[i].getClientMaxBodySize();
+            if (locSize > maxBodySize)
+                maxBodySize = locSize;
+        }
+    }
 
     ClientConnection* client = new ClientConnection(clientFd, maxBodySize);
     _clients[clientFd] = client;
@@ -138,6 +151,12 @@ void ConnectionManager::handleRead(int clientFd, Poller& poller)
             {
                 location.addIndex(serverIndices[i]);
             }
+        }
+
+        // Inherit clientMaxBodySize if not specified in location (0 means inherit)
+        if (location.getClientMaxBodySize() == 0)
+        {
+            location.setClientMaxBodySize(config.getClientMaxBodySize());
         }
 
         // Delegate to RequestHandler

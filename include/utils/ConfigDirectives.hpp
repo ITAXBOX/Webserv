@@ -26,6 +26,7 @@ public:
 	static bool parseLocationRoot(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);
 	static bool parseLocationIndex(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);
 	static bool parseAutoindex(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);
+	static bool parseClientMaxBodySize(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);
 	static bool parseUploadPath(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);
 	static bool parseCgiAssign(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);
 	static bool parseReturn(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error);

@@ -60,6 +60,14 @@ HttpResponse RequestHandler::handleRequest(
 		return handler.handle(request);
 	}
 
+	// Check client_max_body_size for this location
+	size_t maxBodySize = location.getClientMaxBodySize();
+	if (maxBodySize > 0 && request.getBody().size() > maxBodySize)
+	{
+		Logger::warn("Body size exceeds location limit: " + toString(request.getBody().size()) + " > " + toString(maxBodySize));
+		return StatusCodes::createErrorResponse(HTTP_PAYLOAD_TOO_LARGE, "Payload Too Large");
+	}
+
 	// Check if method is allowed in this location
 	if (!location.isMethodAllowed(methodStr))
 	{
