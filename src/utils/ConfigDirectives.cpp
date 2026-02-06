@@ -302,20 +302,6 @@ bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t
 	location.setClientMaxBodySize(size);
 	return expectSemicolon(tokens, pos, error);
 }
-bool ConfigDirectives::parseUploadPath(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
-{
-	advance(tokens, pos); // Consume 'upload_path'
-	Token value = advance(tokens, pos);
-	
-	if (value.type != TOKEN_WORD)
-	{
-		setError(error, "Expected path after 'upload_path'", value.line);
-		return false;
-	}
-	
-	location.setUploadPath(value.value);
-	return expectSemicolon(tokens, pos, error);
-}
 
 bool ConfigDirectives::parseCgiAssign(std::vector<Token> &tokens, size_t &pos, LocationConfig &location, std::string &error)
 {

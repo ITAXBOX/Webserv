@@ -17,7 +17,6 @@ private:
 	std::set<std::string> allowedMethods;	 // Allowed HTTP methods (GET, POST, PUT, DELETE, HEAD)
 	bool autoindex;							 // Enable directory listing
 	size_t clientMaxBodySize;				 // Maximum request body size in bytes
-	std::string uploadPath;					 // Directory for file uploads
     std::map<std::string, std::string> cgiHandlers; // Map extension -> interpreter path
 	std::string redirect;					 // Redirect URL (if any)
 	int redirectCode;						 // Redirect status code (301, 302, etc.)
@@ -34,7 +33,6 @@ public:
 	LocationConfig &addAllowedMethod(const std::string &method);
 	LocationConfig &setAutoindex(bool enabled);
 	LocationConfig &setClientMaxBodySize(size_t size);
-	LocationConfig &setUploadPath(const std::string &path);
     LocationConfig &addCgiHandler(const std::string &extension, const std::string &interpreterPath);
 	LocationConfig &setRedirect(const std::string &url, int code = 301);
 
@@ -46,7 +44,6 @@ public:
 	bool isMethodAllowed(const std::string &method) const;
 	bool getAutoindex() const;
 	size_t getClientMaxBodySize() const;
-	std::string getUploadPath() const;
     std::string getCgiPath(const std::string &extension) const;
     const std::map<std::string, std::string> &getCgiHandlers() const;
 	std::string getRedirect() const;

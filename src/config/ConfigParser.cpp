@@ -69,7 +69,6 @@ bool ConfigParser::isLocationDirective(const std::string &word) const
 {
 	return word == "root" || word == "index" || word == "allowed_methods" || 
 	       word == "autoindex" || word == "client_max_body_size" || 
-	       word == "upload_path" || word == "upload_store" || 
 	       word == "cgi_assign" || word == "return";
 }
 
@@ -231,8 +230,6 @@ bool ConfigParser::parseLocationDirective(LocationConfig &location)
 		return ConfigDirectives::parseAutoindex(_tokens, _pos, location, _error);
 	else if (directive.value == "client_max_body_size")
 		return ConfigDirectives::parseClientMaxBodySize(_tokens, _pos, location, _error);
-	else if (directive.value == "upload_path" || directive.value == "upload_store")
-		return ConfigDirectives::parseUploadPath(_tokens, _pos, location, _error);
 	else if (directive.value == "cgi_assign")
 		return ConfigDirectives::parseCgiAssign(_tokens, _pos, location, _error);
 	else if (directive.value == "return")
