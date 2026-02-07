@@ -11,7 +11,6 @@ class WebServer;
 namespace SignalHandler
 {
 	void setup(WebServer *server);
-	void handle(int signum);
 }
 
 #endif

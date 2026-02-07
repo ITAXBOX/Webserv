@@ -24,9 +24,4 @@ namespace SignalHandler
 		signal(SIGQUIT, SIG_IGN);			   // Ignore Ctrl+\ to prevent core dump
 		signal(SIGPIPE, SIG_IGN);			   // Ignore SIGPIPE (broken pipe on write)
 	}
-
-	void handle(int signum)
-	{
-		signalHandlerFunction(signum);
-	}
 }
