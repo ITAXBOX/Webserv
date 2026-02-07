@@ -32,6 +32,7 @@ std::string trim(const std::string &str)
 	return str.substr(start, end - start);
 }
 
+// Find the position of the first occurrence of CRLF ("\r\n") starting from 'start'
 size_t findCRLF(const std::string &str, size_t start)
 {
 	return str.find("\r\n", start);

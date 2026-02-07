@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 	if (argc != 2)
 	{
 		Logger::error(std::string("Usage: ") + argv[0] + " <config_file>");
-		return 1;
+		return (1);
 	}
 
 	std::string configFile = argv[1];
@@ -27,11 +27,11 @@ int main(int argc, char **argv)
 	if (!server.init(configFile))
 	{
 		Logger::error("WebServer initialization failed");
-		return 1;
+		return (1);
 	}
 
 	server.run();
 
 	Logger::info("Server shutdown complete");
-	return 0;
+	return (0);
 }

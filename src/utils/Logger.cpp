@@ -100,6 +100,7 @@ const char *Logger::levelColor(Logger::Level lvl)
 	return "\033[0m"; // Reset
 }
 
+// Get current timestamp as string in format "YYYY-MM-DD HH:MM:SS"
 std::string Logger::now()
 {
 	std::time_t t = std::time(0);
@@ -117,6 +118,7 @@ std::string Logger::errnoMsg(const std::string &prefix)
 	return os.str();
 }
 
+// Helper to format a message with a file descriptor (e.g. "Failed to read from socket (fd=5)")
 std::string Logger::fdMsg(const std::string &prefix, int fd)
 {
 	std::ostringstream os;
@@ -124,6 +126,7 @@ std::string Logger::fdMsg(const std::string &prefix, int fd)
 	return os.str();
 }
 
+// Helper to format a message with a file descriptor and additional details
 std::string Logger::connMsg(const std::string &prefix, int fd, const std::string &detail)
 {
 	std::ostringstream os;
