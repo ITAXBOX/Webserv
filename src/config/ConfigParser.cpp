@@ -45,7 +45,7 @@ bool ConfigParser::isServerDirective(const std::string &word) const
 {
 	return word == "listen" || word == "host" || word == "server_name" || word == "root" ||
 		   word == "index" || word == "client_max_body_size" ||
-		   word == "error_page" || word == "location";
+		   word == "error_page";
 }
 
 // Check if word is a location directive
@@ -90,14 +90,14 @@ bool ConfigParser::parseServer()
 
 		if (token.type == TOKEN_WORD)
 		{
-			if (token.value == "location")
-			{
-				if (!parseLocation(server))
-					return false;
-			}
-			else if (isServerDirective(token.value))
+			if (isServerDirective(token.value))
 			{
 				if (!parseServerDirective(server))
+					return false;
+			}
+			else if (token.value == "location")
+			{
+				if (!parseLocation(server))
 					return false;
 			}
 			else
