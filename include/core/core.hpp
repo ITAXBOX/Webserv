@@ -24,8 +24,8 @@ public:
 	WebServer();
 	~WebServer();
 
-	// Initialize from config file (or use defaults if empty)
-	bool init(const std::string &configFile = "");
+	// Initialize from config file
+	bool init(const std::string &configFile);
 
 	// Start the server (blocking call)
 	void run();
