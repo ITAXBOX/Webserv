@@ -11,6 +11,12 @@ Logger::Level Logger::s_minLevel =
 bool Logger::s_showTimestamp = true;
 bool Logger::s_showColors = true;
 
+void Logger::init()
+{
+	showTimestamp(true);
+	showColors(true);
+}
+
 void Logger::showTimestamp(bool enabled)
 {
 	s_showTimestamp = enabled;

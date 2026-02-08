@@ -19,8 +19,7 @@ public:
 		LEVEL_ERROR = 3
 	};
 
-	static void showTimestamp(bool enabled);
-	static void showColors(bool enabled);
+	static void init();
 
 	static void debug(const std::string &msg);
 	static void info(const std::string &msg);
@@ -35,6 +34,9 @@ private:
 	Logger();
 	Logger(const Logger &);
 	Logger &operator=(const Logger &);
+
+	static void showTimestamp(bool enabled);
+	static void showColors(bool enabled);
 
 	static void log(Level lvl, const std::string &msg);
 	static const char *levelName(Level lvl);

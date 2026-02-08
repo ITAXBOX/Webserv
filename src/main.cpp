@@ -5,9 +5,10 @@
 
 int main(int argc, char **argv)
 {
-	Logger::showTimestamp(true);
-	Logger::showColors(true);
+	// Initialize logger settings
+	Logger::init();
 
+	// Print startup banner
 	printWebservStartup();
 
 	if (argc != 2)
@@ -21,7 +22,7 @@ int main(int argc, char **argv)
 	// Create and initialize WebServer (Facade pattern)
 	WebServer server;
 
-	// Setup signal handlers (Ctrl+C, Ctrl+Z, Ctrl+\)
+	// Setup signal handlers
 	SignalHandler::setup(&server);
 
 	if (!server.init(configFile))
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
 		return (1);
 	}
 
+	// Start the server loop
 	server.run();
 
 	Logger::info("Server shutdown complete");
