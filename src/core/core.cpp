@@ -46,7 +46,9 @@ bool WebServer::init(const std::string &configFile)
 	}
 
 	_initialized = true;
+	
 	Logger::info("WebServer initialized successfully");
+
 	return true;
 }
 

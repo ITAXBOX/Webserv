@@ -1,4 +1,5 @@
 #include "app/CgiExecutor.hpp"
+#include "utils/utils.hpp"
 
 CgiExecutor::CgiExecutor() {}
 
@@ -85,14 +86,20 @@ char **CgiExecutor::createArgv(const std::string &scriptPath, const std::string 
     // argv[0] = interpreter, argv[1] = script, argv[2] = NULL
     if (!interpreterPath.empty())
     {
-        argv[0] = strdup(interpreterPath.c_str());
-        argv[1] = strdup(scriptPath.c_str());
+        argv[0] = new char[interpreterPath.length() + 1];
+        interpreterPath.copy(argv[0], interpreterPath.length());
+        argv[0][interpreterPath.length()] = '\0';
+        argv[1] = new char[scriptPath.length() + 1];
+        scriptPath.copy(argv[1], scriptPath.length());
+        argv[1][scriptPath.length()] = '\0';
         argv[2] = NULL;
     }
     else
     {
         // Execute directly (requires executable permissions and shebang)
-        argv[0] = strdup(scriptPath.c_str());
+        argv[0] = new char[scriptPath.length() + 1];
+        scriptPath.copy(argv[0], scriptPath.length());
+        argv[0][scriptPath.length()] = '\0';
         argv[1] = NULL;
         argv[2] = NULL;
     }
@@ -155,18 +162,12 @@ char **CgiExecutor::createEnvp(const HttpRequest &request, const std::string &sc
     for (std::map<std::string, std::string>::iterator it = env.begin(); it != env.end(); ++it)
     {
         std::string s = it->first + "=" + it->second;
-        envp[i++] = strdup(s.c_str());
+        envp[i] = new char[s.length() + 1];
+        s.copy(envp[i], s.length());
+        envp[i][s.length()] = '\0';
+        i++;
     }
     envp[i] = NULL;
 
     return envp;
-}
-
-void CgiExecutor::freeArray(char **array)
-{
-    if (!array)
-        return;
-    for (int i = 0; array[i]; ++i)
-        free(array[i]);
-    delete[] array;
 }

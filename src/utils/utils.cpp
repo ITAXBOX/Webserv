@@ -121,3 +121,16 @@ std::string buildFilePath(const std::string &uri, const std::string &rootDir, co
 
 	return filePath;
 }
+
+// ============================================================================
+// Memory Utilities
+// ============================================================================
+
+void freeArray(char **array)
+{
+	if (!array)
+		return;
+	for (int i = 0; array[i]; i++)
+		delete[] array[i];
+	delete[] array;
+}

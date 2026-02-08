@@ -35,5 +35,6 @@ int main(int argc, char **argv)
 	server.run();
 
 	Logger::info("Server shutdown complete");
+	
 	return (0);
 }
