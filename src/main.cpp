@@ -25,6 +25,7 @@ int main(int argc, char **argv)
 	// Setup signal handlers
 	SignalHandler::setup(&server);
 
+	// Initialize server with config file
 	if (!server.init(configFile))
 	{
 		Logger::error("WebServer initialization failed");
@@ -34,7 +35,7 @@ int main(int argc, char **argv)
 	// Start the server loop
 	server.run();
 
-	Logger::info("Server shutdown complete");
-	
+	Logger::shutdown();
+
 	return (0);
 }

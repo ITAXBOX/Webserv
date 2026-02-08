@@ -25,6 +25,7 @@ public:
 	static void info(const std::string &msg);
 	static void warn(const std::string &msg);
 	static void error(const std::string &msg);
+	static void shutdown();
 
 	static std::string errnoMsg(const std::string &prefix);
 	static std::string fdMsg(const std::string &prefix, int fd);

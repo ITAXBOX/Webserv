@@ -47,6 +47,11 @@ void Logger::error(const std::string &msg)
 	log(LEVEL_ERROR, msg);
 }
 
+void Logger::shutdown()
+{
+	log(LEVEL_INFO, "Server shutdown complete");
+}
+
 void Logger::log(Logger::Level lvl, const std::string &msg)
 {
 	// the minimum log level that should be printed.
