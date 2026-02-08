@@ -37,7 +37,7 @@ bool WebServer::init(const std::string &configFile)
 		return false;
 	}
 
-	// Setup servers (from config or defaults)
+	// Setup servers (from config)
 	if (!setupServers())
 	{
 		Logger::error("Failed to setup servers");
@@ -161,10 +161,9 @@ bool WebServer::setupServers()
 			return false;
 		}
 
-		_servers.push_back(srv);
 		_eventLoop->addServer(srv, config);
 
-		// Log server names if any
+		// Log server names
 		const std::vector<std::string> &names = config.getServerNames();
 		if (!names.empty())
 		{
@@ -195,9 +194,7 @@ void WebServer::cleanup()
 		_eventLoop = NULL;
 	}
 
-	// Note: ServerSockets are now owned and deleted by EventLoop
-	// So we just clear our reference list
-	_servers.clear();
+	// ServerSockets are owned and deleted by EventLoop
 
 	_initialized = false;
 }

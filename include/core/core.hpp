@@ -35,7 +35,6 @@ public:
 
 private:
 	EventLoop *_eventLoop;
-	std::vector<ServerSocket *> _servers;
 	std::vector<ServerConfig> _serverConfigs;
 	std::string _configFile;
 	bool _initialized;
