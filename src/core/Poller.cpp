@@ -155,14 +155,19 @@ void Poller::convertEvents(int count)
 
 	for (int i = 0; i < count; i++)
 	{
+		// Extract epoll event and convert to our simpler PollEvent format
 		const struct epoll_event &ev = _rawEvents[i];
 		PollEvent pe;
 
+		// Get the file descriptor that triggered this event
 		pe.fd = ev.data.fd;
-		pe.readable = (ev.events & EPOLLIN) != 0;
-		pe.writable = (ev.events & EPOLLOUT) != 0;
-		pe.error = (ev.events & EPOLLERR) != 0;
-		pe.hangup = (ev.events & (EPOLLHUP | EPOLLRDHUP)) != 0;
+
+		// Use bitwise AND to check which event flags are set
+		// ev.events & EPOLLIN checks if the EPOLLIN flag is set, meaning data is available to read
+		pe.readable = (ev.events & EPOLLIN) != 0;				// Data available to read
+		pe.writable = (ev.events & EPOLLOUT) != 0;				// Can write without blocking
+		pe.error = (ev.events & EPOLLERR) != 0;					// Error condition occurred
+		pe.hangup = (ev.events & (EPOLLHUP | EPOLLRDHUP)) != 0; // Connection closed/peer shutdown
 
 		_events.push_back(pe);
 
