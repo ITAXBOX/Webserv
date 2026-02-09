@@ -29,6 +29,7 @@ std::string toString(T n)
 void skipWhitespace(const std::string &input, size_t &pos, int &line);
 void skipComment(const std::string &input, size_t &pos);
 bool isWordChar(char c);
+size_t parseSizeString(const std::string &str);
 
 // HTTP utilities
 HttpMethod stringToHttpMethod(const std::string &method);

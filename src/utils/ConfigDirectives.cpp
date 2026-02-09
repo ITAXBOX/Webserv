@@ -1,4 +1,5 @@
 #include "utils/ConfigDirectives.hpp"
+#include "utils/utils.hpp"
 
 // ============================================================================
 // Utility Functions
@@ -157,7 +158,7 @@ bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t
 		return false;
 	}
 
-	size_t size = std::atol(value.value.c_str());
+	size_t size = parseSizeString(value.value);
 	server.setClientMaxBodySize(size);
 	return expectSemicolon(tokens, pos, error);
 }
@@ -277,7 +278,7 @@ bool ConfigDirectives::parseClientMaxBodySize(std::vector<Token> &tokens, size_t
 		return false;
 	}
 
-	size_t size = std::atol(value.value.c_str());
+	size_t size = parseSizeString(value.value);
 	location.setClientMaxBodySize(size);
 	return expectSemicolon(tokens, pos, error);
 }

@@ -1,4 +1,5 @@
 #include "utils/utils.hpp"
+#include <cstdlib>
 
 // ============================================================================
 // Webserv Startup Print
@@ -76,6 +77,39 @@ bool isWordChar(char c)
 {
 	return std::isalnum(static_cast<unsigned char>(c)) ||
 		   c == '-' || c == '_' || c == '.' || c == '/' || c == ':';
+}
+
+// Parse size string with optional suffix (k/K, m/M, g/G)
+// Examples: "1024" = 1024 bytes, "10k" = 10240 bytes, "5m" = 5242880 bytes
+size_t parseSizeString(const std::string &str)
+{
+	if (str.empty())
+		return 0;
+
+	// Extract numeric part
+	size_t i = 0;
+	while (i < str.length() && std::isdigit(str[i]))
+		i++;
+
+	if (i == 0)
+		return 0; // No digits found
+
+	size_t number = std::atol(str.substr(0, i).c_str());
+
+	// Check for suffix
+	if (i < str.length())
+	{
+		char suffix = std::tolower(str[i]);
+		if (suffix == 'k')
+			return number * 1024;
+		else if (suffix == 'm')
+			return number * 1024 * 1024;
+		else if (suffix == 'g')
+			return number * 1024 * 1024 * 1024;
+	}
+
+	// No suffix, return as bytes
+	return number;
 }
 
 // ============================================================================
