@@ -5,6 +5,8 @@ namespace SignalHandler
 	// Global pointer for signal handler
 	static WebServer *g_server = NULL;
 
+	// extern "C" is used to prevent name mangling, allowing the signal handler to be correctly linked
+	// name mangling means that the C++ compiler changes the names of functions to include additional information
 	extern "C" void signalHandlerFunction(int)
 	{
 		if (g_server)
