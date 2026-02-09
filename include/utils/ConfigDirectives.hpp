@@ -18,7 +18,6 @@ class ConfigDirectives
 public:
 	// Server directive parsers
 	static bool parseListen(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error);
-	static bool parseHost(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error);
 	static bool parseServerName(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error);
 	static bool parseRoot(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error);
 	static bool parseIndex(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error);

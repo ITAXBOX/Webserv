@@ -43,7 +43,7 @@ void ConfigParser::setError(const std::string &msg, int line)
 // Check if word is a server directive
 bool ConfigParser::isServerDirective(const std::string &word) const
 {
-	return word == "listen" || word == "host" || word == "server_name" || word == "root" ||
+	return word == "listen" || word == "server_name" || word == "root" ||
 		   word == "index" || word == "client_max_body_size" ||
 		   word == "error_page";
 }
@@ -124,8 +124,6 @@ bool ConfigParser::parseServerDirective(ServerConfig &server)
 
 	if (directive.value == "listen")
 		return ConfigDirectives::parseListen(_tokens, _pos, server, _error);
-	else if (directive.value == "host")
-		return ConfigDirectives::parseHost(_tokens, _pos, server, _error);
 	else if (directive.value == "server_name")
 		return ConfigDirectives::parseServerName(_tokens, _pos, server, _error);
 	else if (directive.value == "root")

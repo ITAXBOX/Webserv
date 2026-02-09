@@ -103,21 +103,6 @@ bool ConfigDirectives::parseListen(std::vector<Token> &tokens, size_t &pos, Serv
 	return expectSemicolon(tokens, pos, error);
 }
 
-bool ConfigDirectives::parseHost(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error)
-{
-	advance(tokens, pos); // Consume 'host'
-	Token value = advance(tokens, pos);
-
-	if (value.type != TOKEN_WORD)
-	{
-		setError(error, "Expected host address after 'host'", value.line);
-		return false;
-	}
-
-	server.setHost(value.value);
-	return expectSemicolon(tokens, pos, error);
-}
-
 bool ConfigDirectives::parseServerName(std::vector<Token> &tokens, size_t &pos, ServerConfig &server, std::string &error)
 {
 	advance(tokens, pos); // Consume 'server_name'
