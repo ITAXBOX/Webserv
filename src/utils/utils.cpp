@@ -6,9 +6,9 @@
 
 void printWebservStartup()
 {
-	std::cout << "===============================================" << std::endl;
+	std::cout << "=================================================" << std::endl;
 	std::cout << "🔥  WEB SERV INITIALIZATION SEQUENCE STARTED  🔥" << std::endl;
-	std::cout << "===============================================" << std::endl;
+	std::cout << "=================================================" << std::endl;
 	std::cout << "     Team: Cache Me If You Can" << std::endl;
 	std::cout << "     Engineers: fel-khat & mal-moha & aitawi" << std::endl;
 	std::cout << std::endl;
