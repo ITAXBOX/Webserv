@@ -147,20 +147,9 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
             _cgiHandler.startCgi(client, request, response, poller);
         else
         {
-            if (request.getHeader("Connection") == "close" || response.getHeader("Connection") == "close")
+            if (request.getHeader("Connection") == "close")
                 client->setShouldClose(true);
-
-            std::string rawResponse = response.build();
-            rawResponse += "\r\n";
-
-            client->appendToWriteBuffer(rawResponse);
-            client->setState(WRITING);
-
-            // Reset parser for next request (keep-alive support)
-            client->getParser().reset();
-
-            // Change to monitor for write events
-            poller.modifyFd(clientFd, EPOLLOUT);
+            sendResponse(client, response, poller);
         }
     }
     else if (client->getParser().hasError())
@@ -178,16 +167,7 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
 
         // Send Error Response
         HttpResponse response = StatusCodes::createErrorResponse(code, msg);
-        std::string rawResponse = response.build();
-        rawResponse += "\r\n";
-        client->appendToWriteBuffer(rawResponse);
-        client->setState(WRITING);
-
-        // Reset parser for next request (fix for stuck connection)
-        client->getParser().reset();
-
-        // Change to monitor for write events
-        poller.modifyFd(clientFd, EPOLLOUT);
+        sendResponse(client, response, poller);
     }
     // else: Still parsing, wait for more data
 }
@@ -262,4 +242,22 @@ void ConnectionManager::closeAllConnections(Poller &poller)
 
     for (size_t i = 0; i < fds.size(); ++i)
         handleDisconnect(fds[i], poller);
+}
+
+void ConnectionManager::sendResponse(ClientConnection *client, HttpResponse &response, Poller &poller)
+{
+    if (response.getHeader("Connection") == "close")
+        client->setShouldClose(true);
+
+    std::string rawResponse = response.build();
+    rawResponse += "\r\n";
+
+    client->appendToWriteBuffer(rawResponse);
+    client->setState(WRITING);
+
+    // Reset parser for next request
+    client->getParser().reset();
+
+    // Change to monitor for write events
+    poller.modifyFd(client->getFd(), EPOLLOUT);
 }

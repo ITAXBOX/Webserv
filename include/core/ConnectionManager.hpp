@@ -43,6 +43,8 @@ private:
 
     RequestHandler &_requestHandler;
     CgiHandler &_cgiHandler;
+
+    void sendResponse(ClientConnection *client, HttpResponse &response, Poller &poller);
 };
 
 #endif
