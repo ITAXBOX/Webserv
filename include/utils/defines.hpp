@@ -25,7 +25,7 @@
 // Buffer and Limit Constants
 // ============================================================================
 
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 1024
 #define MAX_BODY_SIZE 1048576 // 1MB (1024 * 1024)
 #define CGI_TIMEOUT_SEC 5     // 5 seconds timeout for CGI scripts
 
