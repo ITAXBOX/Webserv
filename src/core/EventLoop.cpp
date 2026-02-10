@@ -49,8 +49,11 @@ void EventLoop::run()
 
     while (_running)
     {
+        // Check for active CGI scripts running too long
+        _connManager.checkCgiTimeouts(_poller);
+
         // Wait for events using Poller (epoll-based)
-        int n = _poller.wait(-1); // -1 = infinite timeout
+        int n = _poller.wait(1000); // 1s timeout to allow periodic tasks
 
         if (n < 0)
         {

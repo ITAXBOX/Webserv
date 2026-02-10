@@ -36,6 +36,8 @@ public:
     bool hasClient(int fd) const;
     void closeAllConnections(Poller &poller);
 
+    void checkCgiTimeouts(Poller &poller);
+
 private:
     std::map<int, ClientConnection *> _clients;
     std::map<int, int> _clientToServer;         // Map client FD to server FD

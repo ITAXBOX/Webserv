@@ -29,7 +29,7 @@ public:
     void handleCgiRead(int pipeFd, ClientConnection *client, Poller &poller);
     void handleCgiWrite(int pipeFd, ClientConnection *client, Poller &poller);
 
-    // Cleanup/Completion
+    void handleTimeout(ClientConnection *client, Poller &poller);
     void handleCgiHangup(int pipeFd, ClientConnection *client, Poller &poller);
     void cleanupCgi(ClientConnection *client, Poller &poller);
 

@@ -21,6 +21,7 @@ void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, 
 {
     // Reset CGI state for new execution
     client->getCgiState() = CgiState();
+    client->getCgiState().startTime = time(NULL);
 
     CgiExecutor executor;
     executor.start(request, response.getCgiScriptPath(), response.getCgiInterpreterPath(), client->getCgiState());
@@ -87,7 +88,7 @@ void CgiHandler::cleanupCgi(ClientConnection *client, Poller &poller)
             state.pipeOut[0] = -1;
         }
         kill(state.pid, SIGKILL);
-        waitpid(state.pid, NULL, WNOHANG);
+        waitpid(state.pid, NULL, 0);
         state.active = false;
     }
 }
@@ -258,4 +259,25 @@ void CgiHandler::processCgiResponse(ClientConnection *client)
     }
 
     client->appendToWriteBuffer(response.build());
+}
+
+void CgiHandler::handleTimeout(ClientConnection *client, Poller &poller)
+{
+    Logger::error(Logger::connMsg("CGI Timeout detected (Infinite Loop)", client->getFd()));
+
+    // Use cleanupCgi to kill process and closing pipes
+    cleanupCgi(client, poller);
+
+    // Send 508 Error Response
+    // 508 Loop Detected is WebDAV, typically 504 Gateway Timeout makes more sense for CGI timeout, 
+    // but user asked for "Loop detected error". 508 is "Loop Detected".
+    HttpResponse response = StatusCodes::createErrorResponse(HTTP_LOOP_DETECTED, "Loop Detected"); 
+
+    std::string rawResponse = response.build();
+    rawResponse += "\r\n";
+    client->appendToWriteBuffer(rawResponse);
+    
+    // Reset parser for next request
+    client->getParser().reset();
+    poller.modifyFd(client->getFd(), EPOLLOUT);
 }

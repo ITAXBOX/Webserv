@@ -5,6 +5,7 @@
 #include <string>
 #include <unistd.h>
 #include <sys/types.h>
+#include <ctime>
 
 struct CgiState
 {
@@ -15,8 +16,9 @@ struct CgiState
     std::string responseBuffer; // Output from CGI
     bool headersParsed;
     bool active;
+    time_t startTime;
 
-    CgiState() : pid(-1), headersParsed(false), active(false)
+    CgiState() : pid(-1), headersParsed(false), active(false), startTime(0)
     {
         pipeIn[0] = -1;
         pipeIn[1] = -1;

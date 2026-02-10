@@ -242,6 +242,24 @@ void ConnectionManager::closeAllConnections(Poller &poller)
         handleDisconnect(fds[i], poller);
 }
 
+void ConnectionManager::checkCgiTimeouts(Poller &poller)
+{
+    time_t now = time(NULL);
+
+    // Iterate through all clients
+    for (std::map<int, ClientConnection *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        ClientConnection *client = it->second;
+        CgiState &state = client->getCgiState();
+
+        if (state.active)
+        {
+            if (difftime(now, state.startTime) > CGI_TIMEOUT_SEC)
+                _cgiHandler.handleTimeout(client, poller);
+        }
+    }
+}
+
 void ConnectionManager::sendResponse(ClientConnection *client, HttpResponse &response, Poller &poller)
 {
     if (response.getHeader("Connection") == "close")
