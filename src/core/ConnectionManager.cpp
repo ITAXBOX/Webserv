@@ -78,7 +78,7 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
     if (n <= 0)
     {
         if (n == 0)
-            Logger::debug(Logger::connMsg("Client closed connection", clientFd));
+            Logger::debug(Logger::connMsg("Client closed connection during read", clientFd));
         else
             Logger::warn(Logger::connMsg(std::string("Client read error: ") + std::strerror(errno), clientFd));
 
@@ -183,7 +183,11 @@ void ConnectionManager::handleWrite(int clientFd, Poller &poller)
     ssize_t bytes = send(clientFd, data.c_str(), data.size(), 0);
     if (bytes <= 0)
     {
-        Logger::warn(Logger::connMsg("Client write failed", clientFd));
+        if (bytes == 0)
+            Logger::debug(Logger::connMsg("Client closed connection during write", clientFd));
+        else
+            Logger::warn(Logger::connMsg("Client write failed", clientFd));
+
         handleDisconnect(clientFd, poller);
         return;
     }
