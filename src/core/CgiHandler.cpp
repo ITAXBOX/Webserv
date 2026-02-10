@@ -29,7 +29,6 @@ void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, 
     {
         Logger::error("Failed to start CGI");
         client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "CGI Start Failed").build());
-        client->setState(WRITING);
         // Assuming poller is accessible or we return status to update poller
         // Here we need to update poller outside or pass it in. We passed it in.
         poller.modifyFd(client->getFd(), EPOLLOUT);
@@ -65,7 +64,6 @@ void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, 
             _pipeToClient[state.pipeOut[0]] = clientFd;
     }
 
-    client->setState(CGI_ACTIVE);
     Logger::info(Logger::connMsg("CGI Started asynchronously", clientFd));
 }
 
@@ -185,7 +183,6 @@ void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection *client, Poller &p
             processCgiResponse(client);
         }
 
-        client->setState(WRITING);
         client->getParser().reset();
         poller.modifyFd(client->getFd(), EPOLLOUT);
     }

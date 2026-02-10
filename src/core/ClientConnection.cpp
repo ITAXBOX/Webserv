@@ -1,7 +1,7 @@
 #include "core/ClientConnection.hpp"
 
 ClientConnection::ClientConnection(int fd, size_t maxBodySize)
-    : _fd(fd), _state(READING), _shouldClose(false)
+    : _fd(fd), _shouldClose(false)
 {
     _parser.setMaxBodySize(maxBodySize);
     Logger::debug(Logger::fdMsg("ClientConnection created", fd));
@@ -21,11 +21,6 @@ int ClientConnection::getFd() const
 std::string &ClientConnection::getWriteBuffer()
 {
     return _writeBuffer;
-}
-
-void ClientConnection::setState(ConnState state)
-{
-    _state = state;
 }
 
 void ClientConnection::setShouldClose(bool close)

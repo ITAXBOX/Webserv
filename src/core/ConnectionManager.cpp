@@ -208,8 +208,6 @@ void ConnectionManager::handleWrite(int clientFd, Poller &poller)
         return;
     }
 
-    c->setState(READING);
-
     // Change back to monitor for read events
     poller.modifyFd(clientFd, EPOLLIN);
 }
@@ -253,7 +251,6 @@ void ConnectionManager::sendResponse(ClientConnection *client, HttpResponse &res
     rawResponse += "\r\n";
 
     client->appendToWriteBuffer(rawResponse);
-    client->setState(WRITING);
 
     // Reset parser for next request
     client->getParser().reset();
