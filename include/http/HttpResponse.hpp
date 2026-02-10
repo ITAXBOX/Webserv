@@ -30,6 +30,7 @@ public:
     HttpResponse &setBody(const std::string &body);
     HttpResponse &addCookie(const std::string &key, const std::string &value, int maxAge = 0);
     std::string getHeader(const std::string &key) const;
+    int getStatusCode() const;
 
     void setCgi(bool isCgi);
     bool isCgi() const;

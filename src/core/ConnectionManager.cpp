@@ -147,11 +147,13 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
             _cgiHandler.startCgi(client, request, response, poller);
         else
         {
-            // Check if we should close the connection after this response
-            if (response.getHeader("Connection") == "close")
+            if (request.getHeader("Connection") == "close" || response.getHeader("Connection") == "close")
                 client->setShouldClose(true);
 
-            client->appendToWriteBuffer(response.build());
+            std::string rawResponse = response.build();
+            rawResponse += "\r\n";
+
+            client->appendToWriteBuffer(rawResponse);
             client->setState(WRITING);
 
             // Reset parser for next request (keep-alive support)
@@ -176,8 +178,13 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
 
         // Send Error Response
         HttpResponse response = StatusCodes::createErrorResponse(code, msg);
-        client->appendToWriteBuffer(response.build());
+        std::string rawResponse = response.build();
+        rawResponse += "\r\n";
+        client->appendToWriteBuffer(rawResponse);
         client->setState(WRITING);
+
+        // Reset parser for next request (fix for stuck connection)
+        client->getParser().reset();
 
         // Change to monitor for write events
         poller.modifyFd(clientFd, EPOLLOUT);
@@ -213,7 +220,7 @@ void ConnectionManager::handleWrite(int clientFd, Poller &poller)
     }
     c->clearWriteBuffer();
 
-    // Close connection if requested (e.g. after DELETE or Connection: close)
+    // Close connection if requested (Connection: close)
     if (c->shouldClose())
     {
         Logger::info(Logger::connMsg("Closing connection as requested", clientFd));

@@ -43,6 +43,11 @@ std::string HttpResponse::getHeader(const std::string &key) const
     return "";
 }
 
+int HttpResponse::getStatusCode() const
+{
+    return statusCode;
+}
+
 void HttpResponse::setCgi(bool isCgi) { _isCgi = isCgi; }
 bool HttpResponse::isCgi() const { return _isCgi; }
 void HttpResponse::setCgiInfo(const std::string &script, const std::string &interpreter)
