@@ -1,0 +1,301 @@
+#include "core/CgiHandler.hpp"
+
+CgiHandler::CgiHandler() {}
+
+CgiHandler::~CgiHandler() {}
+
+int CgiHandler::getClientFd(int pipeFd) const
+{
+    std::map<int, int>::const_iterator it = _pipeToClient.find(pipeFd);
+    if (it != _pipeToClient.end())
+        return it->second;
+    return -1;
+}
+
+bool CgiHandler::hasCgiPipe(int pipeFd) const
+{
+    return _pipeToClient.count(pipeFd) > 0;
+}
+
+void CgiHandler::startCgi(ClientConnection *client, const HttpRequest &request, const HttpResponse &response, Poller &poller)
+{
+    // Reset CGI state for new execution
+    client->getCgiState() = CgiState();
+    client->getCgiState().startTime = time(NULL);
+
+    CgiExecutor executor;
+    executor.start(request, response.getCgiScriptPath(), response.getCgiInterpreterPath(), client->getCgiState());
+
+    if (!client->getCgiState().active)
+    {
+        Logger::error("Failed to start CGI");
+        client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "CGI Start Failed").build());
+        // Assuming poller is accessible or we return status to update poller
+        // Here we need to update poller outside or pass it in. We passed it in.
+        poller.modifyFd(client->getFd(), EPOLLOUT);
+        return;
+    }
+
+    CgiState &state = client->getCgiState();
+    int clientFd = client->getFd();
+
+    // Register pipeIn[1] for Writing (sending body to child)
+    if (state.pipeIn[1] != -1)
+    {
+        if (!poller.addFd(state.pipeIn[1], EPOLLOUT))
+        {
+            Logger::error("Failed to add CGI input pipe to poller");
+            cleanupCgi(client, poller);
+            return;
+        }
+        else
+            _pipeToClient[state.pipeIn[1]] = clientFd;
+    }
+
+    // Register pipeOut[0] for Reading (reading response from child)
+    if (state.pipeOut[0] != -1)
+    {
+        if (!poller.addFd(state.pipeOut[0], EPOLLIN))
+        {
+            Logger::error("Failed to add CGI output pipe to poller");
+            cleanupCgi(client, poller);
+            return;
+        }
+        else
+            _pipeToClient[state.pipeOut[0]] = clientFd;
+    }
+
+    Logger::info(Logger::connMsg("CGI Started asynchronously", clientFd));
+}
+
+void CgiHandler::cleanupCgi(ClientConnection *client, Poller &poller)
+{
+    CgiState &state = client->getCgiState();
+    if (state.active)
+    {
+        if (state.pipeIn[1] != -1)
+        {
+            poller.removeFd(state.pipeIn[1]);
+            _pipeToClient.erase(state.pipeIn[1]);
+            close(state.pipeIn[1]);
+            state.pipeIn[1] = -1;
+        }
+        if (state.pipeOut[0] != -1)
+        {
+            poller.removeFd(state.pipeOut[0]);
+            _pipeToClient.erase(state.pipeOut[0]);
+            close(state.pipeOut[0]);
+            state.pipeOut[0] = -1;
+        }
+        kill(state.pid, SIGKILL);
+        waitpid(state.pid, NULL, 0);
+        state.active = false;
+    }
+}
+
+void CgiHandler::handleCgiRead(int pipeFd, ClientConnection *client, Poller &poller)
+{
+    CgiState &state = client->getCgiState();
+
+    if (state.pipeOut[0] != pipeFd)
+        return;
+
+    char buffer[4096];
+    ssize_t bytes = read(pipeFd, buffer, sizeof(buffer));
+    
+    if (bytes <= 0)
+    {
+        if (bytes == -1)
+            Logger::error("CGI read error");
+        else if (bytes == 0)
+            Logger::debug("CGI output pipe closed (EOF)");
+
+        handleCgiHangup(pipeFd, client, poller);
+        return;
+    }
+
+    state.responseBuffer.append(buffer, bytes);
+}
+
+void CgiHandler::handleCgiWrite(int pipeFd, ClientConnection *client, Poller &poller)
+{
+    CgiState &state = client->getCgiState();
+
+    if (state.pipeIn[1] != pipeFd)
+        return;
+
+    const std::string &body = state.requestBody;
+    if (!body.empty())
+    {
+        ssize_t bytes = write(pipeFd, body.c_str(), body.size());
+        
+        if (bytes == -1)
+        {
+            Logger::error("CGI write error");
+            handleCgiHangup(pipeFd, client, poller);
+            return;
+        }
+        // Don't erase anything, will retry or handle on next event
+        else if (bytes == 0)
+            Logger::debug("CGI write returned 0, pipe may be closed");
+        else if (bytes > 0)
+            state.requestBody.erase(0, bytes);
+    }
+
+    if (state.requestBody.empty())
+    {
+        poller.removeFd(pipeFd);
+        _pipeToClient.erase(pipeFd);
+        close(state.pipeIn[1]);
+        state.pipeIn[1] = -1;
+        Logger::debug("CGI input closed");
+    }
+}
+
+void CgiHandler::handleCgiHangup(int pipeFd, ClientConnection *client, Poller &poller)
+{
+    CgiState &state = client->getCgiState();
+
+    // Remove pipe from poller
+    poller.removeFd(pipeFd);
+    _pipeToClient.erase(pipeFd);
+
+    if (state.pipeOut[0] == pipeFd)
+    {
+        close(state.pipeOut[0]);
+        state.pipeOut[0] = -1;
+    }
+    if (state.pipeIn[1] == pipeFd)
+    {
+        close(state.pipeIn[1]);
+        state.pipeIn[1] = -1;
+    }
+
+    // If output pipe is closed, we assume CGI is done sending data
+    if (state.pipeOut[0] == -1)
+    {
+        state.active = false;
+
+        // Ensure child process is terminated and reaped
+        int status;
+        pid_t wpid = waitpid(state.pid, &status, WNOHANG);
+
+        if (wpid == 0)
+        {
+            kill(state.pid, SIGKILL);
+            waitpid(state.pid, &status, 0);
+        }
+
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+        {
+            Logger::error("CGI process exited with error code");
+            client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_BAD_GATEWAY, "Bad Gateway").build());
+        }
+        else if (WIFSIGNALED(status))
+        {
+            Logger::error("CGI process killed by signal");
+            client->appendToWriteBuffer(StatusCodes::createErrorResponse(HTTP_INTERNAL_SERVER_ERROR, "Internal Server Error").build());
+        }
+        else
+        {
+            Logger::info("CGI Finished, processing response");
+            processCgiResponse(client);
+        }
+
+        client->getParser().reset();
+        poller.modifyFd(client->getFd(), EPOLLOUT);
+    }
+}
+
+void CgiHandler::processCgiResponse(ClientConnection *client)
+{
+    CgiState &state = client->getCgiState();
+    HttpResponse response;
+    response.setStatus(HTTP_OK, "OK");
+
+    std::string &raw = state.responseBuffer;
+    // Support both CRLF and LF for headers
+    size_t headerEnd = raw.find("\r\n\r\n");
+    size_t bodyStart = 0;
+
+    if (headerEnd != std::string::npos)
+        bodyStart = headerEnd + 4;
+    else
+    {
+        headerEnd = raw.find("\n\n");
+        if (headerEnd != std::string::npos)
+            bodyStart = headerEnd + 2;
+    }
+
+    if (headerEnd != std::string::npos)
+    {
+        std::string headers = raw.substr(0, headerEnd);
+        std::string body = raw.substr(bodyStart);
+
+        std::istringstream stream(headers);
+        std::string line;
+        while (std::getline(stream, line))
+        {
+            if (!line.empty() && line[line.size() - 1] == '\r')
+                line.resize(line.size() - 1);
+
+            size_t colon = line.find(':');
+            if (colon != std::string::npos)
+            {
+                std::string key = line.substr(0, colon);
+                std::string val = line.substr(colon + 1);
+                size_t first = val.find_first_not_of(" \t");
+                if (first != std::string::npos)
+                    val = val.substr(first);
+
+                if (key == "Status")
+                {
+                    size_t sp = val.find(' ');
+                    if (sp != std::string::npos)
+                        response.setStatus(std::atoi(val.c_str()), val.substr(sp + 1));
+                    else
+                        response.setStatus(std::atoi(val.c_str()), "OK");
+                }
+                else
+                    response.addHeader(key, val);
+            }
+        }
+        response.setBody(body);
+
+        // Ensure Content-Length is set
+        std::ostringstream ss;
+        ss << body.size();
+        response.addHeader("Content-Length", ss.str());
+    }
+    else
+    {
+        response.setBody(raw);
+        std::ostringstream ss;
+        ss << raw.size();
+        response.addHeader("Content-Length", ss.str());
+        response.addHeader("Content-Type", "text/plain"); // Default fallback
+    }
+
+    client->appendToWriteBuffer(response.build());
+}
+
+void CgiHandler::handleTimeout(ClientConnection *client, Poller &poller)
+{
+    Logger::error(Logger::connMsg("CGI Timeout detected (Infinite Loop)", client->getFd()));
+
+    // Use cleanupCgi to kill process and closing pipes
+    cleanupCgi(client, poller);
+
+    // Send 508 Error Response
+    // 508 Loop Detected is WebDAV, typically 504 Gateway Timeout makes more sense for CGI timeout, 
+    // but user asked for "Loop detected error". 508 is "Loop Detected".
+    HttpResponse response = StatusCodes::createErrorResponse(HTTP_LOOP_DETECTED, "Loop Detected"); 
+
+    std::string rawResponse = response.build();
+    rawResponse += "\r\n";
+    client->appendToWriteBuffer(rawResponse);
+    
+    // Reset parser for next request
+    client->getParser().reset();
+    poller.modifyFd(client->getFd(), EPOLLOUT);
+}
