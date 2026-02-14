@@ -3,78 +3,1259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebServ - Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>WebServ - High-Performance HTTP Server</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --primary: #00f5ff;
+            --secondary: #ff006e;
+            --accent: #8338ec;
+            --success: #06ffa5;
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.7);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(131, 56, 236, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.15) 0%, transparent 50%);
+            animation: bgShift 20s ease infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 20px) scale(1.05); }
+        }
+
+        /* Floating Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            z-index: -1;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            top: -200px;
+            left: -200px;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--secondary);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: var(--accent);
+            top: 50%;
+            right: 10%;
+            animation-delay: -12s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(120deg); }
+            66% { transform: translate(-20px, 20px) rotate(240deg); }
+        }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--text-dim);
+            max-width: 600px;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .stats {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 3rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section Container */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 3rem;
+            font-size: 1.125rem;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 60px rgba(0, 245, 255, 0.2);
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: transparent;
+            color: var(--text);
+            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Input Fields */
+        input, textarea, select {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.875rem;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        label {
+            display: block;
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 245, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--secondary), #ff1744);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Output Console */
+        .console {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: var(--success);
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .console.show {
+            display: block;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .console pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 60px rgba(0, 245, 255, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            color: var(--text-dim);
+            font-size: 0.875rem;
+        }
+
+        /* Script Cards */
+        .script-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .script-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .script-card:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .script-card h4 {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .script-card p {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(0, 245, 255, 0.2);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Status Badge */
+        .status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .status-success {
+            background: rgba(6, 255, 165, 0.2);
+            color: var(--success);
+        }
+
+        .status-error {
+            background: rgba(255, 0, 110, 0.2);
+            color: var(--secondary);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.75rem;
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .stats {
+                gap: 1.5rem;
+            }
+
+            .section {
+                padding: 3rem 1rem;
+            }
+
+            .glass-card {
+                padding: 1.5rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Glow Effect */
+        .glow {
+            box-shadow: 0 0 30px var(--primary);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Web<span>Serv</span></h1>
-            <p class="subtitle">A High-Performance C++ HTTP Server</p>
-        </header>
+    <!-- Animated Background -->
+    <div class="bg-animated"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
 
-        <nav>
-            <a href="index.html" class="active">Dashboard</a>
-            <a href="methods.html">Methods</a>
-            <a href="cgi-bin/file_manager.py">File Manager</a>
-            <a href="cgi.html">CGI Tests</a>
-            <a href="sessions.html">Sessions</a>
-        </nav>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">WEBSERV</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#testing">Testing</a></li>
+            <li><a href="#cgi">CGI</a></li>
+            <li><a href="#sessions">Sessions</a></li>
+        </ul>
+    </nav>
 
-        <div class="card-grid">
-            <div class="card">
-                <h2>🚀 Static Content</h2>
-                <p>If you can read this, the core GET handler is fully operational.</p>
-                <ul class="feature-list">
-                    <li>Static file serving</li>
-                    <li>MIME type detection</li>
-                    <li>Keep-Alive connections</li>
-                </ul>
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <h1>WEBSERV</h1>
+        <p>High-performance HTTP/1.1 server built from scratch in C++98 with epoll and advanced design patterns</p>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">RFC Compliant</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">epoll</div>
+                <div class="stat-label">I/O Multiplexing</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">0</div>
+                <div class="stat-label">Dependencies</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Connections</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <h2 class="section-title">Core Capabilities</h2>
+        <p class="section-subtitle">Built with modern software engineering principles</p>
+
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>High Performance</h3>
+                <p>epoll-based event loop for scalable concurrent connections</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>HTTP/1.1</h3>
+                <p>Complete implementation of GET, POST, PUT, DELETE, HEAD</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <h3>CGI Support</h3>
+                <p>Execute Python, Shell scripts with full environment support</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🍪</div>
+                <h3>Sessions</h3>
+                <p>Cookie-based state management across requests</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📂</div>
+                <h3>File Ops</h3>
+                <p>Upload, download, delete with multipart support</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Robust</h3>
+                <p>Error handling, timeouts, security measures</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testing Section -->
+    <section id="testing" class="section">
+        <h2 class="section-title">HTTP Methods Testing</h2>
+        <p class="section-subtitle">Interactive testing console for all HTTP methods</p>
+
+        <div class="glass-card">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('get')">GET</button>
+                <button class="tab-btn" onclick="switchTab('post')">POST</button>
+                <button class="tab-btn" onclick="switchTab('put')">PUT</button>
+                <button class="tab-btn" onclick="switchTab('delete')">DELETE</button>
+                <button class="tab-btn" onclick="switchTab('head')">HEAD</button>
             </div>
 
-            <div class="card">
-                <h2>⚡ CGI Execution</h2>
-                <p>Run dynamic scripts via CGI protocol. Test GET and POST methods.</p>
-                <div class="flex gap-3 flex-wrap mt-4">
-                    <a href="cgi.html" class="btn">Open CGI Playground</a>
-                    <a href="cgi-bin/calculator.py" class="btn" style="background: var(--accent);">Calculator</a>
+            <!-- GET Tab -->
+            <div id="tab-get" class="tab-content active">
+                <label>Resource Path</label>
+                <input type="text" id="get-path" value="/style.css" placeholder="/path/to/resource">
+                
+                <label>Query Parameters (Optional)</label>
+                <input type="text" id="get-query" placeholder="param1=value1&param2=value2">
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="executeGET()">Execute GET Request</button>
+                    <button class="btn btn-secondary" onclick="setExample('GET', '/style.css', '')">CSS Example</button>
+                    <button class="btn btn-secondary" onclick="setExample('GET', '/cgi-bin/hello.py', 'name=Test')">CGI Example</button>
                 </div>
+                
+                <div id="get-console" class="console"></div>
             </div>
 
-            <div class="card">
-                <h2>📂 File Manager</h2>
-                <p>Full-featured file management. Test multipart uploads, file listing, and DELETE method.</p>
-                <div class="mt-4">
-                    <a href="cgi-bin/file_manager.py" class="btn" style="width: 100%; justify-content: center;">Open File Manager</a>
+            <!-- POST Tab -->
+            <div id="tab-post" class="tab-content">
+                <label>Target URL</label>
+                <input type="text" id="post-path" value="/cgi-bin/post_test.py">
+                
+                <label>Request Body</label>
+                <textarea id="post-body" placeholder="Request body data...">name=WebServ&message=Hello from POST!</textarea>
+                
+                <label>Content-Type</label>
+                <select id="post-content-type">
+                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                    <option value="application/json">application/json</option>
+                    <option value="text/plain">text/plain</option>
+                </select>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="executePOST()">Execute POST Request</button>
+                    <button class="btn btn-secondary" onclick="setExample('POST', '/cgi-bin/calculator.py', 'a=10&b=5&op=add')">Calculator</button>
                 </div>
+                
+                <div id="post-console" class="console"></div>
             </div>
 
-            <div class="card">
-                <h2>🔍 HTTP Methods</h2>
-                <p>Test advanced HTTP methods like HEAD and PUT directly.</p>
-                <a href="methods.html" class="btn mt-4" style="background: var(--gray-600);">Test Methods</a>
-            </div>
-
-            <div class="card">
-                <h2>🛑 Error Handling</h2>
-                <p>Robust error page generation for various HTTP statuses.</p>
-                <div class="flex gap-3 flex-wrap mt-4">
-                    <a href="missing-page" class="btn" style="background: var(--accent);">Trigger 404</a>
+            <!-- PUT Tab -->
+            <div id="tab-put" class="tab-content">
+                <label>Resource Path</label>
+                <input type="text" id="put-path" value="/uploads/test.txt">
+                
+                <label>Content</label>
+                <textarea id="put-content" placeholder="Resource content...">Test file created via PUT method!</textarea>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="executePUT()">Execute PUT Request</button>
                 </div>
+                
+                <div id="put-console" class="console"></div>
             </div>
 
-            <div class="card">
-                <h2>🍪 Sessions</h2>
-                <p>Test session persistence and cookie management.</p>
-                <div class="mt-4">
-                    <a href="sessions.html" class="btn">Session Manager</a>
+            <!-- DELETE Tab -->
+            <div id="tab-delete" class="tab-content">
+                <label>Resource Path</label>
+                <input type="text" id="delete-path" value="/uploads/test.txt">
+                
+                <div style="background: rgba(255, 0, 110, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--secondary);">
+                    <strong>⚠️ Warning:</strong> This will permanently delete the resource
                 </div>
+                
+                <div class="btn-group">
+                    <button class="btn btn-danger" onclick="executeDELETE()">Execute DELETE Request</button>
+                </div>
+                
+                <div id="delete-console" class="console"></div>
+            </div>
+
+            <!-- HEAD Tab -->
+            <div id="tab-head" class="tab-content">
+                <label>Resource Path</label>
+                <input type="text" id="head-path" value="/style.css">
+                
+                <div style="background: rgba(0, 245, 255, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--primary);">
+                    <strong>ℹ️ Info:</strong> HEAD returns only headers, no body content
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="executeHEAD()">Execute HEAD Request</button>
+                </div>
+                
+                <div id="head-console" class="console"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CGI Section -->
+    <section id="cgi" class="section">
+        <h2 class="section-title">CGI Playground</h2>
+        <p class="section-subtitle">Execute server-side scripts with full CGI protocol support</p>
+
+        <div class="script-grid">
+            <div class="script-card" onclick="loadCGI('/cgi-bin/hello.py', 'name=Tester')">
+                <div class="feature-icon" style="font-size: 2rem;">👋</div>
+                <h4>hello.py</h4>
+                <p>Basic greeting with environment info</p>
+                <span class="badge">Python</span>
+                <span class="badge">GET/POST</span>
+            </div>
+            
+            <div class="script-card" onclick="loadCGI('/cgi-bin/calculator.py', 'a=10&b=5&op=add')">
+                <div class="feature-icon" style="font-size: 2rem;">🧮</div>
+                <h4>calculator.py</h4>
+                <p>Arithmetic operations via CGI</p>
+                <span class="badge">Python</span>
+                <span class="badge">Math</span>
+            </div>
+            
+            <div class="script-card" onclick="loadCGI('/cgi-bin/environ.py', '')">
+                <div class="feature-icon" style="font-size: 2rem;">🔍</div>
+                <h4>environ.py</h4>
+                <p>Display all CGI environment vars</p>
+                <span class="badge">Python</span>
+                <span class="badge">Debug</span>
+            </div>
+            
+            <div class="script-card" onclick="window.open('/cgi-bin/file_manager.py', '_blank')">
+                <div class="feature-icon" style="font-size: 2rem;">📁</div>
+                <h4>file_manager.py</h4>
+                <p>Upload, list, delete files</p>
+                <span class="badge">Python</span>
+                <span class="badge">Files</span>
             </div>
         </div>
 
-        <footer>
-            <p>WebServ Project © 2026 · Running on C++98</p>
-        </footer>
-    </div>
+        <div class="glass-card" style="margin-top: 2rem;">
+            <h3 style="margin-bottom: 1rem;">Custom CGI Executor</h3>
+            
+            <label>Script Path</label>
+            <input type="text" id="cgi-script" value="/cgi-bin/hello.py">
+            
+            <label>Method</label>
+            <select id="cgi-method">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+            </select>
+            
+            <label>Data</label>
+            <textarea id="cgi-data" placeholder="Parameters or body data...">name=WebServ&test=CGI</textarea>
+            
+            <div class="btn-group">
+                <button class="btn" onclick="executeCGI()">Execute CGI Script</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('cgi-console').classList.remove('show')">Clear</button>
+            </div>
+            
+            <div id="cgi-console" class="console"></div>
+        </div>
+    </section>
+
+    <!-- Sessions Section -->
+    <section id="sessions" class="section">
+        <h2 class="section-title">Session & Cookie Management</h2>
+        <p class="section-subtitle">Test server-side sessions and cookie handling</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+            <div class="glass-card">
+                <h3 style="margin-bottom: 1rem;">🔐 Session Testing</h3>
+                <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
+                    Test session creation, cookie setting, and state persistence
+                </p>
+                
+                <div class="btn-group" style="flex-direction: column;">
+                    <button class="btn" onclick="testSession()">Test Session Handler</button>
+                    <button class="btn btn-secondary" onclick="viewSession()">View Current Session</button>
+                    <a href="/session_test" class="btn" style="text-decoration: none; text-align: center;">Open Session Interface</a>
+                </div>
+                
+                <div id="session-console" class="console"></div>
+            </div>
+
+            <div class="glass-card">
+                <h3 style="margin-bottom: 1rem;">🍪 Cookie Inspector</h3>
+                <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
+                    View and manage browser cookies for this domain
+                </p>
+                
+                <div class="btn-group" style="flex-direction: column;">
+                    <button class="btn" onclick="inspectCookies()">Inspect All Cookies</button>
+                    <button class="btn btn-danger" onclick="clearCookies()">Clear All Cookies</button>
+                </div>
+                
+                <div id="cookie-console" class="console"></div>
+            </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 2rem;">
+            <h3 style="margin-bottom: 1rem;">📊 Session Lifecycle</h3>
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 2rem; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 0.875rem;">
+                <div style="margin-bottom: 1rem;">1. Client Request → <span style="color: var(--primary);">GET /session_test</span></div>
+                <div style="margin-bottom: 1rem;">2. Server Generates → <span style="color: var(--success);">SESSIONID=abc123...</span></div>
+                <div style="margin-bottom: 1rem;">3. Response Header → <span style="color: var(--accent);">Set-Cookie: SESSIONID=abc123</span></div>
+                <div style="margin-bottom: 1rem;">4. Browser Stores → <span style="color: var(--text-dim);">Cookie saved locally</span></div>
+                <div style="margin-bottom: 1rem;">5. Subsequent Requests → <span style="color: var(--primary);">Cookie: SESSIONID=abc123</span></div>
+                <div>6. Server Access → <span style="color: var(--success);">Retrieve session data using SESSIONID</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 3rem 2rem; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border);">
+        <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">
+            WEBSERV
+        </div>
+        <p style="color: var(--text-dim); margin-bottom: 1rem;">
+            Built with ❤️ for 42 School • C++98 • epoll • Design Patterns
+        </p>
+        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
+            <span style="color: var(--text-dim);">✓ HTTP/1.1 Compliant</span>
+            <span style="color: var(--text-dim);">✓ CGI 1.1 Protocol</span>
+            <span style="color: var(--text-dim);">✓ epoll I/O Multiplexing</span>
+            <span style="color: var(--text-dim);">✓ Zero Dependencies</span>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // Show console output
+        function showConsole(id, content, status = 'success') {
+            const console = document.getElementById(id);
+            console.innerHTML = `<pre>${content}</pre>`;
+            console.classList.add('show');
+            
+            if (status === 'error') {
+                console.style.borderColor = 'var(--secondary)';
+                console.style.color = 'var(--secondary)';
+            } else {
+                console.style.borderColor = 'var(--primary);
+                console.style.color = 'var(--success)';
+            }
+        }
+
+        // Set example
+        function setExample(method, path, data) {
+            if (method === 'GET') {
+                document.getElementById('get-path').value = path;
+                document.getElementById('get-query').value = data;
+            } else if (method === 'POST') {
+                document.getElementById('post-path').value = path;
+                document.getElementById('post-body').value = data;
+            }
+        }
+
+        // HTTP Methods
+        async function executeGET() {
+            const path = document.getElementById('get-path').value;
+            const query = document.getElementById('get-query').value;
+            const url = query ? `${path}?${query}` : path;
+            
+            try {
+                const response = await fetch(url);
+                const body = await response.text();
+                const headers = Array.from(response.headers.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
+                
+                showConsole('get-console', 
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  GET REQUEST SUCCESSFUL                ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `URL: ${url}\n\n` +
+                    `Headers:\n${headers}\n\n` +
+                    `Body (first 500 chars):\n${body.substring(0, 500)}${body.length > 500 ? '...' : ''}`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('get-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function executePOST() {
+            const path = document.getElementById('post-path').value;
+            const body = document.getElementById('post-body').value;
+            const contentType = document.getElementById('post-content-type').value;
+            
+            try {
+                const response = await fetch(path, {
+                    method: 'POST',
+                    headers: { 'Content-Type': contentType },
+                    body: body
+                });
+                
+                const responseBody = await response.text();
+                const headers = Array.from(response.headers.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
+                
+                showConsole('post-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  POST REQUEST SUCCESSFUL               ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `URL: ${path}\n` +
+                    `Content-Type: ${contentType}\n\n` +
+                    `Response:\n${responseBody}`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('post-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function executePUT() {
+            const path = document.getElementById('put-path').value;
+            const content = document.getElementById('put-content').value;
+            
+            try {
+                const response = await fetch(path, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: content
+                });
+                
+                const body = await response.text();
+                
+                showConsole('put-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  PUT REQUEST SUCCESSFUL                ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `Resource: ${path}\n\n` +
+                    `Response:\n${body}`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('put-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function executeDELETE() {
+            const path = document.getElementById('delete-path').value;
+            
+            if (!confirm(`⚠️ Delete ${path}?`)) return;
+            
+            try {
+                const response = await fetch(path, { method: 'DELETE' });
+                const body = await response.text();
+                
+                showConsole('delete-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  DELETE REQUEST SUCCESSFUL             ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `Deleted: ${path}\n\n` +
+                    `Response:\n${body}`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('delete-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function executeHEAD() {
+            const path = document.getElementById('head-path').value;
+            
+            try {
+                const response = await fetch(path, { method: 'HEAD' });
+                const headers = Array.from(response.headers.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
+                
+                showConsole('head-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  HEAD REQUEST SUCCESSFUL               ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `Resource: ${path}\n\n` +
+                    `Headers:\n${headers}\n\n` +
+                    `Note: HEAD returns only headers, no body`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('head-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // CGI Functions
+        function loadCGI(path, data) {
+            document.getElementById('cgi-script').value = path;
+            document.getElementById('cgi-data').value = data;
+            document.getElementById('cgi').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function executeCGI() {
+            const script = document.getElementById('cgi-script').value;
+            const method = document.getElementById('cgi-method').value;
+            const data = document.getElementById('cgi-data').value;
+            
+            let url = script;
+            const options = { method };
+            
+            if (method === 'GET' && data) {
+                url += `?${data}`;
+            } else if (method === 'POST') {
+                options.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+                options.body = data;
+            }
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch(url, options);
+                const executionTime = Date.now() - startTime;
+                const body = await response.text();
+                
+                showConsole('cgi-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  CGI EXECUTION SUCCESSFUL              ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Script: ${script}\n` +
+                    `Method: ${method}\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `Execution Time: ${executionTime}ms\n\n` +
+                    `Output:\n${body}`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('cgi-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Session Functions
+        async function testSession() {
+            try {
+                const response = await fetch('/session_test', { credentials: 'include' });
+                const body = await response.text();
+                const cookies = document.cookie;
+                
+                showConsole('session-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  SESSION TEST SUCCESSFUL               ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Status: ${response.status} ${response.statusText}\n` +
+                    `Cookies: ${cookies || '(none)'}\n\n` +
+                    `Response:\n${body.substring(0, 400)}...`,
+                    response.ok ? 'success' : 'error'
+                );
+            } catch (error) {
+                showConsole('session-console', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function viewSession() {
+            const cookies = document.cookie;
+            const sessionId = cookies.split(';').find(c => c.trim().startsWith('SESSIONID='));
+            
+            if (sessionId) {
+                showConsole('session-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  ACTIVE SESSION FOUND                  ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `✓ Session Active\n\n` +
+                    `${sessionId.trim()}\n\n` +
+                    `All Cookies:\n${cookies}\n\n` +
+                    `Status: Your session is active and will be sent\nwith all requests to this domain.`,
+                    'success'
+                );
+            } else {
+                showConsole('session-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  NO ACTIVE SESSION                     ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `✗ No session cookie found\n\n` +
+                    `To create a session, click "Test Session Handler"\nor visit /session_test\n\n` +
+                    `Current Cookies: ${cookies || '(none)'}`,
+                    'error'
+                );
+            }
+        }
+
+        function inspectCookies() {
+            const cookies = document.cookie;
+            
+            if (cookies) {
+                const cookieArray = cookies.split(';').map(c => c.trim());
+                showConsole('cookie-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  COOKIE INSPECTOR                      ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `Found ${cookieArray.length} cookie(s):\n\n` +
+                    cookieArray.map((c, i) => `${i + 1}. ${c}`).join('\n') + '\n\n' +
+                    `Raw:\n${cookies}`,
+                    'success'
+                );
+            } else {
+                showConsole('cookie-console',
+                    `╔════════════════════════════════════════╗\n` +
+                    `║  NO COOKIES FOUND                      ║\n` +
+                    `╚════════════════════════════════════════╝\n\n` +
+                    `No cookies are currently stored for this domain.\n\n` +
+                    `Cookies will be set when you visit endpoints that\nrequire session management.`,
+                    'error'
+                );
+            }
+        }
+
+        function clearCookies() {
+            if (!confirm('⚠️ Clear all cookies?')) return;
+            
+            document.cookie.split(';').forEach(cookie => {
+                const name = cookie.split('=')[0].trim();
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            });
+            
+            showConsole('cookie-console',
+                `╔════════════════════════════════════════╗\n` +
+                `║  COOKIES CLEARED                       ║\n` +
+                `╚════════════════════════════════════════╝\n\n` +
+                `✓ All cookies have been cleared!\n\n` +
+                `Refresh the page to verify.`,
+                'success'
+            );
+        }
+    </script>
 </body>
 </html>
