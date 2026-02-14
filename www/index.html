@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebServ - High-Performance HTTP Server</title>
+    <title>WebServ - Cache Me If You Can</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -12,976 +15,2901 @@
         }
 
         :root {
-            --bg-dark: #0a0a0f;
-            --bg-card: rgba(255, 255, 255, 0.05);
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --primary: #00f5ff;
-            --secondary: #ff006e;
-            --accent: #8338ec;
-            --success: #06ffa5;
-            --text: #ffffff;
-            --text-dim: rgba(255, 255, 255, 0.7);
+            --bg: #06060a;
+            --surface: #0c0c14;
+            --surface-2: #111119;
+            --border: rgba(255, 200, 80, 0.06);
+            --border-hover: rgba(255, 200, 80, 0.25);
+            --gold: #f0c040;
+            --gold-bright: #ffd966;
+            --gold-dim: rgba(240, 192, 64, 0.12);
+            --gold-muted: rgba(240, 192, 64, 0.06);
+            --cream: #fff8e7;
+            --amber: #ff9f1c;
+            --amber-dim: rgba(255, 159, 28, 0.1);
+            --green: #34d399;
+            --green-dim: rgba(52, 211, 153, 0.1);
+            --red: #f87171;
+            --red-dim: rgba(248, 113, 113, 0.1);
+            --blue: #60a5fa;
+            --blue-dim: rgba(96, 165, 250, 0.1);
+            --text: #f5f0e8;
+            --text-dim: rgba(245, 240, 232, 0.5);
+            --text-muted: rgba(245, 240, 232, 0.25);
+            --mono: 'JetBrains Mono', monospace;
+            --heading: 'Playfair Display', serif;
+            --body: 'Space Grotesk', sans-serif;
+            --radius: 12px;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-dark);
+            font-family: var(--body);
+            background: var(--bg);
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Animated Background */
-        .bg-animated {
+        /* ───── CANVAS ───── */
+        #particles-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(131, 56, 236, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.15) 0%, transparent 50%);
-            animation: bgShift 20s ease infinite;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        @keyframes bgShift {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, 20px) scale(1.05); }
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(240, 192, 64, 0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(240, 192, 64, 0.012) 1px, transparent 1px);
+            background-size: 80px 80px;
         }
 
-        /* Floating Orbs */
-        .orb {
+        .glow-spot {
             position: fixed;
             border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            z-index: -1;
-            animation: float 15s ease-in-out infinite;
+            filter: blur(180px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
         }
 
-        .orb-1 {
-            width: 400px;
-            height: 400px;
-            background: var(--primary);
-            top: -200px;
-            left: -200px;
+        .glow-spot.gold {
+            width: 700px;
+            height: 700px;
+            background: var(--gold);
+            top: -20%;
+            left: -10%;
         }
 
-        .orb-2 {
-            width: 300px;
-            height: 300px;
-            background: var(--secondary);
-            bottom: -150px;
-            right: -150px;
-            animation-delay: -7s;
+        .glow-spot.amber {
+            width: 500px;
+            height: 500px;
+            background: var(--amber);
+            bottom: 0%;
+            right: -10%;
         }
 
-        .orb-3 {
-            width: 350px;
-            height: 350px;
-            background: var(--accent);
-            top: 50%;
-            right: 10%;
-            animation-delay: -12s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(120deg); }
-            66% { transform: translate(-20px, 20px) rotate(240deg); }
-        }
-
-        /* Navigation */
+        /* ═══════ NAVIGATION ═══════ */
         nav {
-            position: sticky;
-            top: 0;
-            background: rgba(10, 10, 15, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 1rem 2rem;
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 1000;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 4px;
+            background: rgba(6, 6, 10, 0.4);
+            backdrop-filter: blur(24px) saturate(1.6);
+            border: 1px solid rgba(240, 192, 64, 0.08);
+            border-radius: 100px;
+            padding: 10px 10px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        nav.scrolled {
+            background: rgba(6, 6, 10, 0.92);
+            border-color: rgba(240, 192, 64, 0.12);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(240, 192, 64, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 4px;
             list-style: none;
+            align-items: center;
         }
 
         .nav-links a {
-            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 22px;
+            color: var(--text-muted);
             text-decoration: none;
+            font-size: 0.85rem;
             font-weight: 500;
-            font-size: 0.875rem;
+            letter-spacing: 0.3px;
             transition: all 0.3s ease;
+            border-radius: 100px;
+            font-family: var(--body);
             position: relative;
         }
 
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--gold-bright);
+            background: rgba(240, 192, 64, 0.06);
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: width 0.3s ease;
+        .nav-links a.active {
+            color: #000;
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            font-weight: 600;
+            box-shadow: 0 2px 12px rgba(240, 192, 64, 0.25);
         }
 
-        .nav-links a:hover::after {
-            width: 100%;
+        .nav-link-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
         }
 
-        /* Hero Section */
+        .nav-links a.active .nav-link-icon {
+            opacity: 1;
+        }
+
+        .nav-links a:hover .nav-link-icon {
+            opacity: 1;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            color: var(--gold);
+            border-radius: 50%;
+        }
+
+        /* ═══════ HERO ═══════ */
         .hero {
+            position: relative;
+            z-index: 1;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 2rem;
-            position: relative;
+            padding: 7rem 2rem 4rem;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.4rem 1.2rem;
+            background: rgba(240, 192, 64, 0.04);
+            border: 1px solid rgba(240, 192, 64, 0.12);
+            border-radius: 100px;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--gold);
+            margin-bottom: 2.5rem;
+            animation: fadeDown 0.8s ease both;
+        }
+
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 8px var(--gold);
+            animation: pulse-dot 2s ease infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.8);
+            }
         }
 
         .hero h1 {
-            font-size: clamp(3rem, 8vw, 7rem);
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            font-family: var(--heading);
+            font-size: clamp(4rem, 10vw, 9rem);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 0.92;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 0.8s ease 0.1s both;
+        }
+
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--cream) 0%, var(--gold) 40%, var(--amber) 70%, var(--gold-bright) 100%);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 1rem;
-            animation: fadeInUp 1s ease-out;
+            -webkit-text-fill-color: transparent;
         }
 
-        .hero p {
-            font-size: clamp(1rem, 2vw, 1.5rem);
-            color: var(--text-dim);
-            max-width: 600px;
-            margin-bottom: 2rem;
-            animation: fadeInUp 1s ease-out 0.2s both;
-        }
-
-        .stats {
+        .hero-team {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: var(--gold);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            animation: fadeUp 0.8s ease 0.15s both;
             display: flex;
-            gap: 3rem;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-team .team-dash {
+            width: 20px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+        }
+
+        .hero-sub {
+            font-size: clamp(1rem, 1.8vw, 1.15rem);
+            color: var(--text-dim);
+            max-width: 540px;
+            line-height: 1.75;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+
+        .hero-sub strong {
+            color: var(--gold-bright);
+            font-weight: 600;
+        }
+
+        /* ───── TEAM STRIP ───── */
+        .hero-members {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            animation: fadeUp 0.8s ease 0.28s both;
+        }
+
+        .hero-member {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-member-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(240, 192, 64, 0.2);
+            display: flex;
+            align-items: center;
             justify-content: center;
-            margin-top: 3rem;
-            animation: fadeInUp 1s ease-out 0.4s both;
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--gold);
+            background: rgba(240, 192, 64, 0.06);
+        }
+
+        .hero-member-name {
+            font-family: var(--body);
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        /* ───── TYPING TERMINAL ───── */
+        .hero-terminal {
+            width: 100%;
+            max-width: 640px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            animation: fadeUp 0.8s ease 0.35s both;
+            text-align: left;
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 16px;
+            background: rgba(240, 192, 64, 0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.r {
+            background: #ff5f57;
+        }
+
+        .terminal-dot.y {
+            background: var(--gold);
+        }
+
+        .terminal-dot.g {
+            background: var(--green);
+        }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .terminal-body {
+            padding: 1.25rem 1.5rem;
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            line-height: 1.8;
+            color: var(--gold-bright);
+            min-height: 140px;
+        }
+
+        .terminal-body .prompt {
+            color: var(--gold);
+        }
+
+        .terminal-body .comment {
+            color: var(--text-muted);
+        }
+
+        .terminal-body .flag {
+            color: var(--amber);
+        }
+
+        .terminal-body .path {
+            color: var(--gold-bright);
+        }
+
+        .terminal-body .fn {
+            color: var(--gold);
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--gold);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* ═══════ STATS RIBBON ═══════ */
+        .stats-ribbon {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            padding: 0 2rem;
+            max-width: 1000px;
+            margin: -2rem auto 0;
+            animation: fadeUp 0.8s ease 0.5s both;
         }
 
         .stat-item {
+            flex: 1;
             text-align: center;
+            padding: 2rem 1rem;
+            border: 1px solid var(--border);
+            background: rgba(12, 12, 20, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item:first-child {
+            border-radius: var(--radius) 0 0 var(--radius);
+        }
+
+        .stat-item:last-child {
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .stat-item+.stat-item {
+            border-left: none;
         }
 
         .stat-number {
-            font-size: 3rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: var(--mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gold);
+            display: block;
         }
 
         .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-dim);
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 2px;
+            margin-top: 0.25rem;
         }
 
-        @keyframes fadeInUp {
+        /* ═══════ SECTIONS BASE ═══════ */
+        .section {
+            position: relative;
+            z-index: 1;
+            padding: 8rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-eyebrow {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-eyebrow::before {
+            content: '';
+            width: 24px;
+            height: 1px;
+            background: var(--gold);
+        }
+
+        .section-title {
+            font-family: var(--heading);
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .section-desc {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+            max-width: 540px;
+            line-height: 1.7;
+            margin-bottom: 4rem;
+        }
+
+        /* ═══════ ARCHITECTURE ═══════ */
+        .arch-diagram {
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .arch-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(240, 192, 64, 0.02);
+        }
+
+        .arch-header-title {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .arch-header-title .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 6px var(--gold);
+            animation: pulse-dot 2s ease infinite;
+        }
+
+        .arch-body {
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        .arch-epoll {
+            width: 100%;
+            max-width: 560px;
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, rgba(240, 192, 64, 0.06), rgba(240, 192, 64, 0.02));
+            border: 1px solid rgba(240, 192, 64, 0.15);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .arch-epoll h4 {
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .arch-epoll p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: var(--mono);
+        }
+
+        .arch-connector {
+            width: 1px;
+            height: 32px;
+            background: linear-gradient(to bottom, var(--gold), rgba(240, 192, 64, 0.15));
+            position: relative;
+        }
+
+        .arch-connector::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: -3px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 8px var(--gold);
+        }
+
+        .arch-dispatch {
+            width: 100%;
+            max-width: 560px;
+            padding: 1.25rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .arch-dispatch h4 {
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.15rem;
+        }
+
+        .arch-dispatch p {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: var(--mono);
+        }
+
+        .arch-fanout {
+            width: 100%;
+            max-width: 560px;
+            height: 32px;
+            position: relative;
+        }
+
+        .arch-fanout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: rgba(240, 192, 64, 0.1);
+        }
+
+        .arch-fanout::after {
+            content: '';
+            position: absolute;
+            top: 16px;
+            left: 12.5%;
+            right: 12.5%;
+            height: 1px;
+            background: rgba(240, 192, 64, 0.08);
+        }
+
+        .arch-handlers {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .arch-handler {
+            padding: 1.25rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .arch-handler::before {
+            content: '';
+            position: absolute;
+            top: -17px;
+            left: 50%;
+            width: 1px;
+            height: 16px;
+            background: rgba(240, 192, 64, 0.08);
+        }
+
+        .arch-handler:hover {
+            border-color: var(--border-hover);
+            background: rgba(240, 192, 64, 0.03);
+        }
+
+        .arch-handler-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            margin: 0 auto 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .arch-handler h5 {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .arch-handler p {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        .arch-code {
+            width: 100%;
+            margin-top: 2rem;
+            padding: 1.25rem 1.5rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        .arch-code .kw {
+            color: var(--amber);
+        }
+
+        .arch-code .fn {
+            color: var(--gold);
+        }
+
+        .arch-code .str {
+            color: var(--green);
+        }
+
+        .arch-code .cmt {
+            color: var(--text-muted);
+        }
+
+        .arch-code .num {
+            color: var(--gold-bright);
+        }
+
+        .arch-features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            margin-top: 1rem;
+            background: var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .arch-feature {
+            background: var(--surface);
+            padding: 2rem;
+            transition: background 0.3s;
+        }
+
+        .arch-feature:hover {
+            background: var(--surface-2);
+        }
+
+        .arch-feature h4 {
+            font-family: var(--heading);
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        .arch-feature p {
+            font-size: 0.82rem;
+            color: var(--text-dim);
+            line-height: 1.55;
+        }
+
+        .arch-feature-tag {
+            display: inline-block;
+            margin-bottom: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* ═══════ DESIGN PATTERNS ═══════ */
+        .patterns-showcase {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .patterns-nav {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .patterns-nav-item {
+            flex: 1;
+            padding: 1.15rem 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: var(--body);
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: center;
+            transition: all 0.25s;
+            position: relative;
+            white-space: nowrap;
+            border-right: 1px solid var(--border);
+        }
+
+        .patterns-nav-item:last-child {
+            border-right: none;
+        }
+
+        .patterns-nav-item:hover {
+            color: var(--text-dim);
+            background: rgba(240, 192, 64, 0.02);
+        }
+
+        .patterns-nav-item.active {
+            color: var(--gold);
+            background: rgba(240, 192, 64, 0.04);
+        }
+
+        .patterns-nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gold);
+        }
+
+        .patterns-nav-label {
+            display: block;
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 4px;
+        }
+
+        .patterns-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 380px;
+        }
+
+        .pattern-panel {
+            display: none;
+        }
+
+        .pattern-panel.active {
+            display: contents;
+        }
+
+        .pattern-info {
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .pattern-info h3 {
+            font-family: var(--heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .pattern-info-type {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .pattern-info p {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .pattern-info-benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0.75rem 1rem;
+            background: rgba(240, 192, 64, 0.05);
+            border: 1px solid rgba(240, 192, 64, 0.1);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--gold);
+            line-height: 1.5;
+        }
+
+        .pattern-info-benefit svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .pattern-code-side {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .pattern-code-side .code-label {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+        }
+
+        .pattern-code-side pre {
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            line-height: 1.75;
+            color: var(--text-dim);
+        }
+
+        .pattern-code-side .kw {
+            color: var(--amber);
+        }
+
+        .pattern-code-side .cls {
+            color: var(--gold);
+        }
+
+        .pattern-code-side .fn {
+            color: var(--gold-bright);
+        }
+
+        .pattern-code-side .cmt {
+            color: var(--text-muted);
+        }
+
+        .pattern-code-side .str {
+            color: var(--green);
+        }
+
+        /* ═══════ HTTP TESTING ═══════ */
+        .http-console {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .http-console-bar {
+            display: flex;
+            align-items: center;
+            padding: 0;
+            border-bottom: 1px solid var(--border);
+            background: rgba(240, 192, 64, 0.02);
+        }
+
+        .http-method-btn {
+            padding: 14px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            position: relative;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-right: 1px solid var(--border);
+        }
+
+        .http-method-btn:last-of-type {
+            border-right: none;
+        }
+
+        .http-method-btn:hover {
+            background: rgba(240, 192, 64, 0.03);
+            color: var(--text-dim);
+        }
+
+        .http-method-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .method-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .http-method-btn[data-method="get"] .method-dot {
+            background: var(--green);
+        }
+
+        .http-method-btn[data-method="get"].active {
+            color: var(--green);
+        }
+
+        .http-method-btn[data-method="get"].active::after {
+            background: var(--green);
+        }
+
+        .http-method-btn[data-method="post"] .method-dot {
+            background: var(--gold);
+        }
+
+        .http-method-btn[data-method="post"].active {
+            color: var(--gold);
+        }
+
+        .http-method-btn[data-method="post"].active::after {
+            background: var(--gold);
+        }
+
+        .http-method-btn[data-method="put"] .method-dot {
+            background: var(--amber);
+        }
+
+        .http-method-btn[data-method="put"].active {
+            color: var(--amber);
+        }
+
+        .http-method-btn[data-method="put"].active::after {
+            background: var(--amber);
+        }
+
+        .http-method-btn[data-method="delete"] .method-dot {
+            background: var(--red);
+        }
+
+        .http-method-btn[data-method="delete"].active {
+            color: var(--red);
+        }
+
+        .http-method-btn[data-method="delete"].active::after {
+            background: var(--red);
+        }
+
+        .http-method-btn[data-method="head"] .method-dot {
+            background: var(--blue);
+        }
+
+        .http-method-btn[data-method="head"].active {
+            color: var(--blue);
+        }
+
+        .http-method-btn[data-method="head"].active::after {
+            background: var(--blue);
+        }
+
+        .http-body {
+            padding: 2rem;
+        }
+
+        .http-panel {
+            display: none;
+        }
+
+        .http-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .field-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .field-label {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .field-input,
+        .field-textarea,
+        .field-select {
+            width: 100%;
+            padding: 0.85rem 1.15rem;
+            background: rgba(240, 192, 64, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.82rem;
+            transition: all 0.25s;
+            outline: none;
+        }
+
+        .field-input:focus,
+        .field-textarea:focus,
+        .field-select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
+            background: rgba(240, 192, 64, 0.05);
+        }
+
+        .field-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .field-select option {
+            background: var(--surface);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.7rem 1.3rem;
+            border: none;
+            border-radius: 8px;
+            font-family: var(--mono);
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--amber));
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 20px var(--gold-dim);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: rgba(240, 192, 64, 0.04);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--border-hover);
+            color: var(--gold);
+        }
+
+        .btn-danger {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 4px 20px var(--red-dim);
+            transform: translateY(-1px);
+        }
+
+        .response-console {
+            margin-top: 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .response-console.show {
+            display: block;
+            animation: slideIn 0.35s ease;
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            background: rgba(240, 192, 64, 0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .console-status {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .console-status .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .console-status.success .status-dot {
+            background: var(--green);
+            box-shadow: 0 0 6px var(--green);
+        }
+
+        .console-status.success {
+            color: var(--green);
+        }
+
+        .console-status.error .status-dot {
+            background: var(--red);
+            box-shadow: 0 0 6px var(--red);
+        }
+
+        .console-status.error {
+            color: var(--red);
+        }
+
+        .console-time {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        .console-body {
+            padding: 1.25rem;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.65;
+        }
+
+        .console-body .h-key {
+            color: var(--gold);
+        }
+
+        .console-body .h-val {
+            color: var(--text-dim);
+        }
+
+        .console-body .h-status {
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .console-body .h-err {
+            color: var(--red);
+        }
+
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(8px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        /* Section Container */
-        .section {
-            padding: 5rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
+        .info-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.25rem;
+            font-size: 0.82rem;
+            line-height: 1.5;
         }
 
-        .section-title {
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .info-box.warn {
+            background: var(--red-dim);
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            color: var(--red);
         }
 
-        .section-subtitle {
-            text-align: center;
-            color: var(--text-dim);
-            margin-bottom: 3rem;
-            font-size: 1.125rem;
+        .info-box.info {
+            background: var(--gold-dim);
+            border: 1px solid rgba(240, 192, 64, 0.2);
+            color: var(--gold);
         }
 
-        /* Glass Card */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
+        .info-box svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ═══════ CGI ═══════ */
+        .cgi-pipeline {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .cgi-pipeline-visual {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 2.5rem;
+            overflow: hidden;
+        }
+
+        .cgi-pipeline-visual h4 {
+            font-family: var(--heading);
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .pipeline-node {
+            flex-shrink: 0;
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .pipeline-node h5 {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .pipeline-node p {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-family: var(--mono);
+        }
+
+        .pipeline-arrow {
+            flex-shrink: 0;
+            padding: 0 8px;
+            color: var(--gold);
+            font-family: var(--mono);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            animation: arrow-pulse 2s ease infinite;
+        }
+
+        @keyframes arrow-pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .cgi-scripts-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .cgi-script-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .glass-card::before {
+        .cgi-script-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), transparent);
+            right: 0;
+            height: 2px;
+            transition: opacity 0.3s;
             opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
-        .glass-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 60px rgba(0, 245, 255, 0.2);
+        .cgi-script-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
         }
 
-        .glass-card:hover::before {
+        .cgi-script-card:hover::before {
             opacity: 1;
         }
 
-        /* Tab Navigation */
-        .tab-nav {
+        .cgi-script-card:nth-child(1)::before {
+            background: var(--gold);
+        }
+
+        .cgi-script-card:nth-child(2)::before {
+            background: var(--amber);
+        }
+
+        .cgi-script-card:nth-child(3)::before {
+            background: var(--gold-bright);
+        }
+
+        .cgi-script-card:nth-child(4)::before {
+            background: var(--green);
+        }
+
+        .cgi-script-name {
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+
+        .cgi-script-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .cgi-script-tags {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            gap: 0.35rem;
             flex-wrap: wrap;
-            justify-content: center;
         }
 
-        .tab-btn {
-            padding: 1rem 2rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text-dim);
-            font-weight: 600;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .cgi-script-tag {
+            padding: 2px 8px;
+            background: rgba(240, 192, 64, 0.04);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
         }
 
-        .tab-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-color: transparent;
-            color: var(--text);
-            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Input Fields */
-        input, textarea, select {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            color: var(--text);
-            font-size: 0.875rem;
-            font-family: 'Courier New', monospace;
-            transition: all 0.3s ease;
-            margin-bottom: 1rem;
-        }
-
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        label {
-            display: block;
-            color: var(--text);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 1rem 2.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border: none;
-            border-radius: 12px;
-            color: var(--text);
-            font-weight: 700;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
+        .cgi-executor {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             overflow: hidden;
         }
 
-        .btn::before {
+        .cgi-executor-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(240, 192, 64, 0.02);
+        }
+
+        .cgi-executor-header span {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .cgi-executor-body {
+            padding: 1.75rem;
+        }
+
+        /* ═══════ SESSIONS ═══════ */
+        .session-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .session-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+        }
+
+        .session-card h3 {
+            font-family: var(--heading);
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .session-card p {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .session-timeline {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+        }
+
+        .session-timeline h3 {
+            font-family: var(--heading);
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text);
+        }
+
+        .timeline-track {
+            position: relative;
+            margin-left: 20px;
+            padding-left: 32px;
+        }
+
+        .timeline-track::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
+            left: 0;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--gold), var(--amber), var(--gold-bright), var(--green));
+            border-radius: 2px;
+        }
+
+        .timeline-step {
+            position: relative;
+            padding: 0 0 1.75rem 0;
+        }
+
+        .timeline-step:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: -38px;
+            top: 6px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+            border: 3px solid var(--bg);
         }
 
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
+        .timeline-step:nth-child(1)::before {
+            background: var(--gold);
+            box-shadow: 0 0 10px rgba(240, 192, 64, 0.4);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px rgba(0, 245, 255, 0.4);
+        .timeline-step:nth-child(2)::before {
+            background: var(--gold);
+            box-shadow: 0 0 10px rgba(240, 192, 64, 0.4);
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
+        .timeline-step:nth-child(3)::before {
+            background: var(--amber);
+            box-shadow: 0 0 10px rgba(255, 159, 28, 0.4);
         }
 
-        .btn-danger {
-            background: linear-gradient(135deg, var(--secondary), #ff1744);
+        .timeline-step:nth-child(4)::before {
+            background: var(--amber);
+            box-shadow: 0 0 10px rgba(255, 159, 28, 0.4);
         }
 
-        .btn-group {
+        .timeline-step:nth-child(5)::before {
+            background: var(--gold-bright);
+            box-shadow: 0 0 10px rgba(255, 217, 102, 0.4);
+        }
+
+        .timeline-step:nth-child(6)::before {
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+        }
+
+        .timeline-step-text {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .timeline-step-text .hl {
+            font-weight: 600;
+        }
+
+        .timeline-step-text .hl-gold {
+            color: var(--gold);
+        }
+
+        .timeline-step-text .hl-amber {
+            color: var(--amber);
+        }
+
+        .timeline-step-text .hl-bright {
+            color: var(--gold-bright);
+        }
+
+        .timeline-step-text .hl-green {
+            color: var(--green);
+        }
+
+        /* ═══════ FOOTER ═══════ */
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 5rem 2rem 4rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-team-name {
+            font-family: var(--heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--cream), var(--gold), var(--amber));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-members {
+            font-family: var(--body);
+            font-size: 0.88rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-family: var(--mono);
+        }
+
+        .footer-checks {
             display: flex;
-            gap: 1rem;
+            gap: 2rem;
+            justify-content: center;
             flex-wrap: wrap;
         }
 
-        /* Output Console */
-        .console {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-top: 2rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.875rem;
-            color: var(--success);
-            max-height: 500px;
-            overflow-y: auto;
-            display: none;
+        .footer-check {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .console.show {
-            display: block;
-            animation: slideUp 0.5s ease-out;
+        .footer-check .chk {
+            color: var(--gold);
         }
 
-        .console pre {
-            margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        /* ═══════ SCROLL REVEAL ═══════ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
         }
 
-        @keyframes slideUp {
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(240, 192, 64, 0.15);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(240, 192, 64, 0.3);
+        }
+
+        @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(24px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        /* Feature Grid */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .feature-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 60px rgba(0, 245, 255, 0.2);
+        /* ═══════ RESPONSIVE ═══════ */
+        @media (max-width: 1000px) {
+            .arch-handlers {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .arch-features {
+                grid-template-columns: 1fr;
+            }
+
+            .patterns-body {
+                grid-template-columns: 1fr;
+            }
+
+            .pattern-code-side {
+                border-left: none;
+                border-top: 1px solid var(--border);
+            }
+
+            .cgi-scripts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
-
-        .feature-card p {
-            color: var(--text-dim);
-            font-size: 0.875rem;
-        }
-
-        /* Script Cards */
-        .script-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        .script-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .script-card:hover {
-            border-color: var(--accent);
-            transform: scale(1.05);
-        }
-
-        .script-card h4 {
-            font-size: 1.125rem;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
-
-        .script-card p {
-            font-size: 0.875rem;
-            color: var(--text-dim);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: rgba(0, 245, 255, 0.2);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--primary);
-            margin-top: 0.5rem;
-            margin-right: 0.5rem;
-        }
-
-        /* Status Badge */
-        .status {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.875rem;
-        }
-
-        .status-success {
-            background: rgba(6, 255, 165, 0.2);
-            color: var(--success);
-        }
-
-        .status-error {
-            background: rgba(255, 0, 110, 0.2);
-            color: var(--secondary);
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent);
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
+            nav {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                transform: none;
+                padding: 10px 14px;
+                border-radius: 24px;
+            }
+
             .nav-links {
-                gap: 1rem;
-                font-size: 0.75rem;
+                display: none;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: calc(100% + 8px);
+                left: 0;
+                right: 0;
+                background: rgba(6, 6, 10, 0.95);
+                backdrop-filter: blur(24px);
+                border: 1px solid rgba(240, 192, 64, 0.08);
+                border-radius: 24px;
+                padding: 8px;
+            }
+
+            .nav-links.open a {
+                border-radius: 16px;
+                padding: 14px 18px;
+                font-size: 0.88rem;
+            }
+
+            .stats-ribbon {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .stat-item:first-child {
+                border-radius: var(--radius) var(--radius) 0 0;
+            }
+
+            .stat-item:last-child {
+                border-radius: 0 0 var(--radius) var(--radius);
+            }
+
+            .stat-item+.stat-item {
+                border-left: 1px solid var(--border);
+                border-top: none;
+            }
+
+            .session-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-handlers {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .pipeline-flow {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero-members {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .section {
+                padding: 5rem 1rem;
+            }
+
+            .hero {
+                padding: 5rem 1rem 3rem;
             }
 
             .hero h1 {
-                font-size: 3rem;
+                letter-spacing: -1px;
             }
 
-            .stats {
-                gap: 1.5rem;
-            }
-
-            .section {
-                padding: 3rem 1rem;
-            }
-
-            .glass-card {
-                padding: 1.5rem;
-            }
-
-            .btn-group {
+            .btn-row {
                 flex-direction: column;
             }
 
             .btn {
                 width: 100%;
+                justify-content: center;
             }
-        }
 
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+            .cgi-scripts-grid {
+                grid-template-columns: 1fr;
+            }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+            .patterns-nav-item {
+                padding: 0.85rem 1rem;
+                font-size: 0.74rem;
+            }
 
-        /* Glow Effect */
-        .glow {
-            box-shadow: 0 0 30px var(--primary);
+            .http-method-btn {
+                padding: 12px 14px;
+                font-size: 0.72rem;
+            }
+
+            .arch-handlers {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links.open a .nav-link-icon {
+                display: none;
+            }
         }
     </style>
 </head>
-<body>
-    <!-- Animated Background -->
-    <div class="bg-animated"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
 
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">WEBSERV</div>
+<body>
+
+    <canvas id="particles-canvas"></canvas>
+    <div class="grid-overlay"></div>
+    <div class="glow-spot gold"></div>
+    <div class="glow-spot amber"></div>
+
+    <!-- ═══════ NAVIGATION ═══════ -->
+    <nav id="navbar">
         <ul class="nav-links">
-            <li><a href="#hero">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#testing">Testing</a></li>
-            <li><a href="#cgi">CGI</a></li>
-            <li><a href="#sessions">Sessions</a></li>
+            <li><a href="#architecture">
+                    <span class="nav-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8">
+                            <rect x="3" y="3" width="7" height="7" rx="1" />
+                            <rect x="14" y="3" width="7" height="7" rx="1" />
+                            <rect x="3" y="14" width="7" height="7" rx="1" />
+                            <rect x="14" y="14" width="7" height="7" rx="1" />
+                        </svg></span>
+                    Architecture
+                </a></li>
+            <li><a href="#patterns">
+                    <span class="nav-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                            <path d="M2 17l10 5 10-5" />
+                            <path d="M2 12l10 5 10-5" />
+                        </svg></span>
+                    Patterns
+                </a></li>
+            <li><a href="#testing">
+                    <span class="nav-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8">
+                            <polyline points="4 17 10 11 4 5" />
+                            <line x1="12" y1="19" x2="20" y2="19" />
+                        </svg></span>
+                    Testing
+                </a></li>
+            <li><a href="#cgi">
+                    <span class="nav-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8">
+                            <path
+                                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                        </svg></span>
+                    CGI
+                </a></li>
+            <li><a href="#sessions">
+                    <span class="nav-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg></span>
+                    Sessions
+                </a></li>
         </ul>
+        <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')"
+            aria-label="Toggle navigation">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="4" y1="6" x2="18" y2="6" />
+                <line x1="4" y1="11" x2="18" y2="11" />
+                <line x1="4" y1="16" x2="18" y2="16" />
+            </svg>
+        </button>
     </nav>
 
-    <!-- Hero Section -->
-    <section id="hero" class="hero">
-        <h1>WEBSERV</h1>
-        <p>High-performance HTTP/1.1 server built from scratch in C++98 with epoll and advanced design patterns</p>
-        
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">RFC Compliant</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">epoll</div>
-                <div class="stat-label">I/O Multiplexing</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">0</div>
-                <div class="stat-label">Dependencies</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">∞</div>
-                <div class="stat-label">Connections</div>
-            </div>
+    <!-- ═══════ HERO ═══════ -->
+    <section class="hero" id="hero">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            42 Beirut &middot; Outstanding Project &middot; 125/100
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="section">
-        <h2 class="section-title">Core Capabilities</h2>
-        <p class="section-subtitle">Built with modern software engineering principles</p>
-
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>High Performance</h3>
-                <p>epoll-based event loop for scalable concurrent connections</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>HTTP/1.1</h3>
-                <p>Complete implementation of GET, POST, PUT, DELETE, HEAD</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔥</div>
-                <h3>CGI Support</h3>
-                <p>Execute Python, Shell scripts with full environment support</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🍪</div>
-                <h3>Sessions</h3>
-                <p>Cookie-based state management across requests</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📂</div>
-                <h3>File Ops</h3>
-                <p>Upload, download, delete with multipart support</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🛡️</div>
-                <h3>Robust</h3>
-                <p>Error handling, timeouts, security measures</p>
-            </div>
+        <h1><span class="gradient">WebServ</span></h1>
+        <div class="hero-team">
+            <span class="team-dash"></span>
+            Cache Me If You Can
+            <span class="team-dash"></span>
         </div>
-    </section>
-
-    <!-- Testing Section -->
-    <section id="testing" class="section">
-        <h2 class="section-title">HTTP Methods Testing</h2>
-        <p class="section-subtitle">Interactive testing console for all HTTP methods</p>
-
-        <div class="glass-card">
-            <div class="tab-nav">
-                <button class="tab-btn active" onclick="switchTab('get')">GET</button>
-                <button class="tab-btn" onclick="switchTab('post')">POST</button>
-                <button class="tab-btn" onclick="switchTab('put')">PUT</button>
-                <button class="tab-btn" onclick="switchTab('delete')">DELETE</button>
-                <button class="tab-btn" onclick="switchTab('head')">HEAD</button>
-            </div>
-
-            <!-- GET Tab -->
-            <div id="tab-get" class="tab-content active">
-                <label>Resource Path</label>
-                <input type="text" id="get-path" value="/style.css" placeholder="/path/to/resource">
-                
-                <label>Query Parameters (Optional)</label>
-                <input type="text" id="get-query" placeholder="param1=value1&param2=value2">
-                
-                <div class="btn-group">
-                    <button class="btn" onclick="executeGET()">Execute GET Request</button>
-                    <button class="btn btn-secondary" onclick="setExample('GET', '/style.css', '')">CSS Example</button>
-                    <button class="btn btn-secondary" onclick="setExample('GET', '/cgi-bin/hello.py', 'name=Test')">CGI Example</button>
-                </div>
-                
-                <div id="get-console" class="console"></div>
-            </div>
-
-            <!-- POST Tab -->
-            <div id="tab-post" class="tab-content">
-                <label>Target URL</label>
-                <input type="text" id="post-path" value="/cgi-bin/post_test.py">
-                
-                <label>Request Body</label>
-                <textarea id="post-body" placeholder="Request body data...">name=WebServ&message=Hello from POST!</textarea>
-                
-                <label>Content-Type</label>
-                <select id="post-content-type">
-                    <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-                    <option value="application/json">application/json</option>
-                    <option value="text/plain">text/plain</option>
-                </select>
-                
-                <div class="btn-group">
-                    <button class="btn" onclick="executePOST()">Execute POST Request</button>
-                    <button class="btn btn-secondary" onclick="setExample('POST', '/cgi-bin/calculator.py', 'a=10&b=5&op=add')">Calculator</button>
-                </div>
-                
-                <div id="post-console" class="console"></div>
-            </div>
-
-            <!-- PUT Tab -->
-            <div id="tab-put" class="tab-content">
-                <label>Resource Path</label>
-                <input type="text" id="put-path" value="/uploads/test.txt">
-                
-                <label>Content</label>
-                <textarea id="put-content" placeholder="Resource content...">Test file created via PUT method!</textarea>
-                
-                <div class="btn-group">
-                    <button class="btn" onclick="executePUT()">Execute PUT Request</button>
-                </div>
-                
-                <div id="put-console" class="console"></div>
-            </div>
-
-            <!-- DELETE Tab -->
-            <div id="tab-delete" class="tab-content">
-                <label>Resource Path</label>
-                <input type="text" id="delete-path" value="/uploads/test.txt">
-                
-                <div style="background: rgba(255, 0, 110, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--secondary);">
-                    <strong>⚠️ Warning:</strong> This will permanently delete the resource
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn btn-danger" onclick="executeDELETE()">Execute DELETE Request</button>
-                </div>
-                
-                <div id="delete-console" class="console"></div>
-            </div>
-
-            <!-- HEAD Tab -->
-            <div id="tab-head" class="tab-content">
-                <label>Resource Path</label>
-                <input type="text" id="head-path" value="/style.css">
-                
-                <div style="background: rgba(0, 245, 255, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid var(--primary);">
-                    <strong>ℹ️ Info:</strong> HEAD returns only headers, no body content
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn" onclick="executeHEAD()">Execute HEAD Request</button>
-                </div>
-                
-                <div id="head-console" class="console"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CGI Section -->
-    <section id="cgi" class="section">
-        <h2 class="section-title">CGI Playground</h2>
-        <p class="section-subtitle">Execute server-side scripts with full CGI protocol support</p>
-
-        <div class="script-grid">
-            <div class="script-card" onclick="loadCGI('/cgi-bin/hello.py', 'name=Tester')">
-                <div class="feature-icon" style="font-size: 2rem;">👋</div>
-                <h4>hello.py</h4>
-                <p>Basic greeting with environment info</p>
-                <span class="badge">Python</span>
-                <span class="badge">GET/POST</span>
-            </div>
-            
-            <div class="script-card" onclick="loadCGI('/cgi-bin/calculator.py', 'a=10&b=5&op=add')">
-                <div class="feature-icon" style="font-size: 2rem;">🧮</div>
-                <h4>calculator.py</h4>
-                <p>Arithmetic operations via CGI</p>
-                <span class="badge">Python</span>
-                <span class="badge">Math</span>
-            </div>
-            
-            <div class="script-card" onclick="loadCGI('/cgi-bin/environ.py', '')">
-                <div class="feature-icon" style="font-size: 2rem;">🔍</div>
-                <h4>environ.py</h4>
-                <p>Display all CGI environment vars</p>
-                <span class="badge">Python</span>
-                <span class="badge">Debug</span>
-            </div>
-            
-            <div class="script-card" onclick="window.open('/cgi-bin/file_manager.py', '_blank')">
-                <div class="feature-icon" style="font-size: 2rem;">📁</div>
-                <h4>file_manager.py</h4>
-                <p>Upload, list, delete files</p>
-                <span class="badge">Python</span>
-                <span class="badge">Files</span>
-            </div>
-        </div>
-
-        <div class="glass-card" style="margin-top: 2rem;">
-            <h3 style="margin-bottom: 1rem;">Custom CGI Executor</h3>
-            
-            <label>Script Path</label>
-            <input type="text" id="cgi-script" value="/cgi-bin/hello.py">
-            
-            <label>Method</label>
-            <select id="cgi-method">
-                <option value="GET">GET</option>
-                <option value="POST">POST</option>
-            </select>
-            
-            <label>Data</label>
-            <textarea id="cgi-data" placeholder="Parameters or body data...">name=WebServ&test=CGI</textarea>
-            
-            <div class="btn-group">
-                <button class="btn" onclick="executeCGI()">Execute CGI Script</button>
-                <button class="btn btn-secondary" onclick="document.getElementById('cgi-console').classList.remove('show')">Clear</button>
-            </div>
-            
-            <div id="cgi-console" class="console"></div>
-        </div>
-    </section>
-
-    <!-- Sessions Section -->
-    <section id="sessions" class="section">
-        <h2 class="section-title">Session & Cookie Management</h2>
-        <p class="section-subtitle">Test server-side sessions and cookie handling</p>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
-            <div class="glass-card">
-                <h3 style="margin-bottom: 1rem;">🔐 Session Testing</h3>
-                <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
-                    Test session creation, cookie setting, and state persistence
-                </p>
-                
-                <div class="btn-group" style="flex-direction: column;">
-                    <button class="btn" onclick="testSession()">Test Session Handler</button>
-                    <button class="btn btn-secondary" onclick="viewSession()">View Current Session</button>
-                    <a href="/session_test" class="btn" style="text-decoration: none; text-align: center;">Open Session Interface</a>
-                </div>
-                
-                <div id="session-console" class="console"></div>
-            </div>
-
-            <div class="glass-card">
-                <h3 style="margin-bottom: 1rem;">🍪 Cookie Inspector</h3>
-                <p style="color: var(--text-dim); margin-bottom: 1.5rem;">
-                    View and manage browser cookies for this domain
-                </p>
-                
-                <div class="btn-group" style="flex-direction: column;">
-                    <button class="btn" onclick="inspectCookies()">Inspect All Cookies</button>
-                    <button class="btn btn-danger" onclick="clearCookies()">Clear All Cookies</button>
-                </div>
-                
-                <div id="cookie-console" class="console"></div>
-            </div>
-        </div>
-
-        <div class="glass-card" style="margin-top: 2rem;">
-            <h3 style="margin-bottom: 1rem;">📊 Session Lifecycle</h3>
-            <div style="background: rgba(0, 0, 0, 0.3); padding: 2rem; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 0.875rem;">
-                <div style="margin-bottom: 1rem;">1. Client Request → <span style="color: var(--primary);">GET /session_test</span></div>
-                <div style="margin-bottom: 1rem;">2. Server Generates → <span style="color: var(--success);">SESSIONID=abc123...</span></div>
-                <div style="margin-bottom: 1rem;">3. Response Header → <span style="color: var(--accent);">Set-Cookie: SESSIONID=abc123</span></div>
-                <div style="margin-bottom: 1rem;">4. Browser Stores → <span style="color: var(--text-dim);">Cookie saved locally</span></div>
-                <div style="margin-bottom: 1rem;">5. Subsequent Requests → <span style="color: var(--primary);">Cookie: SESSIONID=abc123</span></div>
-                <div>6. Server Access → <span style="color: var(--success);">Retrieve session data using SESSIONID</span></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer style="text-align: center; padding: 3rem 2rem; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border);">
-        <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem;">
-            WEBSERV
-        </div>
-        <p style="color: var(--text-dim); margin-bottom: 1rem;">
-            Built with ❤️ for 42 School • C++98 • epoll • Design Patterns
+        <p class="hero-sub">
+            A <strong>fully asynchronous</strong> HTTP/1.1 server built from scratch
+            in C++98. Zero dependencies. <strong>epoll</strong>-powered. Production-grade.
         </p>
-        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem;">
-            <span style="color: var(--text-dim);">✓ HTTP/1.1 Compliant</span>
-            <span style="color: var(--text-dim);">✓ CGI 1.1 Protocol</span>
-            <span style="color: var(--text-dim);">✓ epoll I/O Multiplexing</span>
-            <span style="color: var(--text-dim);">✓ Zero Dependencies</span>
+        <div class="hero-members">
+            <div class="hero-member">
+                <div class="hero-member-avatar">AI</div>
+                <span class="hero-member-name">Ali Itawi</span>
+            </div>
+            <div class="hero-member">
+                <div class="hero-member-avatar">MM</div>
+                <span class="hero-member-name">Mohamad Al Mohamad</span>
+            </div>
+            <div class="hero-member">
+                <div class="hero-member-avatar">FK</div>
+                <span class="hero-member-name">Farah El Khatib</span>
+            </div>
+        </div>
+        <div class="hero-terminal">
+            <div class="terminal-bar">
+                <span class="terminal-dot r"></span>
+                <span class="terminal-dot y"></span>
+                <span class="terminal-dot g"></span>
+                <span class="terminal-title">webserv &mdash; bash</span>
+            </div>
+            <div class="terminal-body" id="hero-typed"></div>
+        </div>
+    </section>
+
+    <!-- ═══════ STATS ═══════ -->
+    <div class="stats-ribbon">
+        <div class="stat-item">
+            <span class="stat-number">5</span>
+            <span class="stat-label">HTTP Methods</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">O(1)</span>
+            <span class="stat-label">epoll Perf</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">5</span>
+            <span class="stat-label">Design Patterns</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">0</span>
+            <span class="stat-label">External Deps</span>
+        </div>
+    </div>
+
+    <!-- ═══════ ARCHITECTURE ═══════ -->
+    <section class="section" id="architecture">
+        <div class="reveal">
+            <div class="section-eyebrow">Architecture</div>
+            <h2 class="section-title">Reactor-Powered Event Loop</h2>
+            <p class="section-desc">
+                A single-threaded, event-driven core using Linux epoll for O(1) event
+                notification. Every byte flows through this diagram.
+            </p>
+        </div>
+
+        <div class="arch-diagram reveal">
+            <div class="arch-header">
+                <div class="arch-header-title">
+                    <span class="live-dot"></span>
+                    SYSTEM ARCHITECTURE
+                </div>
+                <span style="font-family:var(--mono);font-size:0.68rem;color:var(--text-muted)">Level-Triggered
+                    Mode</span>
+            </div>
+            <div class="arch-body">
+                <div class="arch-epoll">
+                    <h4>epoll_wait()</h4>
+                    <p>Monitors all file descriptors in a single syscall</p>
+                </div>
+                <div class="arch-connector"></div>
+                <div class="arch-dispatch">
+                    <h4>ConnectionManager::dispatch()</h4>
+                    <p>Routes events to registered handlers by fd type</p>
+                </div>
+                <div class="arch-fanout"></div>
+                <div class="arch-handlers">
+                    <div class="arch-handler">
+                        <div class="arch-handler-icon"
+                            style="background:var(--gold-dim);color:var(--gold);border:1px solid rgba(240,192,64,0.15);">
+                            Sk</div>
+                        <h5>Client Socket</h5>
+                        <p>TCP connections</p>
+                    </div>
+                    <div class="arch-handler">
+                        <div class="arch-handler-icon"
+                            style="background:var(--amber-dim);color:var(--amber);border:1px solid rgba(255,159,28,0.15);">
+                            Cg</div>
+                        <h5>CGI Handler</h5>
+                        <p>Process pipes</p>
+                    </div>
+                    <div class="arch-handler">
+                        <div class="arch-handler-icon"
+                            style="background:var(--green-dim);color:var(--green);border:1px solid rgba(52,211,153,0.15);">
+                            Sv</div>
+                        <h5>Server Socket</h5>
+                        <p>Accept new clients</p>
+                    </div>
+                    <div class="arch-handler">
+                        <div class="arch-handler-icon"
+                            style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(96,165,250,0.15);">
+                            Pp</div>
+                        <h5>Pipe FD</h5>
+                        <p>stdin/stdout/stderr</p>
+                    </div>
+                </div>
+            </div>
+            <div class="arch-code">
+                <span class="cmt">// Core event loop - single-threaded, zero allocation per iteration</span>
+                <span class="kw">while</span> (running) {
+                <span class="kw">int</span> n = <span class="fn">epoll_wait</span>(epfd, events, <span
+                    class="num">MAX_EVENTS</span>, timeout);
+                <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; n; i++)
+                connectionManager.<span class="fn">dispatch</span>(events[i]); <span class="cmt">// O(1) lookup +
+                    handler call</span>
+                }
+            </div>
+        </div>
+
+        <div class="arch-features reveal">
+            <div class="arch-feature">
+                <span class="arch-feature-tag" style="background:var(--gold-dim);color:var(--gold);">NON-BLOCKING</span>
+                <h4>Zero Blocking I/O</h4>
+                <p>Every operation - sockets, pipes, file reads - is asynchronous. No thread ever blocks on any syscall.
+                </p>
+            </div>
+            <div class="arch-feature">
+                <span class="arch-feature-tag" style="background:var(--amber-dim);color:var(--amber);">CONFIG</span>
+                <h4>NGINX-Style Blocks</h4>
+                <p>Hierarchical server/location blocks with method restrictions, upload config, CGI setup, and custom
+                    error pages.</p>
+            </div>
+            <div class="arch-feature">
+                <span class="arch-feature-tag" style="background:var(--green-dim);color:var(--green);">SECURITY</span>
+                <h4>Hardened by Default</h4>
+                <p>Path traversal protection, request size limits, timeout handling, and CGI process sandboxing built
+                    in.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ DESIGN PATTERNS ═══════ -->
+    <section class="section" id="patterns">
+        <div class="reveal">
+            <div class="section-eyebrow">Design Patterns</div>
+            <h2 class="section-title">Five GoF Patterns, One Server</h2>
+            <p class="section-desc">
+                Each pattern solves a specific architectural challenge. Click to explore the class
+                hierarchies and see how they integrate.
+            </p>
+        </div>
+
+        <div class="patterns-showcase reveal">
+            <div class="patterns-nav">
+                <button class="patterns-nav-item active" data-pattern="strategy">Strategy<span
+                        class="patterns-nav-label">HTTP Methods</span></button>
+                <button class="patterns-nav-item" data-pattern="state">State<span class="patterns-nav-label">HTTP
+                        Parsing</span></button>
+                <button class="patterns-nav-item" data-pattern="factory">Factory<span
+                        class="patterns-nav-label">Responses</span></button>
+                <button class="patterns-nav-item" data-pattern="observer">Observer<span
+                        class="patterns-nav-label">Events</span></button>
+                <button class="patterns-nav-item" data-pattern="reactor">Reactor<span class="patterns-nav-label">Core
+                        Arch</span></button>
+            </div>
+            <div class="patterns-body">
+                <!-- Strategy -->
+                <div class="pattern-panel active" data-panel="strategy">
+                    <div class="pattern-info">
+                        <div class="pattern-info-type">Behavioral Pattern</div>
+                        <h3>Strategy Pattern</h3>
+                        <p>HTTP method handlers are interchangeable strategies behind a common interface. Adding a new
+                            HTTP method means writing one class - zero changes to the request routing core.</p>
+                        <div class="pattern-info-benefit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Open/Closed Principle - extend without modifying core logic
+                        </div>
+                    </div>
+                    <div class="pattern-code-side">
+                        <div class="code-label">Class Hierarchy</div>
+                        <pre><span class="kw">class</span> <span class="cls">IMethodHandler</span> {
+<span class="kw">public</span>:
+    <span class="kw">virtual</span> <span class="cls">HttpResponse</span> <span class="fn">handle</span>(
+        <span class="kw">const</span> <span class="cls">HttpRequest</span>&amp; req,
+        <span class="kw">const</span> <span class="cls">ServerConfig</span>&amp; cfg
+    ) = <span class="str">0</span>;
+};
+
+<span class="cmt">// Concrete strategies</span>
+<span class="kw">class</span> <span class="cls">GetHandler</span>    : <span class="kw">public</span> <span class="cls">IMethodHandler</span>;
+<span class="kw">class</span> <span class="cls">PostHandler</span>   : <span class="kw">public</span> <span class="cls">IMethodHandler</span>;
+<span class="kw">class</span> <span class="cls">PutHandler</span>    : <span class="kw">public</span> <span class="cls">IMethodHandler</span>;
+<span class="kw">class</span> <span class="cls">DeleteHandler</span> : <span class="kw">public</span> <span class="cls">IMethodHandler</span>;
+<span class="kw">class</span> <span class="cls">HeadHandler</span>   : <span class="kw">public</span> <span class="cls">IMethodHandler</span>;</pre>
+                    </div>
+                </div>
+                <!-- State -->
+                <div class="pattern-panel" data-panel="state">
+                    <div class="pattern-info">
+                        <div class="pattern-info-type">Behavioral Pattern</div>
+                        <h3>State Pattern</h3>
+                        <p>HTTP parsing transitions through discrete states. Each state handles its own logic and
+                            decides when to transition - making partial reads and chunked data natural.</p>
+                        <div class="pattern-info-benefit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Handles partial TCP reads gracefully - no buffering hacks
+                        </div>
+                    </div>
+                    <div class="pattern-code-side">
+                        <div class="code-label">Parse State Machine</div>
+                        <pre><span class="kw">class</span> <span class="cls">IParseState</span> {
+<span class="kw">public</span>:
+    <span class="kw">virtual</span> <span class="cls">ParseResult</span> <span class="fn">parse</span>(
+        <span class="kw">const</span> <span class="cls">std::string</span>&amp; buffer,
+        <span class="cls">HttpRequest</span>&amp; req
+    ) = <span class="str">0</span>;
+};
+
+<span class="cmt">// State transitions:</span>
+<span class="cls">RequestLineState</span>  <span class="str">-&gt;</span>  <span class="cmt">GET /path HTTP/1.1</span>
+  <span class="str">|</span>
+<span class="cls">HeadersState</span>      <span class="str">-&gt;</span>  <span class="cmt">Key: Value pairs</span>
+  <span class="str">|</span>
+<span class="cls">BodyState</span>         <span class="str">-&gt;</span>  <span class="cmt">Content-Length body</span>
+  <span class="str">|</span>
+<span class="cls">ChunkedState</span>     <span class="str">-&gt;</span>  <span class="cmt">Chunked encoding</span></pre>
+                    </div>
+                </div>
+                <!-- Factory -->
+                <div class="pattern-panel" data-panel="factory">
+                    <div class="pattern-info">
+                        <div class="pattern-info-type">Creational Pattern</div>
+                        <h3>Factory Pattern</h3>
+                        <p>All HTTP responses are built through ResponseFactory - ensuring consistent headers, status
+                            lines, and content formatting across the entire server.</p>
+                        <div class="pattern-info-benefit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Single source of truth for response construction
+                        </div>
+                    </div>
+                    <div class="pattern-code-side">
+                        <div class="code-label">Response Factory</div>
+                        <pre><span class="kw">class</span> <span class="cls">ResponseFactory</span> {
+<span class="kw">public</span>:
+    <span class="kw">static</span> <span class="cls">HttpResponse</span> <span class="fn">createSuccess</span>(
+        <span class="kw">int</span> code, <span class="kw">const</span> <span class="cls">std::string</span>&amp; body
+    );
+    <span class="kw">static</span> <span class="cls">HttpResponse</span> <span class="fn">createRedirect</span>(
+        <span class="kw">int</span> code, <span class="kw">const</span> <span class="cls">std::string</span>&amp; url
+    );
+    <span class="kw">static</span> <span class="cls">HttpResponse</span> <span class="fn">createError</span>(
+        <span class="kw">int</span> code, <span class="kw">const</span> <span class="cls">ServerConfig</span>&amp; cfg
+    );
+    <span class="kw">static</span> <span class="cls">HttpResponse</span> <span class="fn">createCGI</span>(
+        <span class="kw">const</span> <span class="cls">std::string</span>&amp; output
+    );
+};</pre>
+                    </div>
+                </div>
+                <!-- Observer -->
+                <div class="pattern-panel" data-panel="observer">
+                    <div class="pattern-info">
+                        <div class="pattern-info-type">Behavioral Pattern</div>
+                        <h3>Observer Pattern</h3>
+                        <p>The ConnectionManager acts as a subject, notifying registered observers when I/O events fire.
+                            This decouples event detection from handling completely.</p>
+                        <div class="pattern-info-benefit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Decoupled event callbacks - handlers know nothing about epoll
+                        </div>
+                    </div>
+                    <div class="pattern-code-side">
+                        <div class="code-label">Event Notification</div>
+                        <pre><span class="kw">class</span> <span class="cls">ConnectionManager</span> {
+<span class="kw">private</span>:
+    <span class="cls">std::map</span>&lt;<span class="kw">int</span>, <span class="cls">IHandler</span>*&gt; handlers;
+
+<span class="kw">public</span>:
+    <span class="kw">void</span> <span class="fn">registerHandler</span>(<span class="kw">int</span> fd, <span class="cls">IHandler</span>* h);
+    <span class="kw">void</span> <span class="fn">unregisterHandler</span>(<span class="kw">int</span> fd);
+
+    <span class="cmt">// Notifications dispatched by event type</span>
+    <span class="kw">void</span> <span class="fn">notifyReadReady</span>(<span class="kw">int</span> fd);
+    <span class="kw">void</span> <span class="fn">notifyWriteReady</span>(<span class="kw">int</span> fd);
+    <span class="kw">void</span> <span class="fn">notifyCGIComplete</span>(<span class="kw">int</span> fd);
+};</pre>
+                    </div>
+                </div>
+                <!-- Reactor -->
+                <div class="pattern-panel" data-panel="reactor">
+                    <div class="pattern-info">
+                        <div class="pattern-info-type">Architectural Pattern</div>
+                        <h3>Reactor Pattern</h3>
+                        <p>The master pattern binding it all together. The Poller (epoll wrapper) centralizes all I/O
+                            detection, while the EventLoop dispatches to appropriate handlers - entirely non-blocking.
+                        </p>
+                        <div class="pattern-info-benefit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Single-threaded yet handles thousands of concurrent connections
+                        </div>
+                    </div>
+                    <div class="pattern-code-side">
+                        <div class="code-label">Reactor Flow</div>
+                        <pre><span class="cmt">// The three pillars of our reactor:</span>
+
+<span class="cls">Poller</span>
+  <span class="str">|</span>  <span class="cmt">wraps epoll, centralizes I/O detection</span>
+  <span class="str">v</span>
+<span class="cls">EventLoop</span>
+  <span class="str">|</span>  <span class="cmt">dispatches events to handlers</span>
+  <span class="str">v</span>
+<span class="cls">Handlers</span>
+     <span class="cmt">process data, never block</span>
+
+<span class="cmt">// Why epoll over select/poll?</span>
+<span class="fn">select</span>()  <span class="str">O(n)</span>  <span class="cmt">scan all fds every call</span>
+<span class="fn">poll</span>()    <span class="str">O(n)</span>  <span class="cmt">same, no fd limit</span>
+<span class="fn">epoll</span>()   <span class="str">O(1)</span>  <span class="cmt">kernel maintains ready list</span></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ HTTP TESTING ═══════ -->
+    <section class="section" id="testing">
+        <div class="reveal">
+            <div class="section-eyebrow">Interactive Console</div>
+            <h2 class="section-title">HTTP Methods Testing</h2>
+            <p class="section-desc">
+                Fire real requests against your running WebServ instance.
+                Watch headers, status codes, and timing in real time.
+            </p>
+        </div>
+        <div class="http-console reveal">
+            <div class="http-console-bar">
+                <button class="http-method-btn active" data-method="get"><span class="method-dot"></span>GET</button>
+                <button class="http-method-btn" data-method="post"><span class="method-dot"></span>POST</button>
+                <button class="http-method-btn" data-method="put"><span class="method-dot"></span>PUT</button>
+                <button class="http-method-btn" data-method="delete"><span class="method-dot"></span>DELETE</button>
+                <button class="http-method-btn" data-method="head"><span class="method-dot"></span>HEAD</button>
+            </div>
+            <div class="http-body">
+                <!-- GET -->
+                <div class="http-panel active" id="panel-get">
+                    <div class="field-group">
+                        <label class="field-label">Resource Path</label>
+                        <input class="field-input" type="text" id="get-path" value="/index.html"
+                            placeholder="/path/to/resource">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Query Parameters</label>
+                        <input class="field-input" type="text" id="get-query" placeholder="key=value&key2=value2">
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="executeGET()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                            Send Request
+                        </button>
+                        <button class="btn btn-ghost" onclick="setExample('GET','/index.html','')">Index Page</button>
+                        <button class="btn btn-ghost" onclick="setExample('GET','/cgi-bin/hello.py','name=Test')">CGI
+                            Script</button>
+                    </div>
+                    <div class="response-console" id="get-console"></div>
+                </div>
+
+                <!-- POST -->
+                <div class="http-panel" id="panel-post">
+                    <div class="field-group">
+                        <label class="field-label">Target URL</label>
+                        <input class="field-input" type="text" id="post-path" value="/cgi-bin/post_test.py">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Request Body</label>
+                        <textarea class="field-textarea" id="post-body"
+                            placeholder="Request body...">name=WebServ&message=Hello from POST!</textarea>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Content-Type</label>
+                        <select class="field-select" id="post-content-type">
+                            <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                            <option value="application/json">application/json</option>
+                            <option value="text/plain">text/plain</option>
+                        </select>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="executePOST()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                            Send Request
+                        </button>
+                        <button class="btn btn-ghost"
+                            onclick="setExample('POST','/cgi-bin/calculator.py','a=10&b=5&op=add')">Calculator</button>
+                    </div>
+                    <div class="response-console" id="post-console"></div>
+                </div>
+
+                <!-- PUT -->
+                <div class="http-panel" id="panel-put">
+                    <div class="field-group">
+                        <label class="field-label">Resource Path</label>
+                        <input class="field-input" type="text" id="put-path" value="/uploads/test.txt">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Content</label>
+                        <textarea class="field-textarea" id="put-content"
+                            placeholder="Resource content...">Test file created via PUT method!</textarea>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="executePUT()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                            Send Request
+                        </button>
+                    </div>
+                    <div class="response-console" id="put-console"></div>
+                </div>
+
+                <!-- DELETE -->
+                <div class="http-panel" id="panel-delete">
+                    <div class="field-group">
+                        <label class="field-label">Resource Path</label>
+                        <input class="field-input" type="text" id="delete-path" value="/uploads/test.txt">
+                    </div>
+                    <div class="info-box warn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        This will permanently delete the specified resource
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-danger" onclick="executeDELETE()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+                            </svg>
+                            Delete Resource
+                        </button>
+                    </div>
+                    <div class="response-console" id="delete-console"></div>
+                </div>
+
+                <!-- HEAD -->
+                <div class="http-panel" id="panel-head">
+                    <div class="field-group">
+                        <label class="field-label">Resource Path</label>
+                        <input class="field-input" type="text" id="head-path" value="/index.html">
+                    </div>
+                    <div class="info-box info">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        HEAD returns response headers only, without the body content
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="executeHEAD()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                            Send Request
+                        </button>
+                    </div>
+                    <div class="response-console" id="head-console"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ CGI ═══════ -->
+    <section class="section" id="cgi">
+        <div class="reveal">
+            <div class="section-eyebrow">CGI Protocol</div>
+            <h2 class="section-title">Async CGI Pipeline</h2>
+            <p class="section-desc">
+                Fork, pipe, execute - all without blocking the event loop.
+                Every pipe fd is registered with epoll for true async I/O.
+            </p>
+        </div>
+
+        <div class="cgi-pipeline">
+            <div class="cgi-pipeline-visual reveal">
+                <h4>Request-to-Response Pipeline</h4>
+                <div class="pipeline-flow">
+                    <div class="pipeline-node"
+                        style="background:var(--gold-dim);border:1px solid rgba(240,192,64,0.15);">
+                        <h5 style="color:var(--gold);">Client</h5>
+                        <p>HTTP Request</p>
+                    </div>
+                    <div class="pipeline-arrow">&#8594;</div>
+                    <div class="pipeline-node"
+                        style="background:rgba(255,255,255,0.03);border:1px solid var(--border);">
+                        <h5 style="color:var(--text);">fork()</h5>
+                        <p>New process</p>
+                    </div>
+                    <div class="pipeline-arrow">&#8594;</div>
+                    <div class="pipeline-node"
+                        style="background:var(--amber-dim);border:1px solid rgba(255,159,28,0.12);">
+                        <h5 style="color:var(--amber);">Pipes</h5>
+                        <p>stdin/stdout</p>
+                    </div>
+                    <div class="pipeline-arrow">&#8594;</div>
+                    <div class="pipeline-node"
+                        style="background:var(--gold-muted);border:1px solid rgba(240,192,64,0.1);">
+                        <h5 style="color:var(--gold-bright);">epoll</h5>
+                        <p>Watch pipes</p>
+                    </div>
+                    <div class="pipeline-arrow">&#8594;</div>
+                    <div class="pipeline-node"
+                        style="background:var(--green-dim);border:1px solid rgba(52,211,153,0.12);">
+                        <h5 style="color:var(--green);">Script</h5>
+                        <p>Execute CGI</p>
+                    </div>
+                    <div class="pipeline-arrow">&#8594;</div>
+                    <div class="pipeline-node"
+                        style="background:var(--blue-dim);border:1px solid rgba(96,165,250,0.12);">
+                        <h5 style="color:var(--blue);">Response</h5>
+                        <p>Back to client</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cgi-scripts-grid reveal">
+                <div class="cgi-script-card" onclick="loadCGI('/cgi-bin/hello.py','name=Tester')">
+                    <div class="cgi-script-name">hello.py</div>
+                    <div class="cgi-script-desc">Basic greeting with environment info</div>
+                    <div class="cgi-script-tags">
+                        <span class="cgi-script-tag">Python</span>
+                        <span class="cgi-script-tag">GET / POST</span>
+                    </div>
+                </div>
+                <div class="cgi-script-card" onclick="loadCGI('/cgi-bin/calculator.py','a=10&b=5&op=add')">
+                    <div class="cgi-script-name">calculator.py</div>
+                    <div class="cgi-script-desc">Arithmetic operations via CGI protocol</div>
+                    <div class="cgi-script-tags">
+                        <span class="cgi-script-tag">Python</span>
+                        <span class="cgi-script-tag">Math</span>
+                    </div>
+                </div>
+                <div class="cgi-script-card" onclick="loadCGI('/cgi-bin/environ.py','')">
+                    <div class="cgi-script-name">environ.py</div>
+                    <div class="cgi-script-desc">Display all CGI environment variables</div>
+                    <div class="cgi-script-tags">
+                        <span class="cgi-script-tag">Python</span>
+                        <span class="cgi-script-tag">Debug</span>
+                    </div>
+                </div>
+                <div class="cgi-script-card" onclick="window.open('/cgi-bin/file_manager.py','_blank')">
+                    <div class="cgi-script-name">file_manager.py</div>
+                    <div class="cgi-script-desc">Upload, list, and delete files</div>
+                    <div class="cgi-script-tags">
+                        <span class="cgi-script-tag">Python</span>
+                        <span class="cgi-script-tag">Files</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cgi-executor reveal">
+                <div class="cgi-executor-header">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2">
+                        <polyline points="4 17 10 11 4 5" />
+                        <line x1="12" y1="19" x2="20" y2="19" />
+                    </svg>
+                    <span>Custom CGI Executor</span>
+                </div>
+                <div class="cgi-executor-body">
+                    <div class="field-group">
+                        <label class="field-label">Script Path</label>
+                        <input class="field-input" type="text" id="cgi-script" value="/cgi-bin/hello.py">
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="field-group">
+                            <label class="field-label">Method</label>
+                            <select class="field-select" id="cgi-method">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">Data</label>
+                            <input class="field-input" type="text" id="cgi-data" value="name=WebServ&test=CGI">
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" onclick="executeCGI()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                            </svg>
+                            Execute Script
+                        </button>
+                        <button class="btn btn-ghost" onclick="clearConsole('cgi-console')">Clear Output</button>
+                    </div>
+                    <div class="response-console" id="cgi-console"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ SESSIONS ═══════ -->
+    <section class="section" id="sessions">
+        <div class="reveal">
+            <div class="section-eyebrow">State Management</div>
+            <h2 class="section-title">Sessions &amp; Cookies</h2>
+            <p class="section-desc">
+                Cookie-based session management with server-side storage,
+                UUID generation, and automatic expiry tracking.
+            </p>
+        </div>
+
+        <div class="session-layout reveal">
+            <div class="session-card">
+                <h3>Session Testing</h3>
+                <p>Create and inspect server-side sessions with cookie persistence across requests.</p>
+                <div class="btn-row" style="flex-direction:column;">
+                    <button class="btn btn-primary" onclick="testSession()"
+                        style="width:100%;justify-content:center;">Test Session Handler</button>
+                    <button class="btn btn-ghost" onclick="viewSession()"
+                        style="width:100%;justify-content:center;">View Current Session</button>
+                    <a href="/session_test" class="btn btn-ghost"
+                        style="width:100%;justify-content:center;text-decoration:none;">Open Session Interface</a>
+                </div>
+                <div class="response-console" id="session-console"></div>
+            </div>
+            <div class="session-card">
+                <h3>Cookie Inspector</h3>
+                <p>Examine and manage all cookies stored for this domain in the browser.</p>
+                <div class="btn-row" style="flex-direction:column;">
+                    <button class="btn btn-primary" onclick="inspectCookies()"
+                        style="width:100%;justify-content:center;">Inspect All Cookies</button>
+                    <button class="btn btn-danger" onclick="clearCookies()"
+                        style="width:100%;justify-content:center;">Clear All Cookies</button>
+                </div>
+                <div class="response-console" id="cookie-console"></div>
+            </div>
+        </div>
+
+        <div class="session-timeline reveal">
+            <h3>Session Lifecycle</h3>
+            <div class="timeline-track">
+                <div class="timeline-step">
+                    <div class="timeline-step-text">Client sends request <span class="hl hl-gold">GET
+                            /session_test</span></div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-step-text">Server checks for existing <span class="hl hl-gold">Cookie:
+                            SESSIONID=...</span> header</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-step-text">SessionManager generates UUID <span
+                            class="hl hl-amber">SESSIONID=a7f3c9...</span></div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-step-text">Response includes <span class="hl hl-amber">Set-Cookie:
+                            SESSIONID=a7f3c9; Path=/</span></div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-step-text">Browser stores cookie, subsequent requests include <span
+                            class="hl hl-bright">Cookie: SESSIONID=a7f3c9</span></div>
+                </div>
+                <div class="timeline-step">
+                    <div class="timeline-step-text">Server retrieves data via <span
+                            class="hl hl-green">SessionManager::getSession(id)</span> - state restored</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ FOOTER ═══════ -->
+    <footer>
+        <div class="footer-team-name">Cache Me If You Can</div>
+        <div class="footer-members">Ali Itawi &middot; Mohamad Al Mohamad &middot; Farah El Khatib</div>
+        <p class="footer-sub">Built with precision at 42 Beirut &middot; C++98 &middot; epoll &middot; 125/100</p>
+        <div class="footer-checks">
+            <span class="footer-check"><span class="chk">&#10003;</span> HTTP/1.1 Compliant</span>
+            <span class="footer-check"><span class="chk">&#10003;</span> CGI 1.1 Protocol</span>
+            <span class="footer-check"><span class="chk">&#10003;</span> epoll Multiplexing</span>
+            <span class="footer-check"><span class="chk">&#10003;</span> Zero Dependencies</span>
         </div>
     </footer>
 
     <script>
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+        /* ═══════ PARTICLES ═══════ */
+        (function () {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let mouse = { x: -1000, y: -1000 };
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+            class Particle {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.vx = (Math.random() - 0.5) * 0.3;
+                    this.vy = (Math.random() - 0.5) * 0.3;
+                    this.radius = Math.random() * 1.5 + 0.5;
+                    this.opacity = Math.random() * 0.35 + 0.08;
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    const dx = this.x - mouse.x;
+                    const dy = this.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        const force = (120 - dist) / 120 * 0.02;
+                        this.vx += (dx / dist) * force;
+                        this.vy += (dy / dist) * force;
+                    }
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(240, 192, 64, ${this.opacity})`;
+                    ctx.fill();
+                }
+            }
+
+            const count = Math.min(80, Math.floor(window.innerWidth * 0.05));
+            for (let i = 0; i < count; i++) particles.push(new Particle());
+
+            function drawLines() {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 140) {
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(240, 192, 64, ${0.05 * (1 - dist / 140)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function loop() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                drawLines();
+                requestAnimationFrame(loop);
+            }
+            loop();
+        })();
+
+        /* ═══════ HERO TYPING ═══════ */
+        (function () {
+            const el = document.getElementById('hero-typed');
+            const lines = [
+                { text: '$ make && ./webserv conf/default.conf', cls: '' },
+                { text: '# [INFO] Configuration loaded: 1 server block', cls: 'comment' },
+                { text: '# [INFO] Listening on 0.0.0.0:8080', cls: 'comment' },
+                { text: '# [INFO] epoll: Level-Triggered mode active', cls: 'comment' },
+                { text: '# [INFO] WebServ ready - accepting connections', cls: 'comment' },
+            ];
+            let lineIdx = 0, charIdx = 0, output = '';
+
+            function type() {
+                if (lineIdx >= lines.length) {
+                    el.innerHTML = output + '<span class="cursor-blink"></span>';
+                    return;
+                }
+                const line = lines[lineIdx];
+                if (charIdx <= line.text.length) {
+                    const partial = line.text.substring(0, charIdx);
+                    let html = output;
+                    if (line.cls === 'comment') {
+                        html += '<span class="comment">' + partial + '</span>';
+                    } else {
+                        const colored = partial
+                            .replace(/^\$/, '<span class="prompt">$</span>')
+                            .replace(/make/, '<span class="fn">make</span>')
+                            .replace(/\.\/webserv/, '<span class="fn">./webserv</span>')
+                            .replace(/conf\/default\.conf/, '<span class="path">conf/default.conf</span>');
+                        html += colored;
+                    }
+                    html += '<span class="cursor-blink"></span>';
+                    el.innerHTML = html;
+                    charIdx++;
+                    setTimeout(type, lineIdx === 0 ? 35 : 18);
+                } else {
+                    output += lineIdx === 0
+                        ? lines[lineIdx].text
+                            .replace(/^\$/, '<span class="prompt">$</span>')
+                            .replace(/make/, '<span class="fn">make</span>')
+                            .replace(/\.\/webserv/, '<span class="fn">./webserv</span>')
+                            .replace(/conf\/default\.conf/, '<span class="path">conf/default.conf</span>') + '\n'
+                        : '<span class="comment">' + lines[lineIdx].text + '</span>\n';
+                    lineIdx++;
+                    charIdx = 0;
+                    setTimeout(type, lineIdx === 1 ? 600 : 300);
+                }
+            }
+            setTimeout(type, 800);
+        })();
+
+        /* ═══════ NAVBAR ═══════ */
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+            const sections = ['architecture', 'patterns', 'testing', 'cgi', 'sessions'];
+            let current = '';
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top < window.innerHeight * 0.4) current = id;
+            });
+            document.querySelectorAll('.nav-links a').forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + current);
             });
         });
 
-        // Tab switching
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(`tab-${tab}`).classList.add('active');
+        /* ═══════ SCROLL REVEAL ═══════ */
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        /* ═══════ HTTP TAB SWITCHING ═══════ */
+        document.querySelectorAll('.http-method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const method = btn.dataset.method;
+                document.querySelectorAll('.http-method-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.http-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('panel-' + method).classList.add('active');
+            });
+        });
+
+        /* ═══════ PATTERN TABS ═══════ */
+        document.querySelectorAll('.patterns-nav-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.dataset.pattern;
+                document.querySelectorAll('.patterns-nav-item').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.pattern-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelector(`.pattern-panel[data-panel="${name}"]`).classList.add('active');
+            });
+        });
+
+        /* ═══════ CONSOLE ═══════ */
+        function showConsole(id, status, statusCode, statusText, time, body) {
+            const con = document.getElementById(id);
+            con.innerHTML = `
+            <div class="console-header">
+                <span class="console-status ${status}">
+                    <span class="status-dot"></span>
+                    ${statusCode} ${statusText}
+                </span>
+                <span class="console-time">${time}ms</span>
+            </div>
+            <div class="console-body">${body}</div>
+        `;
+            con.classList.add('show');
         }
 
-        // Show console output
-        function showConsole(id, content, status = 'success') {
-            const console = document.getElementById(id);
-            console.innerHTML = `<pre>${content}</pre>`;
-            console.classList.add('show');
-            
-            if (status === 'error') {
-                console.style.borderColor = 'var(--secondary)';
-                console.style.color = 'var(--secondary)';
-            } else {
-                console.style.borderColor = 'var(--primary);
-                console.style.color = 'var(--success)';
-            }
+        function formatHeaders(response) {
+            return Array.from(response.headers.entries())
+                .map(([k, v]) => `<span class="h-key">${k}</span>: <span class="h-val">${v}</span>`)
+                .join('\n');
         }
 
-        // Set example
+        function clearConsole(id) {
+            const con = document.getElementById(id);
+            con.classList.remove('show');
+            con.innerHTML = '';
+        }
+
         function setExample(method, path, data) {
             if (method === 'GET') {
                 document.getElementById('get-path').value = path;
@@ -992,135 +2920,88 @@
             }
         }
 
-        // HTTP Methods
+        /* ═══════ HTTP METHODS ═══════ */
         async function executeGET() {
             const path = document.getElementById('get-path').value;
             const query = document.getElementById('get-query').value;
             const url = query ? `${path}?${query}` : path;
-            
+            const t0 = Date.now();
             try {
-                const response = await fetch(url);
-                const body = await response.text();
-                const headers = Array.from(response.headers.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
-                
-                showConsole('get-console', 
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  GET REQUEST SUCCESSFUL                ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `URL: ${url}\n\n` +
-                    `Headers:\n${headers}\n\n` +
-                    `Body (first 500 chars):\n${body.substring(0, 500)}${body.length > 500 ? '...' : ''}`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch(url);
+                const body = await r.text();
+                const t = Date.now() - t0;
+                const hdrs = formatHeaders(r);
+                showConsole('get-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">URL</span>: ${url}\n\n` +
+                    `<span class="h-key">Headers</span>:\n${hdrs}\n\n` +
+                    `<span class="h-key">Body</span> (first 500 chars):\n${escapeHtml(body.substring(0, 500))}${body.length > 500 ? '...' : ''}`
                 );
-            } catch (error) {
-                showConsole('get-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('get-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
         async function executePOST() {
             const path = document.getElementById('post-path').value;
             const body = document.getElementById('post-body').value;
-            const contentType = document.getElementById('post-content-type').value;
-            
+            const ct = document.getElementById('post-content-type').value;
+            const t0 = Date.now();
             try {
-                const response = await fetch(path, {
-                    method: 'POST',
-                    headers: { 'Content-Type': contentType },
-                    body: body
-                });
-                
-                const responseBody = await response.text();
-                const headers = Array.from(response.headers.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
-                
-                showConsole('post-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  POST REQUEST SUCCESSFUL               ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `URL: ${path}\n` +
-                    `Content-Type: ${contentType}\n\n` +
-                    `Response:\n${responseBody}`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': ct }, body });
+                const rb = await r.text();
+                const t = Date.now() - t0;
+                showConsole('post-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">URL</span>: ${path}\n` +
+                    `<span class="h-key">Content-Type</span>: ${ct}\n\n` +
+                    `<span class="h-key">Response</span>:\n${escapeHtml(rb)}`
                 );
-            } catch (error) {
-                showConsole('post-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('post-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
         async function executePUT() {
             const path = document.getElementById('put-path').value;
             const content = document.getElementById('put-content').value;
-            
+            const t0 = Date.now();
             try {
-                const response = await fetch(path, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: content
-                });
-                
-                const body = await response.text();
-                
-                showConsole('put-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  PUT REQUEST SUCCESSFUL                ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `Resource: ${path}\n\n` +
-                    `Response:\n${body}`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch(path, { method: 'PUT', headers: { 'Content-Type': 'text/plain' }, body: content });
+                const rb = await r.text();
+                const t = Date.now() - t0;
+                showConsole('put-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">Resource</span>: ${path}\n\n` +
+                    `<span class="h-key">Response</span>:\n${escapeHtml(rb)}`
                 );
-            } catch (error) {
-                showConsole('put-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('put-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
         async function executeDELETE() {
             const path = document.getElementById('delete-path').value;
-            
-            if (!confirm(`⚠️ Delete ${path}?`)) return;
-            
+            if (!confirm('Delete ' + path + '?')) return;
+            const t0 = Date.now();
             try {
-                const response = await fetch(path, { method: 'DELETE' });
-                const body = await response.text();
-                
-                showConsole('delete-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  DELETE REQUEST SUCCESSFUL             ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `Deleted: ${path}\n\n` +
-                    `Response:\n${body}`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch(path, { method: 'DELETE' });
+                const rb = await r.text();
+                const t = Date.now() - t0;
+                showConsole('delete-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">Deleted</span>: ${path}\n\n` +
+                    `<span class="h-key">Response</span>:\n${escapeHtml(rb)}`
                 );
-            } catch (error) {
-                showConsole('delete-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('delete-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
         async function executeHEAD() {
             const path = document.getElementById('head-path').value;
-            
+            const t0 = Date.now();
             try {
-                const response = await fetch(path, { method: 'HEAD' });
-                const headers = Array.from(response.headers.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
-                
-                showConsole('head-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  HEAD REQUEST SUCCESSFUL               ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `Resource: ${path}\n\n` +
-                    `Headers:\n${headers}\n\n` +
-                    `Note: HEAD returns only headers, no body`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch(path, { method: 'HEAD' });
+                const t = Date.now() - t0;
+                const hdrs = formatHeaders(r);
+                showConsole('head-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">Resource</span>: ${path}\n\n` +
+                    `<span class="h-key">Headers</span>:\n${hdrs}\n\n` +
+                    `<span class="h-val">HEAD returns headers only - no body content</span>`
                 );
-            } catch (error) {
-                showConsole('head-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('head-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
-        // CGI Functions
+        /* ═══════ CGI ═══════ */
         function loadCGI(path, data) {
             document.getElementById('cgi-script').value = path;
             document.getElementById('cgi-data').value = data;
@@ -1131,131 +3012,100 @@
             const script = document.getElementById('cgi-script').value;
             const method = document.getElementById('cgi-method').value;
             const data = document.getElementById('cgi-data').value;
-            
             let url = script;
-            const options = { method };
-            
-            if (method === 'GET' && data) {
-                url += `?${data}`;
-            } else if (method === 'POST') {
-                options.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
-                options.body = data;
+            const opts = { method };
+            if (method === 'GET' && data) url += '?' + data;
+            else if (method === 'POST') {
+                opts.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+                opts.body = data;
             }
-            
+            const t0 = Date.now();
             try {
-                const startTime = Date.now();
-                const response = await fetch(url, options);
-                const executionTime = Date.now() - startTime;
-                const body = await response.text();
-                
-                showConsole('cgi-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  CGI EXECUTION SUCCESSFUL              ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Script: ${script}\n` +
-                    `Method: ${method}\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `Execution Time: ${executionTime}ms\n\n` +
-                    `Output:\n${body}`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch(url, opts);
+                const rb = await r.text();
+                const t = Date.now() - t0;
+                showConsole('cgi-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">Script</span>: ${script}\n` +
+                    `<span class="h-key">Method</span>: ${method}\n\n` +
+                    `<span class="h-key">Output</span>:\n${escapeHtml(rb)}`
                 );
-            } catch (error) {
-                showConsole('cgi-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('cgi-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
-        // Session Functions
+        /* ═══════ SESSIONS ═══════ */
         async function testSession() {
+            const t0 = Date.now();
             try {
-                const response = await fetch('/session_test', { credentials: 'include' });
-                const body = await response.text();
-                const cookies = document.cookie;
-                
-                showConsole('session-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  SESSION TEST SUCCESSFUL               ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Status: ${response.status} ${response.statusText}\n` +
-                    `Cookies: ${cookies || '(none)'}\n\n` +
-                    `Response:\n${body.substring(0, 400)}...`,
-                    response.ok ? 'success' : 'error'
+                const r = await fetch('/session_test', { credentials: 'include' });
+                const rb = await r.text();
+                const t = Date.now() - t0;
+                showConsole('session-console', r.ok ? 'success' : 'error', r.status, r.statusText, t,
+                    `<span class="h-key">Cookies</span>: ${document.cookie || '(none)'}\n\n` +
+                    `<span class="h-key">Response</span>:\n${escapeHtml(rb.substring(0, 400))}${rb.length > 400 ? '...' : ''}`
                 );
-            } catch (error) {
-                showConsole('session-console', `❌ Error: ${error.message}`, 'error');
-            }
+            } catch (e) { showConsole('session-console', 'error', 0, 'Network Error', Date.now() - t0, `<span class="h-err">${e.message}</span>`); }
         }
 
         function viewSession() {
             const cookies = document.cookie;
-            const sessionId = cookies.split(';').find(c => c.trim().startsWith('SESSIONID='));
-            
-            if (sessionId) {
-                showConsole('session-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  ACTIVE SESSION FOUND                  ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `✓ Session Active\n\n` +
-                    `${sessionId.trim()}\n\n` +
-                    `All Cookies:\n${cookies}\n\n` +
-                    `Status: Your session is active and will be sent\nwith all requests to this domain.`,
-                    'success'
+            const sid = cookies.split(';').find(c => c.trim().startsWith('SESSIONID='));
+            if (sid) {
+                showConsole('session-console', 'success', 200, 'OK', 0,
+                    `<span class="h-status">Session Active</span>\n\n` +
+                    `<span class="h-key">Session</span>: ${sid.trim()}\n` +
+                    `<span class="h-key">All Cookies</span>: ${cookies}`
                 );
             } else {
-                showConsole('session-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  NO ACTIVE SESSION                     ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `✗ No session cookie found\n\n` +
-                    `To create a session, click "Test Session Handler"\nor visit /session_test\n\n` +
-                    `Current Cookies: ${cookies || '(none)'}`,
-                    'error'
+                showConsole('session-console', 'error', 0, 'No Session', 0,
+                    `<span class="h-err">No active session found</span>\n\n` +
+                    `Click "Test Session Handler" or visit /session_test to create one.\n` +
+                    `<span class="h-key">Current Cookies</span>: ${cookies || '(none)'}`
                 );
             }
         }
 
         function inspectCookies() {
             const cookies = document.cookie;
-            
             if (cookies) {
-                const cookieArray = cookies.split(';').map(c => c.trim());
-                showConsole('cookie-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  COOKIE INSPECTOR                      ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `Found ${cookieArray.length} cookie(s):\n\n` +
-                    cookieArray.map((c, i) => `${i + 1}. ${c}`).join('\n') + '\n\n' +
-                    `Raw:\n${cookies}`,
-                    'success'
+                const arr = cookies.split(';').map(c => c.trim());
+                showConsole('cookie-console', 'success', 200, 'OK', 0,
+                    `<span class="h-status">Found ${arr.length} cookie(s)</span>\n\n` +
+                    arr.map((c, i) => `<span class="h-key">${i + 1}</span>. ${c}`).join('\n') + '\n\n' +
+                    `<span class="h-key">Raw</span>: ${cookies}`
                 );
             } else {
-                showConsole('cookie-console',
-                    `╔════════════════════════════════════════╗\n` +
-                    `║  NO COOKIES FOUND                      ║\n` +
-                    `╚════════════════════════════════════════╝\n\n` +
-                    `No cookies are currently stored for this domain.\n\n` +
-                    `Cookies will be set when you visit endpoints that\nrequire session management.`,
-                    'error'
+                showConsole('cookie-console', 'error', 0, 'Empty', 0,
+                    `<span class="h-err">No cookies stored for this domain</span>\n\n` +
+                    `Cookies will be set when you visit endpoints that require session management.`
                 );
             }
         }
 
         function clearCookies() {
-            if (!confirm('⚠️ Clear all cookies?')) return;
-            
-            document.cookie.split(';').forEach(cookie => {
-                const name = cookie.split('=')[0].trim();
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            if (!confirm('Clear all cookies?')) return;
+            document.cookie.split(';').forEach(c => {
+                const name = c.split('=')[0].trim();
+                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             });
-            
-            showConsole('cookie-console',
-                `╔════════════════════════════════════════╗\n` +
-                `║  COOKIES CLEARED                       ║\n` +
-                `╚════════════════════════════════════════╝\n\n` +
-                `✓ All cookies have been cleared!\n\n` +
-                `Refresh the page to verify.`,
-                'success'
+            showConsole('cookie-console', 'success', 200, 'Cleared', 0,
+                `<span class="h-status">All cookies cleared</span>\n\nRefresh the page to verify.`
             );
         }
+
+        /* ═══════ UTIL ═══════ */
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+                document.querySelector('.nav-links').classList.remove('open');
+            });
+        });
     </script>
 </body>
+
 </html>
