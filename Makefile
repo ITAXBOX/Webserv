@@ -45,6 +45,7 @@ all: $(NAME)
 $(NAME): $(OBJ_FILES)
 	@echo "Linking $(NAME)..."
 	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJ_FILES)
+	@mkdir -p www/uploads
 	@echo "✅ Build complete: ./$(NAME) <config_file>"
 
 debug:
@@ -63,6 +64,8 @@ clean:
 fclean: clean
 	@echo "🧹 Removing binary..."
 	@rm -f $(NAME)
+	@rm -rf www/uploads
+	@echo "🧹 Removed www/uploads directory"
 
 re: fclean all
 
