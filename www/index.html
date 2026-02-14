@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebServ - Cache Me If You Can</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
         * {
             margin: 0;
@@ -15,9 +15,9 @@
         }
 
         :root {
-            --bg: #06060a;
-            --surface: #0c0c14;
-            --surface-2: #111119;
+            --bg: #030305;
+            --surface: #0a0a12;
+            --surface-2: #0e0e18;
             --border: rgba(255, 200, 80, 0.06);
             --border-hover: rgba(255, 200, 80, 0.25);
             --gold: #f0c040;
@@ -33,6 +33,8 @@
             --red-dim: rgba(248, 113, 113, 0.1);
             --blue: #60a5fa;
             --blue-dim: rgba(96, 165, 250, 0.1);
+            --rose: #e879a8;
+            --violet: #a78bfa;
             --text: #f5f0e8;
             --text-dim: rgba(245, 240, 232, 0.5);
             --text-muted: rgba(245, 240, 232, 0.25);
@@ -86,23 +88,107 @@
             filter: blur(180px);
             z-index: 0;
             pointer-events: none;
-            opacity: 0.15;
+            opacity: 0.18;
         }
 
         .glow-spot.gold {
-            width: 700px;
-            height: 700px;
-            background: var(--gold);
-            top: -20%;
-            left: -10%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+            top: -25%;
+            left: -12%;
+            animation: auroraFloat1 12s ease-in-out infinite;
         }
 
         .glow-spot.amber {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--amber) 0%, transparent 70%);
+            bottom: -5%;
+            right: -12%;
+            animation: auroraFloat2 14s ease-in-out infinite;
+        }
+
+        .glow-spot.rose {
             width: 500px;
             height: 500px;
-            background: var(--amber);
-            bottom: 0%;
-            right: -10%;
+            background: radial-gradient(circle, var(--rose) 0%, transparent 70%);
+            top: 30%;
+            right: 10%;
+            opacity: 0.06;
+            animation: auroraFloat3 16s ease-in-out infinite;
+        }
+
+        .glow-spot.violet {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, var(--violet) 0%, transparent 70%);
+            bottom: 20%;
+            left: 15%;
+            opacity: 0.05;
+            animation: auroraFloat1 18s ease-in-out infinite reverse;
+        }
+
+        @keyframes auroraFloat1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(40px, 30px) scale(1.05); }
+            66% { transform: translate(-20px, -15px) scale(0.95); }
+        }
+        @keyframes auroraFloat2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-30px, -20px) scale(1.08); }
+            66% { transform: translate(25px, 15px) scale(0.92); }
+        }
+        @keyframes auroraFloat3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-40px, 30px) scale(1.1); }
+        }
+
+        /* ───── HERO AURORA MESH ───── */
+        .hero-aurora {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-aurora::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse 600px 600px at 20% 30%, rgba(240, 192, 64, 0.08) 0%, transparent 70%),
+                radial-gradient(ellipse 500px 500px at 75% 50%, rgba(255, 159, 28, 0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 400px 400px at 50% 70%, rgba(232, 121, 168, 0.04) 0%, transparent 70%),
+                radial-gradient(ellipse 350px 350px at 30% 80%, rgba(167, 139, 250, 0.03) 0%, transparent 70%);
+            animation: auroraMesh 20s ease-in-out infinite;
+        }
+
+        @keyframes auroraMesh {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(3deg) scale(1.02); }
+            50% { transform: rotate(-2deg) scale(0.98); }
+            75% { transform: rotate(1deg) scale(1.01); }
+        }
+
+        /* ───── NOISE TEXTURE ───── */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
         }
 
         /* ═══════ NAVIGATION ═══════ */
@@ -207,25 +293,52 @@
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 0.4rem 1.2rem;
-            background: rgba(240, 192, 64, 0.04);
-            border: 1px solid rgba(240, 192, 64, 0.12);
+            gap: 10px;
+            padding: 0.5rem 1.5rem;
+            background: rgba(240, 192, 64, 0.03);
+            border: 1px solid rgba(240, 192, 64, 0.1);
             border-radius: 100px;
             font-family: var(--mono);
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--gold);
-            margin-bottom: 2.5rem;
+            margin-bottom: 3rem;
             animation: fadeDown 0.8s ease both;
+            backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .hero-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(240, 192, 64, 0.06), transparent);
+            animation: badgeSweep 4s ease-in-out infinite;
+        }
+
+        @keyframes badgeSweep {
+            0% { left: -100%; }
+            100% { left: 200%; }
         }
 
         .hero-badge .dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--gold);
-            box-shadow: 0 0 8px var(--gold);
+            box-shadow: 0 0 10px var(--gold), 0 0 20px rgba(240, 192, 64, 0.3);
             animation: pulse-dot 2s ease infinite;
+        }
+
+        .hero-badge .score {
+            font-weight: 700;
+            color: var(--gold-bright);
+            text-shadow: 0 0 12px rgba(240, 192, 64, 0.4);
         }
 
         @keyframes pulse-dot {
@@ -244,52 +357,138 @@
 
         .hero h1 {
             font-family: var(--heading);
-            font-size: clamp(4rem, 10vw, 9rem);
-            font-weight: 800;
-            letter-spacing: -2px;
-            line-height: 0.92;
-            margin-bottom: 1.5rem;
+            font-size: clamp(4.5rem, 12vw, 11rem);
+            font-weight: 900;
+            letter-spacing: -4px;
+            line-height: 0.88;
+            margin-bottom: 0.5rem;
             animation: fadeUp 0.8s ease 0.1s both;
+            position: relative;
+            filter: drop-shadow(0 0 80px rgba(240, 192, 64, 0.15));
         }
 
         .hero h1 .gradient {
-            background: linear-gradient(135deg, var(--cream) 0%, var(--gold) 40%, var(--amber) 70%, var(--gold-bright) 100%);
+            background: linear-gradient(135deg, #fff 0%, var(--cream) 15%, var(--gold) 35%, var(--amber) 55%, var(--gold-bright) 75%, #fff 100%);
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: titleShimmer 6s ease-in-out infinite;
+            position: relative;
+        }
+
+        .hero h1 .gradient::after {
+            content: 'WebServ';
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.15) 50%, transparent 60%);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlint 5s ease-in-out infinite 1s;
+        }
+
+        @keyframes titleShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes titleGlint {
+            0%, 100% { background-position: 200% 50%; }
+            50% { background-position: -100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-family: var(--mono);
+            font-size: clamp(0.7rem, 1.2vw, 0.85rem);
+            color: var(--text-muted);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 2.5rem;
+            animation: fadeUp 0.8s ease 0.12s both;
+            opacity: 0.6;
         }
 
         .hero-team {
-            font-family: var(--mono);
-            font-size: 0.78rem;
-            color: var(--gold);
-            letter-spacing: 4px;
+            font-family: var(--body);
+            font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+            font-weight: 500;
+            letter-spacing: 6px;
             text-transform: uppercase;
-            margin-bottom: 1.5rem;
-            animation: fadeUp 0.8s ease 0.15s both;
+            margin-bottom: 2rem;
+            animation: fadeUp 0.8s ease 0.15s both, teamGlow 4s ease-in-out infinite;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 20px;
+            background: linear-gradient(90deg, var(--gold), var(--gold-bright), var(--amber), var(--gold));
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        @keyframes teamGlow {
+            0%, 100% { background-position: 0% 50%; filter: drop-shadow(0 0 8px rgba(240, 192, 64, 0.2)); }
+            50% { background-position: 100% 50%; filter: drop-shadow(0 0 16px rgba(240, 192, 64, 0.35)); }
         }
 
         .hero-team .team-dash {
-            width: 20px;
+            width: 40px;
             height: 1px;
             background: linear-gradient(to right, transparent, var(--gold), transparent);
+            position: relative;
+        }
+
+        .hero-team .team-dash::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 6px var(--gold);
+        }
+
+        .hero-team .team-diamond {
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            transform: rotate(45deg);
+            box-shadow: 0 0 8px rgba(240, 192, 64, 0.4);
+            flex-shrink: 0;
         }
 
         .hero-sub {
-            font-size: clamp(1rem, 1.8vw, 1.15rem);
+            font-size: clamp(1rem, 1.6vw, 1.12rem);
             color: var(--text-dim);
-            max-width: 540px;
-            line-height: 1.75;
+            max-width: 560px;
+            line-height: 1.8;
             margin-bottom: 3rem;
             animation: fadeUp 0.8s ease 0.2s both;
+            font-weight: 400;
         }
 
         .hero-sub strong {
             color: var(--gold-bright);
             font-weight: 600;
+            position: relative;
+        }
+
+        .hero-sub strong::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+            opacity: 0.4;
         }
 
         /* ───── TEAM STRIP ───── */
@@ -307,8 +506,8 @@
         }
 
         .hero-member-avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: 1.5px solid rgba(240, 192, 64, 0.2);
             display: flex;
@@ -318,7 +517,15 @@
             font-size: 0.6rem;
             font-weight: 700;
             color: var(--gold);
-            background: rgba(240, 192, 64, 0.06);
+            background: linear-gradient(135deg, rgba(240, 192, 64, 0.08), rgba(255, 159, 28, 0.04));
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 0 rgba(240, 192, 64, 0);
+        }
+
+        .hero-member:hover .hero-member-avatar {
+            border-color: var(--gold);
+            box-shadow: 0 0 16px rgba(240, 192, 64, 0.2);
+            transform: scale(1.1);
         }
 
         .hero-member-name {
@@ -326,27 +533,46 @@
             font-size: 0.82rem;
             color: var(--text-dim);
             font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .hero-member:hover .hero-member-name {
+            color: var(--gold-bright);
         }
 
         /* ───── TYPING TERMINAL ───── */
         .hero-terminal {
             width: 100%;
             max-width: 640px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid rgba(240, 192, 64, 0.08);
+            border-radius: 16px;
             overflow: hidden;
             animation: fadeUp 0.8s ease 0.35s both;
             text-align: left;
+            box-shadow:
+                0 0 0 1px rgba(240, 192, 64, 0.03),
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 100px rgba(240, 192, 64, 0.03);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .hero-terminal:hover {
+            border-color: rgba(240, 192, 64, 0.15);
+            box-shadow:
+                0 0 0 1px rgba(240, 192, 64, 0.06),
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 120px rgba(240, 192, 64, 0.06);
         }
 
         .terminal-bar {
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 12px 16px;
+            padding: 14px 18px;
             background: rgba(240, 192, 64, 0.02);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(240, 192, 64, 0.06);
         }
 
         .terminal-dot {
@@ -418,57 +644,6 @@
             50% {
                 opacity: 0;
             }
-        }
-
-        /* ═══════ STATS RIBBON ═══════ */
-        .stats-ribbon {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            padding: 0 2rem;
-            max-width: 1000px;
-            margin: -2rem auto 0;
-            animation: fadeUp 0.8s ease 0.5s both;
-        }
-
-        .stat-item {
-            flex: 1;
-            text-align: center;
-            padding: 2rem 1rem;
-            border: 1px solid var(--border);
-            background: rgba(12, 12, 20, 0.7);
-            backdrop-filter: blur(10px);
-        }
-
-        .stat-item:first-child {
-            border-radius: var(--radius) 0 0 var(--radius);
-        }
-
-        .stat-item:last-child {
-            border-radius: 0 var(--radius) var(--radius) 0;
-        }
-
-        .stat-item+.stat-item {
-            border-left: none;
-        }
-
-        .stat-number {
-            font-family: var(--mono);
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--gold);
-            display: block;
-        }
-
-        .stat-label {
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 0.25rem;
         }
 
         /* ═══════ SECTIONS BASE ═══════ */
@@ -1657,20 +1832,35 @@
             position: relative;
             z-index: 1;
             text-align: center;
-            padding: 5rem 2rem 4rem;
+            padding: 6rem 2rem 4rem;
             border-top: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
         }
 
         .footer-team-name {
             font-family: var(--heading);
-            font-size: 1.8rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--cream), var(--gold), var(--amber));
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #fff, var(--cream), var(--gold), var(--amber), var(--gold-bright));
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            animation: titleShimmer 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(240, 192, 64, 0.1));
         }
 
         .footer-members {
@@ -1678,13 +1868,15 @@
             font-size: 0.88rem;
             color: var(--text-dim);
             margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
         }
 
         .footer-sub {
             font-size: 0.78rem;
             color: var(--text-muted);
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             font-family: var(--mono);
+            letter-spacing: 0.5px;
         }
 
         .footer-checks {
@@ -1701,10 +1893,21 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            padding: 0.4rem 0.8rem;
+            border-radius: 100px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .footer-check:hover {
+            border-color: rgba(240, 192, 64, 0.1);
+            background: rgba(240, 192, 64, 0.03);
+            color: var(--gold-bright);
         }
 
         .footer-check .chk {
             color: var(--gold);
+            text-shadow: 0 0 6px rgba(240, 192, 64, 0.3);
         }
 
         /* ═══════ SCROLL REVEAL ═══════ */
@@ -1832,24 +2035,6 @@
                 font-size: 0.88rem;
             }
 
-            .stats-ribbon {
-                flex-direction: column;
-                gap: 0;
-            }
-
-            .stat-item:first-child {
-                border-radius: var(--radius) var(--radius) 0 0;
-            }
-
-            .stat-item:last-child {
-                border-radius: 0 0 var(--radius) var(--radius);
-            }
-
-            .stat-item+.stat-item {
-                border-left: 1px solid var(--border);
-                border-top: none;
-            }
-
             .session-layout {
                 grid-template-columns: 1fr;
             }
@@ -1880,7 +2065,17 @@
             }
 
             .hero h1 {
-                letter-spacing: -1px;
+                letter-spacing: -2px;
+            }
+
+            .hero-team {
+                letter-spacing: 3px;
+                gap: 12px;
+                font-size: 0.8rem;
+            }
+
+            .hero-subtitle {
+                letter-spacing: 4px;
             }
 
             .btn-row {
@@ -1923,6 +2118,9 @@
     <div class="grid-overlay"></div>
     <div class="glow-spot gold"></div>
     <div class="glow-spot amber"></div>
+    <div class="glow-spot rose"></div>
+    <div class="glow-spot violet"></div>
+    <div class="noise-overlay"></div>
 
     <!-- ═══════ NAVIGATION ═══════ -->
     <nav id="navbar">
@@ -1982,14 +2180,18 @@
 
     <!-- ═══════ HERO ═══════ -->
     <section class="hero" id="hero">
+        <div class="hero-aurora"></div>
         <div class="hero-badge">
             <span class="dot"></span>
-            42 Beirut &middot; Outstanding Project &middot; 125/100
+            42 Beirut &middot; Outstanding Project &middot; <span class="score">125/100</span>
         </div>
         <h1><span class="gradient">WebServ</span></h1>
+        <div class="hero-subtitle">HTTP/1.1 Server from Scratch</div>
         <div class="hero-team">
             <span class="team-dash"></span>
+            <span class="team-diamond"></span>
             Cache Me If You Can
+            <span class="team-diamond"></span>
             <span class="team-dash"></span>
         </div>
         <p class="hero-sub">
@@ -2020,26 +2222,6 @@
             <div class="terminal-body" id="hero-typed"></div>
         </div>
     </section>
-
-    <!-- ═══════ STATS ═══════ -->
-    <div class="stats-ribbon">
-        <div class="stat-item">
-            <span class="stat-number">5</span>
-            <span class="stat-label">HTTP Methods</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">O(1)</span>
-            <span class="stat-label">epoll Perf</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">5</span>
-            <span class="stat-label">Design Patterns</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-number">0</span>
-            <span class="stat-label">External Deps</span>
-        </div>
-    </div>
 
     <!-- ═══════ ARCHITECTURE ═══════ -->
     <section class="section" id="architecture">
@@ -2698,7 +2880,7 @@
     <footer>
         <div class="footer-team-name">Cache Me If You Can</div>
         <div class="footer-members">Ali Itawi &middot; Mohamad Al Mohamad &middot; Farah El Khatib</div>
-        <p class="footer-sub">Built with precision at 42 Beirut &middot; C++98 &middot; epoll &middot; 125/100</p>
+        <p class="footer-sub">Crafted with precision at 42 Beirut &middot; C++98 &middot; epoll &middot; 125/100</p>
         <div class="footer-checks">
             <span class="footer-check"><span class="chk">&#10003;</span> HTTP/1.1 Compliant</span>
             <span class="footer-check"><span class="chk">&#10003;</span> CGI 1.1 Protocol</span>
@@ -2715,6 +2897,14 @@
             let particles = [];
             let mouse = { x: -1000, y: -1000 };
 
+            const colors = [
+                { r: 240, g: 192, b: 64 },   // gold
+                { r: 255, g: 159, b: 28 },   // amber
+                { r: 255, g: 217, b: 102 },  // bright gold
+                { r: 232, g: 121, b: 168 },  // rose (subtle)
+                { r: 167, g: 139, b: 250 },  // violet (subtle)
+            ];
+
             function resize() {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
@@ -2728,24 +2918,40 @@
                 reset() {
                     this.x = Math.random() * canvas.width;
                     this.y = Math.random() * canvas.height;
-                    this.vx = (Math.random() - 0.5) * 0.3;
-                    this.vy = (Math.random() - 0.5) * 0.3;
-                    this.radius = Math.random() * 1.5 + 0.5;
-                    this.opacity = Math.random() * 0.35 + 0.08;
+                    this.vx = (Math.random() - 0.5) * 0.25;
+                    this.vy = (Math.random() - 0.5) * 0.25;
+                    this.radius = Math.random() * 1.8 + 0.3;
+                    this.baseOpacity = Math.random() * 0.4 + 0.08;
+                    this.opacity = this.baseOpacity;
+                    // 80% gold/amber, 20% rose/violet
+                    const ci = Math.random() < 0.8
+                        ? Math.floor(Math.random() * 3)
+                        : 3 + Math.floor(Math.random() * 2);
+                    this.color = colors[ci];
+                    this.pulseSpeed = Math.random() * 0.02 + 0.005;
+                    this.pulseOffset = Math.random() * Math.PI * 2;
                 }
-                update() {
+                update(time) {
                     this.x += this.vx;
                     this.y += this.vy;
+                    // Gentle breathing
+                    this.opacity = this.baseOpacity + Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.08;
+                    // Mouse attraction
                     const dx = this.x - mouse.x;
                     const dy = this.y - mouse.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 120) {
-                        const force = (120 - dist) / 120 * 0.02;
+                    if (dist < 160) {
+                        const force = (160 - dist) / 160 * 0.015;
                         this.vx += (dx / dist) * force;
                         this.vy += (dy / dist) * force;
+                        this.opacity = Math.min(0.8, this.opacity + (160 - dist) / 160 * 0.3);
+                        this.radius = Math.min(3, this.radius + 0.02);
+                    } else {
+                        this.radius *= 0.999;
+                        this.radius = Math.max(0.3, this.radius);
                     }
-                    this.vx *= 0.99;
-                    this.vy *= 0.99;
+                    this.vx *= 0.992;
+                    this.vy *= 0.992;
                     if (this.x < 0) this.x = canvas.width;
                     if (this.x > canvas.width) this.x = 0;
                     if (this.y < 0) this.y = canvas.height;
@@ -2754,12 +2960,19 @@
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(240, 192, 64, ${this.opacity})`;
+                    ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity})`;
                     ctx.fill();
+                    // Subtle glow for brighter particles
+                    if (this.opacity > 0.25) {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.radius * 3, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.opacity * 0.08})`;
+                        ctx.fill();
+                    }
                 }
             }
 
-            const count = Math.min(80, Math.floor(window.innerWidth * 0.05));
+            const count = Math.min(100, Math.floor(window.innerWidth * 0.06));
             for (let i = 0; i < count; i++) particles.push(new Particle());
 
             function drawLines() {
@@ -2768,11 +2981,18 @@
                         const dx = particles[i].x - particles[j].x;
                         const dy = particles[i].y - particles[j].y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < 140) {
+                        if (dist < 160) {
+                            const alpha = 0.04 * (1 - dist / 160);
+                            // Blend colors between connected particles
+                            const c1 = particles[i].color;
+                            const c2 = particles[j].color;
+                            const mr = (c1.r + c2.r) >> 1;
+                            const mg = (c1.g + c2.g) >> 1;
+                            const mb = (c1.b + c2.b) >> 1;
                             ctx.beginPath();
                             ctx.moveTo(particles[i].x, particles[i].y);
                             ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = `rgba(240, 192, 64, ${0.05 * (1 - dist / 140)})`;
+                            ctx.strokeStyle = `rgba(${mr}, ${mg}, ${mb}, ${alpha})`;
                             ctx.lineWidth = 0.5;
                             ctx.stroke();
                         }
@@ -2780,10 +3000,22 @@
                 }
             }
 
+            // Mouse glow
+            function drawMouseGlow() {
+                const grad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 180);
+                grad.addColorStop(0, 'rgba(240, 192, 64, 0.03)');
+                grad.addColorStop(1, 'rgba(240, 192, 64, 0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(mouse.x - 180, mouse.y - 180, 360, 360);
+            }
+
+            let time = 0;
             function loop() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => { p.update(); p.draw(); });
+                drawMouseGlow();
+                particles.forEach(p => { p.update(time); p.draw(); });
                 drawLines();
+                time++;
                 requestAnimationFrame(loop);
             }
             loop();
