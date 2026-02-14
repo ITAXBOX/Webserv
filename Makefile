@@ -50,6 +50,7 @@ $(NAME): $(OBJ_FILES)
 
 debug:
 	@$(MAKE) CXXFLAGS="$(CXXFLAGS) -DLOGGER_DEBUG" all
+	@mkdir -p www/uploads
 	@echo "🐞 Debug build complete (LOGGER_DEBUG enabled)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
