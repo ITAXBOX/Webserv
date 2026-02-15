@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Forbidden</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#030305;--surface:#0a0a12;--gold:#f0c040;--gold-dim:rgba(240,192,64,0.12);--text:#f5f0e8;--text-dim:rgba(245,240,232,0.5);--amber:#ff9f1c}
+        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+        .glow{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(160px);opacity:.15;pointer-events:none}
+        .glow-1{background:var(--amber);top:-20%;left:-10%}
+        .glow-2{background:var(--gold);bottom:-20%;right:-10%}
+        .card{position:relative;z-index:1;text-align:center;padding:3rem 2.5rem;max-width:480px;width:90%;background:var(--surface);border:1px solid var(--gold-dim);border-radius:16px;box-shadow:0 0 80px rgba(240,192,64,0.04)}
+        .code{font-family:'Playfair Display',serif;font-size:7rem;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--amber),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .reason{font-size:1.3rem;font-weight:600;margin:.5rem 0 1rem;color:var(--text)}
+        .desc{color:var(--text-dim);font-size:.95rem;line-height:1.6;margin-bottom:2rem}
+        .icon{font-size:2.5rem;margin-bottom:1rem}
+        .btn{display:inline-block;padding:.7rem 1.8rem;background:transparent;color:var(--gold);border:1px solid var(--gold-dim);border-radius:8px;text-decoration:none;font-family:inherit;font-weight:600;font-size:.9rem;transition:all .3s ease}
+        .btn:hover{background:var(--gold-dim);border-color:var(--gold);box-shadow:0 0 20px rgba(240,192,64,0.1)}
+        .footer{margin-top:2rem;font-size:.75rem;color:var(--text-dim);letter-spacing:.5px}
+    </style>
+</head>
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    <div class="card">
+        <div class="icon">&#128274;</div>
+        <div class="code">403</div>
+        <div class="reason">Forbidden</div>
+        <p class="desc">You don't have permission to access the requested resource. If you believe this is an error, contact the server administrator.</p>
+        <a href="/" class="btn">Back to Home</a>
+        <div class="footer">Webserv</div>
+    </div>
+</body>
+</html>

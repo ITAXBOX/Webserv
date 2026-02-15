@@ -47,6 +47,7 @@ private:
     CgiHandler &_cgiHandler;
 
     void sendResponse(ClientConnection *client, HttpResponse &response, Poller &poller);
+    void applyCustomErrorPage(HttpResponse &response, const ServerConfig &config);
 };
 
 #endif

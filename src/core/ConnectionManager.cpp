@@ -147,6 +147,7 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
             _cgiHandler.startCgi(client, request, response, poller);
         else
         {
+            applyCustomErrorPage(response, config);
             if (request.getHeader("Connection") == "close")
                 client->setShouldClose(true);
             sendResponse(client, response, poller);
@@ -166,7 +167,13 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
         }
 
         // Send Error Response
+        int serverFd = _clientToServer[clientFd];
+        ServerConfig defaultCfg;
+        const ServerConfig &errConfig = (_serverConfigs.find(serverFd) != _serverConfigs.end())
+                                            ? _serverConfigs[serverFd]
+                                            : defaultCfg;
         HttpResponse response = StatusCodes::createErrorResponse(code, msg);
+        applyCustomErrorPage(response, errConfig);
         sendResponse(client, response, poller);
     }
     // else: Still parsing, wait for more data
@@ -262,6 +269,41 @@ void ConnectionManager::checkCgiTimeouts(Poller &poller)
                 _cgiHandler.handleTimeout(client, poller);
         }
     }
+}
+
+void ConnectionManager::applyCustomErrorPage(HttpResponse &response, const ServerConfig &config)
+{
+    int code = response.getStatusCode();
+    if (code < 400)
+        return;
+
+    std::string errorPagePath = config.getErrorPage(code);
+    if (errorPagePath.empty())
+        return;
+
+    // Resolve the error page path relative to the server root
+    std::string fullPath = config.getRoot();
+    if (!fullPath.empty() && fullPath[fullPath.size() - 1] == '/')
+        fullPath = fullPath.substr(0, fullPath.size() - 1);
+    fullPath += errorPagePath;
+
+    if (!FileHandler::fileExists(fullPath) || !FileHandler::isReadable(fullPath))
+    {
+        Logger::warn("Custom error page not found or not readable: " + fullPath);
+        return;
+    }
+
+    std::string content = FileHandler::readFile(fullPath);
+    if (content.empty() && FileHandler::getFileSize(fullPath) > 0)
+    {
+        Logger::warn("Failed to read custom error page: " + fullPath);
+        return;
+    }
+
+    response.setBody(content);
+    response.addHeader("Content-Type", MimeTypes::getMimeType(fullPath));
+    response.addHeader("Content-Length", toString(content.size()));
+    Logger::info("Serving custom error page: " + fullPath);
 }
 
 void ConnectionManager::sendResponse(ClientConnection *client, HttpResponse &response, Poller &poller)
