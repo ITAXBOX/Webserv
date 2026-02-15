@@ -96,87 +96,90 @@ void ConnectionManager::handleRead(int clientFd, Poller &poller)
     std::string chunk(buffer, n);
     client->getParser().parse(chunk);
 
-    // Check if parsing is complete
     if (client->getParser().isComplete())
-    {
-        Logger::info(Logger::connMsg("HTTP request parsing complete", clientFd));
-
-        // Get the parsed request
-        HttpRequest &request = client->getParser().getRequest();
-
-        // Resolve Config
-        int serverFd = _clientToServer[clientFd];
-
-        // Default config if not found (should not happen if addServerConfig used correctly)
-        ServerConfig defaultConfig;
-        const ServerConfig &config = (_serverConfigs.find(serverFd) != _serverConfigs.end())
-                                         ? _serverConfigs[serverFd]
-                                         : defaultConfig;
-
-        // Resolve Location
-        const LocationConfig *locationPtr = config.matchLocation(request.getUri());
-
-        // Create an effective location config that inherits from server config
-        LocationConfig location;
-
-        if (locationPtr)
-            location = *locationPtr;
-        else
-            location = LocationConfig("/");
-
-        // Inherit root if not specified in location
-        if (location.getRoot().empty())
-            location.setRoot(config.getRoot());
-
-        // Inherit index if not specified in location
-        if (location.getIndex().empty())
-        {
-            const std::vector<std::string> &serverIndices = config.getIndex();
-            for (size_t i = 0; i < serverIndices.size(); ++i)
-                location.addIndex(serverIndices[i]);
-        }
-
-        // Inherit clientMaxBodySize if not specified in location (0 means inherit)
-        if (location.getClientMaxBodySize() == 0)
-            location.setClientMaxBodySize(config.getClientMaxBodySize());
-
-        // Delegate to RequestHandler
-        HttpResponse response = _requestHandler.handleRequest(request, location);
-
-        if (response.isCgi())
-            _cgiHandler.startCgi(client, request, response, poller);
-        else
-        {
-            applyCustomErrorPage(response, config);
-            if (request.getHeader("Connection") == "close")
-                client->setShouldClose(true);
-            sendResponse(client, response, poller);
-        }
-    }
+        processRequest(clientFd, client, poller);
     else if (client->getParser().hasError())
-    {
-        Logger::error(Logger::connMsg("HTTP parsing error: " + client->getParser().getErrorMessage(), clientFd));
-
-        // Determine Error Code
-        int code = HTTP_BAD_REQUEST;
-        std::string msg = "Bad Request";
-        if (client->getParser().getErrorMessage() == "Payload Too Large")
-        {
-            code = HTTP_PAYLOAD_TOO_LARGE;
-            msg = "Payload Too Large";
-        }
-
-        // Send Error Response
-        int serverFd = _clientToServer[clientFd];
-        ServerConfig defaultCfg;
-        const ServerConfig &errConfig = (_serverConfigs.find(serverFd) != _serverConfigs.end())
-                                            ? _serverConfigs[serverFd]
-                                            : defaultCfg;
-        HttpResponse response = StatusCodes::createErrorResponse(code, msg);
-        applyCustomErrorPage(response, errConfig);
-        sendResponse(client, response, poller);
-    }
+        processParseError(clientFd, client, poller);
     // else: Still parsing, wait for more data
+}
+
+const ServerConfig &ConnectionManager::resolveConfig(int clientFd)
+{
+    static ServerConfig defaultConfig;
+
+    int serverFd = _clientToServer[clientFd];
+    if (_serverConfigs.find(serverFd) != _serverConfigs.end())
+        return _serverConfigs[serverFd];
+    return defaultConfig;
+}
+
+LocationConfig ConnectionManager::resolveLocation(const HttpRequest &request, const ServerConfig &config)
+{
+    const LocationConfig *locationPtr = config.matchLocation(request.getUri());
+
+    LocationConfig location;
+    if (locationPtr)
+        location = *locationPtr;
+    else
+        location = LocationConfig("/");
+
+    // Inherit root from server config if not specified in location
+    if (location.getRoot().empty())
+        location.setRoot(config.getRoot());
+
+    // Inherit index files from server config if not specified in location
+    if (location.getIndex().empty())
+    {
+        const std::vector<std::string> &serverIndices = config.getIndex();
+        for (size_t i = 0; i < serverIndices.size(); ++i)
+            location.addIndex(serverIndices[i]);
+    }
+
+    // Inherit clientMaxBodySize from server config (0 means not set)
+    if (location.getClientMaxBodySize() == 0)
+        location.setClientMaxBodySize(config.getClientMaxBodySize());
+
+    return location;
+}
+
+void ConnectionManager::processRequest(int clientFd, ClientConnection *client, Poller &poller)
+{
+    Logger::info(Logger::connMsg("HTTP request parsing complete", clientFd));
+
+    HttpRequest &request = client->getParser().getRequest();
+    const ServerConfig &config = resolveConfig(clientFd);
+    LocationConfig location = resolveLocation(request, config);
+
+    HttpResponse response = _requestHandler.handleRequest(request, location);
+
+    if (response.isCgi())
+    {
+        _cgiHandler.startCgi(client, request, response, poller);
+        return;
+    }
+
+    applyCustomErrorPage(response, config);
+    if (request.getHeader("Connection") == "close")
+        client->setShouldClose(true);
+    sendResponse(client, response, poller);
+}
+
+void ConnectionManager::processParseError(int clientFd, ClientConnection *client, Poller &poller)
+{
+    Logger::error(Logger::connMsg("HTTP parsing error: " + client->getParser().getErrorMessage(), clientFd));
+
+    int code = HTTP_BAD_REQUEST;
+    std::string msg = "Bad Request";
+    if (client->getParser().getErrorMessage() == "Payload Too Large")
+    {
+        code = HTTP_PAYLOAD_TOO_LARGE;
+        msg = "Payload Too Large";
+    }
+
+    const ServerConfig &config = resolveConfig(clientFd);
+    HttpResponse response = StatusCodes::createErrorResponse(code, msg);
+    applyCustomErrorPage(response, config);
+    sendResponse(client, response, poller);
 }
 
 void ConnectionManager::handleWrite(int clientFd, Poller &poller)

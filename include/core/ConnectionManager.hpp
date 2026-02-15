@@ -46,6 +46,12 @@ private:
     RequestHandler &_requestHandler;
     CgiHandler &_cgiHandler;
 
+    // Request processing helpers
+    const ServerConfig &resolveConfig(int clientFd);
+    LocationConfig     resolveLocation(const HttpRequest &request, const ServerConfig &config);
+    void               processRequest(int clientFd, ClientConnection *client, Poller &poller);
+    void               processParseError(int clientFd, ClientConnection *client, Poller &poller);
+
     void sendResponse(ClientConnection *client, HttpResponse &response, Poller &poller);
     void applyCustomErrorPage(HttpResponse &response, const ServerConfig &config);
 };
